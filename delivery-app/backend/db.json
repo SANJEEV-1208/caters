@@ -1,0 +1,635 @@
+{
+  "cuisines": [
+    {
+      "id": "1",
+      "name": "Biryani",
+      "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400"
+    },
+    {
+      "id": "2",
+      "name": "Dosa",
+      "image": "https://images.unsplash.com/photo-1630383249896-424e482df921?w=400"
+    },
+    {
+      "id": "3",
+      "name": "Pizza",
+      "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400"
+    },
+    {
+      "id": "4",
+      "name": "Noodles",
+      "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400"
+    },
+    {
+      "id": "5",
+      "name": "Fried Rice",
+      "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400"
+    },
+    {
+      "id": "6",
+      "name": "Curry",
+      "image": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400"
+    },
+    {
+      "id": "7",
+      "name": "Paratha",
+      "image": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400"
+    },
+    {
+      "id": "8",
+      "name": "Meals",
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400"
+    }
+  ],
+  "foods": [
+    {
+      "id": "1",
+      "name": "Chicken Biryani",
+      "price": 180,
+      "rating": "4.5",
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400",
+      "description": "Authentic spicy chicken biryani cooked with basmati rice and aromatic spices."
+    },
+    {
+      "id": "2",
+      "name": "Mutton Biryani",
+      "price": 220,
+      "rating": "4.6",
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "image": "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=400",
+      "description": "Tender mutton pieces cooked with fragrant basmati rice and traditional spices."
+    },
+    {
+      "id": "3",
+      "name": "Veg Biryani",
+      "price": 140,
+      "rating": "4.3",
+      "category": "veg",
+      "cuisine": "Biryani",
+      "image": "https://images.unsplash.com/photo-1642821373181-696a54913e93?w=400",
+      "description": "Mixed vegetables cooked with aromatic basmati rice and Indian spices."
+    },
+    {
+      "id": "4",
+      "name": "Egg Biryani",
+      "price": 120,
+      "rating": "4.2",
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "image": "https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400",
+      "description": "Boiled eggs layered with spiced rice and herbs."
+    },
+    {
+      "id": "5",
+      "name": "Plain Dosa",
+      "price": 60,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1630383249896-424e482df921?w=400",
+      "description": "Crispy South Indian crepe made from fermented rice and lentil batter."
+    },
+    {
+      "id": "6",
+      "name": "Masala Dosa",
+      "price": 80,
+      "rating": "4.6",
+      "category": "veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400",
+      "description": "Crispy dosa filled with spiced potato masala and served with chutney."
+    },
+    {
+      "id": "7",
+      "name": "Egg Dosa",
+      "price": 90,
+      "rating": "4.5",
+      "category": "non-veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1694241992031-cc610e5fc99a?w=400",
+      "description": "Crispy dosa topped with beaten egg and spices."
+    },
+    {
+      "id": "8",
+      "name": "Podi Dosa",
+      "price": 75,
+      "rating": "4.3",
+      "category": "veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1651468146356-67e2d86d2a5b?w=400",
+      "description": "Crispy dosa spread with spicy lentil powder and ghee."
+    },
+    {
+      "id": "9",
+      "name": "Cheese Dosa",
+      "price": 110,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1589301773859-34c94a6d38e1?w=400",
+      "description": "Crispy dosa loaded with melted cheese."
+    },
+    {
+      "id": "10",
+      "name": "Onion Dosa",
+      "price": 70,
+      "rating": "4.2",
+      "category": "veg",
+      "cuisine": "Dosa",
+      "image": "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=400",
+      "description": "Crispy dosa topped with finely chopped onions."
+    },
+    {
+      "id": "11",
+      "name": "Margherita Pizza",
+      "price": 200,
+      "rating": "4.5",
+      "category": "veg",
+      "cuisine": "Pizza",
+      "image": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+      "description": "Classic pizza with tomato sauce, mozzarella, and fresh basil."
+    },
+    {
+      "id": "12",
+      "name": "Chicken Pizza",
+      "price": 280,
+      "rating": "4.6",
+      "category": "non-veg",
+      "cuisine": "Pizza",
+      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400",
+      "description": "Delicious pizza topped with grilled chicken and vegetables."
+    },
+    {
+      "id": "13",
+      "name": "Veggie Supreme Pizza",
+      "price": 240,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Pizza",
+      "image": "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=400",
+      "description": "Loaded with bell peppers, onions, mushrooms, olives, and cheese."
+    },
+    {
+      "id": "14",
+      "name": "Pepperoni Pizza",
+      "price": 300,
+      "rating": "4.7",
+      "category": "non-veg",
+      "cuisine": "Pizza",
+      "image": "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400",
+      "description": "Classic pizza with spicy pepperoni and mozzarella cheese."
+    },
+    {
+      "id": "15",
+      "name": "Veg Hakka Noodles",
+      "price": 130,
+      "rating": "4.3",
+      "category": "veg",
+      "cuisine": "Noodles",
+      "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=400",
+      "description": "Stir-fried noodles with mixed vegetables and Asian sauces."
+    },
+    {
+      "id": "16",
+      "name": "Chicken Hakka Noodles",
+      "price": 160,
+      "rating": "4.5",
+      "category": "non-veg",
+      "cuisine": "Noodles",
+      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400",
+      "description": "Stir-fried noodles with chicken pieces and vegetables."
+    },
+    {
+      "id": "17",
+      "name": "Schezwan Noodles",
+      "price": 140,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Noodles",
+      "image": "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=400",
+      "description": "Spicy noodles tossed in schezwan sauce with vegetables."
+    },
+    {
+      "id": "18",
+      "name": "Egg Noodles",
+      "price": 150,
+      "rating": "4.3",
+      "category": "non-veg",
+      "cuisine": "Noodles",
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400",
+      "description": "Hakka noodles with scrambled eggs and vegetables."
+    },
+    {
+      "id": "19",
+      "name": "Veg Fried Rice",
+      "price": 120,
+      "rating": "4.2",
+      "category": "veg",
+      "cuisine": "Fried Rice",
+      "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400",
+      "description": "Stir-fried rice with mixed vegetables and soy sauce."
+    },
+    {
+      "id": "20",
+      "name": "Chicken Fried Rice",
+      "price": 150,
+      "rating": "4.5",
+      "category": "non-veg",
+      "cuisine": "Fried Rice",
+      "image": "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400",
+      "description": "Fried rice with chicken pieces and vegetables."
+    },
+    {
+      "id": "21",
+      "name": "Egg Fried Rice",
+      "price": 130,
+      "rating": "4.3",
+      "category": "non-veg",
+      "cuisine": "Fried Rice",
+      "image": "https://images.unsplash.com/photo-1645696377173-139de7a2e6d7?w=400",
+      "description": "Fried rice with scrambled eggs and vegetables."
+    },
+    {
+      "id": "22",
+      "name": "Schezwan Fried Rice",
+      "price": 140,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Fried Rice",
+      "image": "https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=400",
+      "description": "Spicy fried rice in schezwan sauce with vegetables."
+    },
+    {
+      "id": "23",
+      "name": "Paneer Butter Masala",
+      "price": 160,
+      "rating": "4.6",
+      "category": "veg",
+      "cuisine": "Curry",
+      "image": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400",
+      "description": "Creamy paneer curry cooked in rich tomato gravy."
+    },
+    {
+      "id": "24",
+      "name": "Chicken Curry",
+      "price": 180,
+      "rating": "4.5",
+      "category": "non-veg",
+      "cuisine": "Curry",
+      "image": "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400",
+      "description": "Spicy chicken curry cooked with traditional Indian spices."
+    },
+    {
+      "id": "25",
+      "name": "Dal Tadka",
+      "price": 100,
+      "rating": "4.3",
+      "category": "veg",
+      "cuisine": "Curry",
+      "image": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400",
+      "description": "Yellow lentils tempered with ghee and aromatic spices."
+    },
+    {
+      "id": "26",
+      "name": "Mutton Curry",
+      "price": 220,
+      "rating": "4.7",
+      "category": "non-veg",
+      "cuisine": "Curry",
+      "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400",
+      "description": "Tender mutton pieces cooked in rich and spicy gravy."
+    },
+    {
+      "id": "27",
+      "name": "Aloo Paratha",
+      "price": 50,
+      "rating": "4.4",
+      "category": "veg",
+      "cuisine": "Paratha",
+      "image": "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400",
+      "description": "Whole wheat flatbread stuffed with spiced mashed potatoes."
+    },
+    {
+      "id": "28",
+      "name": "Paneer Paratha",
+      "price": 70,
+      "rating": "4.5",
+      "category": "veg",
+      "cuisine": "Paratha",
+      "image": "https://images.unsplash.com/photo-1619095429571-e7e0c3a2b004?w=400",
+      "description": "Flatbread stuffed with spiced paneer filling."
+    },
+    {
+      "id": "29",
+      "name": "Gobi Paratha",
+      "price": 60,
+      "rating": "4.3",
+      "category": "veg",
+      "cuisine": "Paratha",
+      "image": "https://images.unsplash.com/photo-1626074353765-517a65eca2c5?w=400",
+      "description": "Whole wheat flatbread stuffed with spiced cauliflower."
+    },
+    {
+      "id": "30",
+      "name": "Egg Paratha",
+      "price": 65,
+      "rating": "4.4",
+      "category": "non-veg",
+      "cuisine": "Paratha",
+      "image": "https://images.unsplash.com/photo-1617343267018-58e90f9dad75?w=400",
+      "description": "Paratha layered with beaten egg and spices."
+    },
+    {
+      "id": "31",
+      "name": "Veg Meals",
+      "price": 120,
+      "rating": "4.5",
+      "category": "veg",
+      "cuisine": "Meals",
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",
+      "description": "South Indian style full veg meals with rice, sambar, rasam, and sides."
+    },
+    {
+      "id": "32",
+      "name": "Non-Veg Meals",
+      "price": 180,
+      "rating": "4.6",
+      "category": "non-veg",
+      "cuisine": "Meals",
+      "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400",
+      "description": "Complete non-veg meals with rice, chicken/mutton curry, and sides."
+    },
+    {
+      "id": "33",
+      "name": "Mini Meals",
+      "price": 90,
+      "rating": "4.2",
+      "category": "veg",
+      "cuisine": "Meals",
+      "image": "https://images.unsplash.com/photo-1604329760661-e71dc83f8385?w=400",
+      "description": "Smaller portion meals with rice, curry, and sambar."
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "phone": "+919876543210",
+      "role": "customer",
+      "name": "Test Customer",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "2",
+      "phone": "+919123456789",
+      "role": "caterer",
+      "name": "Raj Kumar",
+      "serviceName": "South Indian Kitchen",
+      "address": "123 MG Road, Bangalore",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "3",
+      "phone": "+919111111111",
+      "role": "caterer",
+      "name": "Amit Sharma",
+      "serviceName": "North Indian Delights",
+      "address": "456 CP, Delhi",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "6107",
+      "phone": "9003995965",
+      "role": "customer",
+      "name": "Sanjeev S",
+      "address": "Bangalore",
+      "createdAt": "2026-01-12"
+    },
+    {
+      "id": "af61",
+      "phone": "6345796123",
+      "role": "customer",
+      "name": "Abcdserg",
+      "address": "Bangalore 2",
+      "createdAt": "2026-01-13"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": "1",
+      "customerId": 1,
+      "catererId": 2,
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "2",
+      "customerId": 1,
+      "catererId": 3,
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "2b51",
+      "customerId": "6107",
+      "catererId": "2",
+      "createdAt": "2026-01-12"
+    },
+    {
+      "id": "a996",
+      "customerId": "af61",
+      "catererId": "2",
+      "createdAt": "2026-01-13"
+    }
+  ],
+  "apartments": [
+    {
+      "id": "1",
+      "catererId": 2,
+      "name": "Green Valley Apartments",
+      "address": "123 Main Street, Building A, Bangalore",
+      "accessCode": "GV2024",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "2",
+      "catererId": 2,
+      "name": "Sunrise Residency",
+      "address": "456 Park Road, Tower B, Bangalore",
+      "accessCode": "SR2024",
+      "createdAt": "2026-01-10"
+    }
+  ],
+  "caterer_menus": [
+    {
+      "id": "1",
+      "catererId": 2,
+      "name": "Chicken Biryani",
+      "price": 180,
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "type": "main_course",
+      "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400",
+      "description": "Authentic spicy chicken biryani cooked with basmati rice and aromatic spices.",
+      "availableDates": [
+        "2026-01-12",
+        "2026-01-13",
+        "2026-01-14"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "2",
+      "catererId": 2,
+      "name": "Masala Dosa",
+      "price": 80,
+      "category": "veg",
+      "cuisine": "Dosa",
+      "type": "breakfast",
+      "image": "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400",
+      "description": "Crispy dosa filled with spiced potato masala and served with chutney.",
+      "availableDates": [
+        "2026-01-12",
+        "2026-01-13",
+        "2026-01-14",
+        "2026-01-15"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "3",
+      "catererId": 2,
+      "name": "Paneer Butter Masala",
+      "price": 160,
+      "category": "veg",
+      "cuisine": "Curry",
+      "type": "main_course",
+      "image": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400",
+      "description": "Creamy paneer curry cooked in rich tomato gravy.",
+      "availableDates": [
+        "2026-01-12",
+        "2026-01-13"
+      ],
+      "inStock": false,
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "5223",
+      "catererId": "2",
+      "name": "Chicken Shawarma",
+      "description": "Mouth watering, melting chicken roll, stuffed with mayo and veggies.",
+      "price": 80,
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "type": "snack",
+      "image": "not yet added",
+      "availableDates": [
+        "2026-01-12"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-12"
+    },
+    {
+      "id": "2aa0",
+      "catererId": "2",
+      "name": "Veg shawarma",
+      "description": "Abfsv",
+      "price": 100,
+      "category": "veg",
+      "cuisine": "Biryani",
+      "type": "main_course",
+      "image": "vsbsb",
+      "availableDates": [
+        "2026-01-13"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-12"
+    },
+    {
+      "id": "324c",
+      "catererId": "2",
+      "name": "Prawn biriyani",
+      "description": "Gsbsn",
+      "price": 200,
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "type": "lunch",
+      "image": "gshsh",
+      "availableDates": [
+        "2026-01-13"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-13"
+    },
+    {
+      "id": "08b9",
+      "catererId": "2",
+      "name": "Egg kothu paratha",
+      "description": "Hdjdjxj",
+      "price": 80,
+      "category": "non-veg",
+      "cuisine": "Paratha",
+      "type": "dinner",
+      "image": "jsnsn",
+      "availableDates": [
+        "2026-01-15"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-15"
+    },
+    {
+      "id": "1847",
+      "catererId": "2",
+      "name": "Chicken Biryani",
+      "description": "Authentic spicy chicken biryani cooked with basmati rice and aromatic spices.",
+      "price": 180,
+      "category": "non-veg",
+      "cuisine": "Biryani",
+      "type": "main_course",
+      "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400",
+      "availableDates": [
+        "2026-01-25"
+      ],
+      "inStock": true,
+      "createdAt": "2026-01-20"
+    }
+  ],
+  "orders": [],
+  "customer_apartments": [
+    {
+      "id": "1",
+      "customerId": 1,
+      "apartmentId": 1,
+      "catererId": 2,
+      "addedVia": "manual",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "03a9",
+      "customerId": "6107",
+      "apartmentId": "1",
+      "catererId": "2",
+      "addedVia": "manual",
+      "createdAt": "2026-01-12"
+    },
+    {
+      "id": "d32a",
+      "customerId": "af61",
+      "apartmentId": "1",
+      "catererId": "2",
+      "addedVia": "manual",
+      "createdAt": "2026-01-13"
+    },
+    {
+      "id": "88b8",
+      "customerId": "6107",
+      "apartmentId": "1",
+      "catererId": "2",
+      "addedVia": "manual",
+      "createdAt": "2026-01-20"
+    }
+  ],
+  "delivery_assignments": []
+}
