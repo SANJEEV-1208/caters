@@ -4,19 +4,48 @@ import { API_CONFIG } from "../config/api";
 const BASE_URL = API_CONFIG.BASE_URL;
 
 export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): Promise<Order> => {
-  const res = await fetch(`${BASE_URL}/orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(orderData),
-  });
+  try {
+    console.log('=== orderApi.createOrder ===');
+    console.log('URL:', `${BASE_URL}/orders`);
+    console.log('Order Data:', JSON.stringify(orderData, null, 2));
 
-  if (!res.ok) {
-    throw new Error("Failed to create order");
+    const res = await fetch(`${BASE_URL}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    console.log('Response status:', res.status);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error('❌ API Error Response:', errorText);
+
+      let errorMessage = "Failed to create order";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const result = await res.json();
+    console.log('✅ Order created successfully:', result);
+    return result;
+  } catch (error: any) {
+    console.error('❌ createOrder error:', error);
+
+    if (error.message?.includes('fetch')) {
+      throw new Error('Cannot connect to server. Please check your network connection and ensure the backend is running.');
+    }
+
+    throw error;
   }
-
-  return await res.json();
 };
 
 export const getCustomerOrders = async (customerId: number): Promise<Order[]> => {

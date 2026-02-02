@@ -26,6 +26,7 @@ import {
 } from "@/src/api/foodApi";
 import { MenuItem } from "@/src/types/menu";
 import ItemHistoryModal from "@/src/components/caterer/ItemHistoryModal";
+import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
 type MealType = typeof MEAL_TYPES[number];
@@ -38,6 +39,7 @@ export default function MenuAddScreen() {
   const [catererCuisines, setCatererCuisines] = useState<Array<{ id: number; name: string; image?: string }>>([]);
   const [showAddCuisineModal, setShowAddCuisineModal] = useState(false);
   const [newCuisineName, setNewCuisineName] = useState("");
+  const [newCuisineImage, setNewCuisineImage] = useState("");
   const [loadingCuisines, setLoadingCuisines] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -82,6 +84,11 @@ export default function MenuAddScreen() {
       return;
     }
 
+    if (!newCuisineImage.trim()) {
+      Alert.alert("Error", "Please upload a cuisine image");
+      return;
+    }
+
     if (!user?.id) {
       Alert.alert("Error", "User ID not found");
       return;
@@ -89,9 +96,10 @@ export default function MenuAddScreen() {
 
     try {
       setLoadingCuisines(true);
-      const newCuisine = await createCatererCuisine(user.id, newCuisineName.trim());
+      const newCuisine = await createCatererCuisine(user.id, newCuisineName.trim(), newCuisineImage.trim());
       setCatererCuisines([...catererCuisines, newCuisine]);
       setNewCuisineName("");
+      setNewCuisineImage("");
       setShowAddCuisineModal(false);
       Alert.alert("Success", "Cuisine added successfully");
     } catch (error) {
@@ -359,15 +367,13 @@ export default function MenuAddScreen() {
           </View>
         </View>
 
-        {/* Image URL */}
+        {/* Image Upload */}
         <View style={styles.field}>
-          <Text style={styles.label}>Image URL *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="https://..."
-            value={formData.image}
-            onChangeText={(text) => setFormData({ ...formData, image: text })}
-            autoCapitalize="none"
+          <CloudinaryImagePicker
+            label="Food Image *"
+            onImageUploaded={(url) => setFormData({ ...formData, image: url })}
+            currentImage={formData.image}
+            disabled={loading}
           />
         </View>
 
@@ -448,6 +454,7 @@ export default function MenuAddScreen() {
         onRequestClose={() => {
           setShowAddCuisineModal(false);
           setNewCuisineName("");
+          setNewCuisineImage("");
         }}
       >
         <Pressable
@@ -455,6 +462,7 @@ export default function MenuAddScreen() {
           onPress={() => {
             setShowAddCuisineModal(false);
             setNewCuisineName("");
+            setNewCuisineImage("");
           }}
         >
           <KeyboardAvoidingView
@@ -466,37 +474,93 @@ export default function MenuAddScreen() {
               style={styles.modalContent}
               onPress={(e) => e.stopPropagation()}
             >
+              {/* Modern Header with Icon */}
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Add New Cuisine</Text>
+                <View style={styles.modalHeaderLeft}>
+                  <View style={styles.modalIconContainer}>
+                    <Ionicons name="restaurant" size={24} color="#10B981" />
+                  </View>
+                  <View>
+                    <Text style={styles.modalTitle}>Add New Cuisine</Text>
+                    <Text style={styles.modalSubtitle}>Create a new cuisine category</Text>
+                  </View>
+                </View>
                 <TouchableOpacity
+                  style={styles.modalCloseButton}
                   onPress={() => {
                     setShowAddCuisineModal(false);
                     setNewCuisineName("");
+                    setNewCuisineImage("");
                   }}
                 >
-                  <Ionicons name="close" size={24} color="#1A1A1A" />
+                  <Ionicons name="close-circle" size={28} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
-              <TextInput
-                style={styles.modalInput}
-                placeholder="Enter cuisine name"
-                value={newCuisineName}
-                onChangeText={setNewCuisineName}
-                placeholderTextColor="#9CA3AF"
-                autoFocus
-                returnKeyType="done"
-                onSubmitEditing={handleAddCuisine}
-              />
+              {/* Divider */}
+              <View style={styles.modalDivider} />
 
+              {/* Cuisine Name Input with Icon */}
+              <View style={styles.modalInputContainer}>
+                <View style={styles.inputLabelRow}>
+                  <Ionicons name="text-outline" size={18} color="#10B981" />
+                  <Text style={styles.inputLabel}>Cuisine Name</Text>
+                  <View style={styles.requiredBadge}>
+                    <Text style={styles.requiredText}>Required</Text>
+                  </View>
+                </View>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="fast-food-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="e.g., Shawarma, Biryani, Pasta"
+                    value={newCuisineName}
+                    onChangeText={setNewCuisineName}
+                    placeholderTextColor="#9CA3AF"
+                    autoFocus
+                    returnKeyType="done"
+                  />
+                </View>
+              </View>
+
+              {/* Cuisine Image Upload with Enhanced Styling */}
+              <View style={styles.cuisineImageUpload}>
+                <View style={styles.inputLabelRow}>
+                  <Ionicons name="image-outline" size={18} color="#10B981" />
+                  <Text style={styles.inputLabel}>Cuisine Image</Text>
+                  <View style={styles.requiredBadge}>
+                    <Text style={styles.requiredText}>Required</Text>
+                  </View>
+                </View>
+                <View style={styles.imagePickerCard}>
+                  <CloudinaryImagePicker
+                    label=""
+                    onImageUploaded={(url) => setNewCuisineImage(url)}
+                    currentImage={newCuisineImage}
+                    disabled={loadingCuisines}
+                  />
+                </View>
+              </View>
+
+              {/* Info Card */}
+              <View style={styles.modalInfoCard}>
+                <Ionicons name="information-circle" size={20} color="#3B82F6" />
+                <Text style={styles.modalInfoText}>
+                  This cuisine will be available for all your menu items
+                </Text>
+              </View>
+
+              {/* Action Buttons */}
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={styles.modalCancelButton}
                   onPress={() => {
                     setShowAddCuisineModal(false);
                     setNewCuisineName("");
+                    setNewCuisineImage("");
                   }}
                 >
+                  <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
                   <Text style={styles.modalCancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -507,7 +571,10 @@ export default function MenuAddScreen() {
                   {loadingCuisines ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.modalAddButtonText}>Add Cuisine</Text>
+                    <>
+                      <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                      <Text style={styles.modalAddButtonText}>Add Cuisine</Text>
+                    </>
                   )}
                 </TouchableOpacity>
               </View>
@@ -748,7 +815,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
   keyboardAvoidingView: {
@@ -756,32 +823,132 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 24,
     paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    maxHeight: "80%",
+    maxHeight: "85%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  modalHeaderLeft: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    gap: 12,
+    flex: 1,
+  },
+  modalIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F0FDF4",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#D1FAE5",
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: "#1A1A1A",
+    letterSpacing: -0.3,
   },
-  modalInput: {
-    backgroundColor: "#F9FAFB",
+  modalSubtitle: {
+    fontSize: 13,
+    fontWeight: "400",
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+  modalCloseButton: {
+    padding: 4,
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginBottom: 24,
+  },
+  modalInputContainer: {
+    marginBottom: 24,
+  },
+  inputLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 10,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    flex: 1,
+  },
+  requiredBadge: {
+    backgroundColor: "#FEF2F2",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
     borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  requiredText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#EF4444",
+    textTransform: "uppercase",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1.5,
     borderColor: "#E5E7EB",
     borderRadius: 12,
-    padding: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  modalInput: {
+    flex: 1,
     fontSize: 15,
     color: "#1A1A1A",
-    marginBottom: 20,
+    paddingVertical: 10,
+    fontWeight: "500",
+  },
+  imagePickerCard: {
+    backgroundColor: "#FAFAFA",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  modalInfoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "#EFF6FF",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#DBEAFE",
+  },
+  modalInfoText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#1E40AF",
+    flex: 1,
+    lineHeight: 18,
   },
   modalButtons: {
     flexDirection: "row",
@@ -789,32 +956,45 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#FEE2E2",
+    backgroundColor: "#FEF2F2",
   },
   modalCancelButtonText: {
     fontSize: 15,
-    fontWeight: "600",
-    color: "#6B7280",
+    fontWeight: "700",
+    color: "#EF4444",
   },
   modalAddButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "#10B981",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#10B981",
+    shadowColor: "#10B981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   modalAddButtonDisabled: {
     opacity: 0.6,
   },
   modalAddButtonText: {
     fontSize: 15,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#FFFFFF",
+  },
+  cuisineImageUpload: {
+    marginBottom: 24,
   },
 });

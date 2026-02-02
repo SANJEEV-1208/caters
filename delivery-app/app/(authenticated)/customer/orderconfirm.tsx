@@ -4,6 +4,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCart } from "@/src/context/CartContext";
@@ -30,9 +32,11 @@ export default function OrderConfirm() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Success Icon Section */}
-      <View style={styles.successSection}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Success Icon Section */}
+        <View style={styles.successSection}>
         <View style={styles.successIconContainer}>
           <Text style={styles.successIcon}>✓</Text>
         </View>
@@ -111,7 +115,8 @@ export default function OrderConfirm() {
 
       {/* Bottom Spacing */}
       <View style={styles.bottomSpacing} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

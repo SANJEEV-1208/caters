@@ -8,6 +8,9 @@ router.get('/', apartmentController.getCatererApartments);
 // GET /api/apartments/customer - Get customer apartments
 router.get('/customer', apartmentController.getCustomerApartments);
 
+// GET /api/apartments/links - Get customer apartment links by caterer
+router.get('/links', apartmentController.getCustomerApartmentLinks);
+
 // POST /api/apartments - Create apartment
 router.post('/', apartmentController.createApartment);
 

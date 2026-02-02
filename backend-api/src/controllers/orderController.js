@@ -1,22 +1,36 @@
 const pool = require('../config/database');
 
 // Format order from database to frontend format
-const formatOrder = (order) => ({
-  id: order.id,
-  orderId: order.order_id,
-  customerId: order.customer_id,
-  catererId: order.caterer_id,
-  items: order.items,
-  totalAmount: parseFloat(order.total_amount),
-  paymentMethod: order.payment_method,
-  transactionId: order.transaction_id,
-  deliveryAddress: order.delivery_address,
-  itemCount: order.item_count,
-  orderDate: order.order_date,
-  deliveryDate: order.delivery_date,
-  status: order.status,
-  createdAt: order.created_at
-});
+const formatOrder = (order) => {
+  // Format delivery_date to YYYY-MM-DD string if it exists
+  let deliveryDateStr = null;
+  if (order.delivery_date) {
+    const date = new Date(order.delivery_date);
+    // Extract YYYY-MM-DD from the date
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    deliveryDateStr = `${year}-${month}-${day}`;
+  }
+
+  return {
+    id: order.id,
+    orderId: order.order_id,
+    customerId: order.customer_id,
+    catererId: order.caterer_id,
+    items: order.items,
+    totalAmount: parseFloat(order.total_amount),
+    paymentMethod: order.payment_method,
+    transactionId: order.transaction_id,
+    deliveryAddress: order.delivery_address,
+    tableNumber: order.table_number ? parseInt(order.table_number, 10) : null, // Parse as integer
+    itemCount: order.item_count,
+    orderDate: order.order_date,
+    deliveryDate: deliveryDateStr,
+    status: order.status,
+    createdAt: order.created_at
+  };
+};
 
 // Create order
 exports.createOrder = async (req, res) => {
@@ -30,6 +44,7 @@ exports.createOrder = async (req, res) => {
       paymentMethod,
       transactionId,
       deliveryAddress,
+      tableNumber,
       itemCount,
       orderDate,
       deliveryDate,
@@ -43,8 +58,8 @@ exports.createOrder = async (req, res) => {
     const result = await pool.query(
       `INSERT INTO orders
       (order_id, customer_id, caterer_id, items, total_amount, payment_method, transaction_id,
-       delivery_address, item_count, order_date, delivery_date, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       delivery_address, table_number, item_count, order_date, delivery_date, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
         orderId,
@@ -55,6 +70,7 @@ exports.createOrder = async (req, res) => {
         paymentMethod,
         transactionId || null,
         deliveryAddress || null,
+        tableNumber || null,
         itemCount,
         orderDate || new Date(),
         deliveryDate || null,

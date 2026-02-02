@@ -9,7 +9,9 @@ export interface Order {
   totalAmount: number;
   paymentMethod: 'upi' | 'cod';
   transactionId?: string;
-  deliveryAddress?: string; // Delivery location
+  paymentProofImage?: string; // Payment proof screenshot URL (for UPI payments)
+  deliveryAddress?: string; // Delivery location for home kitchen
+  tableNumber?: number; // Table number for restaurant kitchen
   itemCount: number;
   orderDate: string; // ISO string
   deliveryDate?: string; // YYYY-MM-DD format

@@ -12,6 +12,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getOrderById, updateOrderStatus } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
+import { formatDateTimeIST, formatDateIST } from "@/src/utils/dateUtils";
 
 const STATUS_COLORS: Record<Order["status"], string> = {
   pending: "#F59E0B",
@@ -128,7 +129,7 @@ export default function OrderDetailsScreen() {
             </View>
           </View>
           <Text style={styles.orderTime}>
-            {new Date(order.orderDate).toLocaleString()}
+            {formatDateTimeIST(order.orderDate)}
           </Text>
         </View>
 
@@ -150,7 +151,7 @@ export default function OrderDetailsScreen() {
               <View style={styles.infoRow}>
                 <Ionicons name="calendar" size={18} color="#6B7280" />
                 <Text style={styles.infoText}>
-                  Delivery: {new Date(order.deliveryDate).toLocaleDateString()}
+                  Delivery: {formatDateIST(order.deliveryDate)}
                 </Text>
               </View>
             )}

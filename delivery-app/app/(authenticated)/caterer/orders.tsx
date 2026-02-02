@@ -11,11 +11,25 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import OrderCard from "@/src/components/caterer/OrderCard";
-import { getCatererOrders, getOrdersByDate, getOrdersByStatus } from "@/src/api/orderApi";
+import { getCatererOrders } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
+import { getTodayIST, getTomorrowIST, getDateAfterDaysIST } from "@/src/utils/dateUtils";
 
 const DATE_FILTERS = ["Today", "Tomorrow", "Week", "All"];
 const STATUS_FILTERS = ["All", "Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
+
+// Helper functions for date comparison (using IST timezone)
+const isSameDate = (orderDate: string | undefined, compareDate: string): boolean => {
+  if (!orderDate) return false;
+  const orderDateStr = orderDate.split('T')[0];
+  return orderDateStr === compareDate;
+};
+
+const isDateInRange = (orderDate: string | undefined, startDate: string, endDate: string): boolean => {
+  if (!orderDate) return false;
+  const orderDateStr = orderDate.split('T')[0];
+  return orderDateStr >= startDate && orderDateStr <= endDate;
+};
 
 export default function CatererOrdersScreen() {
   const { user } = useAuth();
@@ -51,22 +65,38 @@ export default function CatererOrdersScreen() {
   const filterOrders = () => {
     let filtered = orders;
 
-    // Date filter
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    const weekFromNow = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+    // Get current date in YYYY-MM-DD format (IST timezone)
+    const todayIST = getTodayIST();
+    const tomorrowIST = getTomorrowIST();
+    const weekIST = getDateAfterDaysIST(7);
 
+    console.log('=== Filter Debug ===');
+    console.log('Selected Filter:', selectedDateFilter);
+    console.log('Today IST:', todayIST);
+    console.log('Tomorrow IST:', tomorrowIST);
+    console.log('Total orders:', orders.length);
+
+    // Apply date filter
     if (selectedDateFilter === "Today") {
-      filtered = filtered.filter(o => o.deliveryDate === today);
+      filtered = filtered.filter(o => {
+        const match = isSameDate(o.deliveryDate, todayIST);
+        console.log(`Order ${o.orderId}: deliveryDate=${o.deliveryDate}, matches today=${match}`);
+        return match;
+      });
+      console.log('Filtered (Today):', filtered.length);
     } else if (selectedDateFilter === "Tomorrow") {
-      filtered = filtered.filter(o => o.deliveryDate === tomorrow);
+      filtered = filtered.filter(o => {
+        const match = isSameDate(o.deliveryDate, tomorrowIST);
+        console.log(`Order ${o.orderId}: deliveryDate=${o.deliveryDate}, matches tomorrow=${match}`);
+        return match;
+      });
+      console.log('Filtered (Tomorrow):', filtered.length);
     } else if (selectedDateFilter === "Week") {
-      filtered = filtered.filter(o =>
-        o.deliveryDate && o.deliveryDate >= today && o.deliveryDate <= weekFromNow
-      );
+      filtered = filtered.filter(o => isDateInRange(o.deliveryDate, todayIST, weekIST));
+      console.log('Filtered (Week):', filtered.length);
     }
 
-    // Status filter
+    // Apply status filter
     if (selectedStatus !== "All") {
       const status = selectedStatus.toLowerCase().replace(" ", "_");
       filtered = filtered.filter(o => o.status === status);
@@ -82,7 +112,9 @@ export default function CatererOrdersScreen() {
 
   const getStatusCount = (status: string) => {
     if (status === "All") return filteredOrders.length;
-    const statusKey = status.toLowerCase().replace(" ", "_");
+    const statusKey = status === "Out for Delivery" 
+      ? "out_for_delivery" 
+      : status.toLowerCase().replace(" ", "_");
     return filteredOrders.filter(o => o.status === statusKey).length;
   };
 

@@ -101,6 +101,35 @@ export const createCustomer = async (data: {
   }
 };
 
+// Signup as restaurant caterer (handles both new and existing users)
+export const signupRestaurant = async (data: {
+  phone: string;
+  name: string;
+  restaurantName: string;
+  restaurantAddress: string;
+}): Promise<User> => {
+  try {
+    const res = await fetch(`${BASE_URL}/auth/restaurant-signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Restaurant signup failed");
+    }
+
+    const createdUser = await res.json();
+    return createdUser;
+  } catch (error) {
+    console.error("Restaurant signup API error:", error);
+    throw error;
+  }
+};
+
 // Get user by ID
 export const getUserById = async (userId: number): Promise<User | null> => {
   try {

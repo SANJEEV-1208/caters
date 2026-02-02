@@ -14,9 +14,13 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/(authenticated)/customer/caterer-selection" />;
   }
 
-  // Caterer redirect if not already inside caterer routes
+  // Caterer redirect based on caterType
   if (user.role === "caterer" && !pathname.includes("/caterer")) {
-    return <Redirect href="/(authenticated)/caterer/dashboard" />;
+    // Route to appropriate dashboard based on caterType
+    const dashboardPath = user.caterType === "restaurant" 
+      ? "/(authenticated)/caterer/restaurant/dashboard"
+      : "/(authenticated)/caterer/dashboard";
+    return <Redirect href={dashboardPath} />;
   }
 
   return <Slot />; // Renders child layouts (customer or caterer)

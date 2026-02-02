@@ -73,7 +73,7 @@ export default function MenuScreen() {
 
     // Filter by category
     if (selectedCategory !== "All") {
-      const category = selectedCategory.toLowerCase().replace("-", "_");
+      const category = selectedCategory.toLowerCase();
       filtered = filtered.filter(item => item.category === category);
     }
 

@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { FoodItem } from "./FoodCard";
+import { FoodItem } from "@/src/types/menu";
 
 type Props = {
   item: FoodItem;
@@ -20,7 +20,7 @@ export default function SearchResult({ item }: Props) {
               id: String(item.id),
               name: item.name,
               price: String(item.price),
-              rating: item.rating,
+              rating: item.rating || "4.5",
               description: item.description,
               image: item.image,
               category: item.category,

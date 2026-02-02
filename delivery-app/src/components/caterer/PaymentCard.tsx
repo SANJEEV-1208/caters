@@ -7,73 +7,89 @@ type PaymentCardProps = {
   order: Order;
   customerName?: string;
   onPress?: () => void;
+  onMarkReceived?: (orderId: number) => void;
 };
 
-export default function PaymentCard({ order, customerName, onPress }: PaymentCardProps) {
+export default function PaymentCard({ order, customerName, onPress, onMarkReceived }: PaymentCardProps) {
   const isReceived = order.status === "delivered" && order.paymentMethod === "upi";
   const isPending = order.status !== "delivered" || order.paymentMethod === "cod";
 
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <View style={styles.header}>
-        <View style={styles.orderInfo}>
-          <Text style={styles.orderId}>#{order.orderId}</Text>
-          <Text style={styles.customer}>{customerName || 'Customer'}</Text>
-        </View>
-        <Text style={styles.amount}>₹{order.totalAmount}</Text>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.details}>
-        <View style={styles.row}>
-          {order.paymentMethod === 'upi' ? (
-            <Ionicons name="card" size={16} color="#3B82F6" />
-          ) : (
-            <Ionicons name="cash" size={16} color="#F59E0B" />
-          )}
-          <Text style={styles.method}>{order.paymentMethod.toUpperCase()}</Text>
+    <View style={styles.cardContainer}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={onPress}
+        disabled={!onPress}
+      >
+        <View style={styles.header}>
+          <View style={styles.orderInfo}>
+            <Text style={styles.orderId}>#{order.orderId}</Text>
+            <Text style={styles.customer}>{customerName || 'Customer'}</Text>
+          </View>
+          <Text style={styles.amount}>₹{order.totalAmount}</Text>
         </View>
 
-        {order.transactionId && order.transactionId !== "N/A" && (
+        <View style={styles.divider} />
+
+        <View style={styles.details}>
           <View style={styles.row}>
-            <Ionicons name="shield-checkmark" size={16} color="#10B981" />
-            <Text style={styles.transactionId} numberOfLines={1}>
-              {order.transactionId}
-            </Text>
+            {order.paymentMethod === 'upi' ? (
+              <Ionicons name="card" size={16} color="#3B82F6" />
+            ) : (
+              <Ionicons name="cash" size={16} color="#F59E0B" />
+            )}
+            <Text style={styles.method}>{order.paymentMethod.toUpperCase()}</Text>
           </View>
-        )}
 
-        <View style={styles.row}>
-          <View
-            style={[
-              styles.statusBadge,
-              { backgroundColor: isReceived ? "#10B981" : "#F59E0B" },
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {isReceived ? "Received" : "Pending"}
+          {order.transactionId && order.transactionId !== "N/A" && (
+            <View style={styles.row}>
+              <Ionicons name="shield-checkmark" size={16} color="#10B981" />
+              <Text style={styles.transactionId} numberOfLines={1}>
+                {order.transactionId}
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.row}>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: isReceived ? "#10B981" : "#F59E0B" },
+              ]}
+            >
+              <Text style={styles.statusText}>
+                {isReceived ? "Received" : "Pending"}
+              </Text>
+            </View>
+            <Text style={styles.date}>
+              {new Date(order.orderDate).toLocaleDateString()}
             </Text>
           </View>
-          <Text style={styles.date}>
-            {new Date(order.orderDate).toLocaleDateString()}
-          </Text>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      {/* Mark as Received button - only show for pending payments */}
+      {isPending && onMarkReceived && order.id && (
+        <TouchableOpacity
+          style={styles.markReceivedButton}
+          onPress={() => onMarkReceived(order.id!)}
+        >
+          <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+          <Text style={styles.markReceivedText}>Mark as Received</Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  cardContainer: {
+    marginBottom: 12,
+  },
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -143,5 +159,23 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     flex: 1,
     textAlign: "right",
+  },
+  markReceivedButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "#F0FDF4",
+    borderWidth: 1,
+    borderColor: "#10B981",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginTop: 8,
+  },
+  markReceivedText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#10B981",
   },
 });

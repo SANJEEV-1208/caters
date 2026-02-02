@@ -1,5 +1,6 @@
  import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
   import { useRouter } from "expo-router";
+  import { Ionicons } from "@expo/vector-icons";
 
   export type CuisineItem = {
       id: number;
@@ -28,10 +29,16 @@
               }
           >
               <View style={styles.imageContainer}>
-                  <Image
-                      source={{ uri: item.image }}
-                      style={styles.image}
-                  />
+                  {item.image ? (
+                      <Image
+                          source={{ uri: item.image }}
+                          style={styles.image}
+                      />
+                  ) : (
+                      <View style={styles.placeholderContainer}>
+                          <Ionicons name="fast-food-outline" size={32} color="#10B981" />
+                      </View>
+                  )}
               </View>
               <Text style={styles.name} numberOfLines={1}>
                   {item.name}
@@ -75,5 +82,13 @@
           color: "#1A1A1A",
           textAlign: "center",
           maxWidth: 85,
+      },
+
+      placeholderContainer: {
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#F0FDF4",
       },
   });

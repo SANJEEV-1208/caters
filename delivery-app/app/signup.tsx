@@ -7,9 +7,11 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useState } from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
 
@@ -20,6 +22,7 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { signup } = useAuth();
 
   const handleSignup = async () => {
@@ -69,10 +72,12 @@ export default function SignupScreen() {
   
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.content}>
-        {/* Header */}
-        <Text style={styles.title}>Caterer Registration</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.content}>
+          {/* Header */}
+          <Text style={styles.title}>Caterer Registration</Text>
         <View style={styles.warningBox}>
           <Text style={styles.warningText}>
             ⚠️ Signup only for caterers providing service
@@ -154,7 +159,8 @@ export default function SignupScreen() {
           <Text style={styles.backButtonText}>Back to Login</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

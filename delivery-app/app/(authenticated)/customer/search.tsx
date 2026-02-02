@@ -1,8 +1,7 @@
-import { View, Text, TextInput, StyleSheet, FlatList } from "react-native";
-import { getAllCuisines } from "@/src/api/foodApi";
+import { View, Text, TextInput, StyleSheet, FlatList, SafeAreaView, StatusBar } from "react-native";
+import { getCatererCuisines } from "@/src/api/foodApi";
 import SearchResult from "@/src/components/SearchResult";
 import { useEffect, useState } from "react";
-import { FoodItem } from "@/src/components/FoodCard";
 import CuisineCard, { CuisineItem } from "@/src/components/CuisineCard";
 import Result from "@/src/components/Result";
 import { useAuth } from "@/src/context/AuthContext";
@@ -54,16 +53,18 @@ export default function Search() {
   };
 
   const loadCatererCuisines = async (menuItems: MenuItem[]) => {
+    if (!selectedCatererId) return;
+
     try {
-      // Get all cuisines
-      const allCuisines = await getAllCuisines();
+      // Get caterer-specific cuisines (created by the caterer)
+      const catererCuisines = await getCatererCuisines(selectedCatererId);
 
-      // Extract unique cuisines from caterer's menu
-      const catererCuisines = new Set(menuItems.map(item => item.cuisine));
+      // Extract unique cuisines from caterer's menu items
+      const menuCuisineNames = new Set(menuItems.map(item => item.cuisine));
 
-      // Filter cuisines to only show those the caterer has
-      const filteredCuisines = allCuisines.filter(c =>
-        catererCuisines.has(c.name)
+      // Filter cuisines to only show those that have menu items available today
+      const filteredCuisines = catererCuisines.filter((c: CuisineItem) =>
+        menuCuisineNames.has(c.name)
       );
 
       setCuisine(filteredCuisines);
@@ -140,7 +141,8 @@ export default function Search() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       <TextInput
         placeholder="Search Food..."
         style={styles.inputBar}
@@ -171,7 +173,7 @@ export default function Search() {
         renderItem={({ item }) => <Result item={item} />}
         keyExtractor={(item) => item.id.toString()}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

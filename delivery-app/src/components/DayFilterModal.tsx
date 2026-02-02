@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getISTDate } from '../utils/dateUtils';
 
 export type DayFilter = {
   label: string;
@@ -31,7 +32,7 @@ export default function DayFilterModal({
   const [expandedWeek, setExpandedWeek] = useState(false);
 
   const getToday = (): DayFilter => {
-    const today = new Date();
+    const today = getISTDate();
     return {
       label: 'Today',
       value: 'today',
@@ -40,8 +41,8 @@ export default function DayFilterModal({
   };
 
   const getTomorrow = (): DayFilter => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrow = getISTDate();
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     return {
       label: 'Tomorrow',
       value: 'tomorrow',
@@ -51,15 +52,15 @@ export default function DayFilterModal({
 
   const getWeekDays = (): DayFilter[] => {
     const days: DayFilter[] = [];
-    const today = new Date();
+    const today = getISTDate();
 
     // Get next 7 days starting from tomorrow
     for (let i = 1; i <= 7; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
+      const date = getISTDate();
+      date.setUTCDate(today.getUTCDate() + i);
 
       const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayName = dayNames[date.getDay()];
+      const dayName = dayNames[date.getUTCDay()];
 
       days.push({
         label: dayName,
@@ -79,7 +80,8 @@ export default function DayFilterModal({
 
   const formatDate = (date: Date) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${date.getDate()} ${months[date.getMonth()]}`;
+    // Since date is already IST from getISTDate(), use UTC methods to avoid double conversion
+    return `${date.getUTCDate()} ${months[date.getUTCMonth()]}`;
   };
 
   return (
@@ -117,7 +119,7 @@ export default function DayFilterModal({
             >
               <View style={styles.optionContent}>
                 <Text style={styles.optionLabel}>Today</Text>
-                <Text style={styles.optionDate}>{formatDate(new Date())}</Text>
+                <Text style={styles.optionDate}>{formatDate(getISTDate())}</Text>
               </View>
               {selectedDay.value === 'today' && (
                 <Ionicons name="checkmark-circle" size={20} color="#10B981" />

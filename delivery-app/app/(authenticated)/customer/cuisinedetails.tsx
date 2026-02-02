@@ -7,10 +7,11 @@
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
+    SafeAreaView,
+    StatusBar,
   } from "react-native";
   import { useLocalSearchParams, useRouter } from "expo-router";
   import { useCart } from "@/src/context/CartContext";
-  import { FoodItem } from "@/src/components/FoodCard";
   import { useAuth } from "@/src/context/AuthContext";
   import { getCatererMenuItems } from "@/src/api/catererMenuApi";
   import { MenuItem } from "@/src/types/menu";
@@ -68,17 +69,6 @@
     const renderFoodItem = ({ item }: { item: MenuItem }) => {
       const quantity = getCartQuantity(item.id);
 
-      const foodItem: FoodItem = {
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        rating: 4.5, // Default rating for menu items
-        image: item.image,
-        description: item.description,
-        category: item.category,
-        cuisine: item.cuisine,
-      };
-
       return (
         <View style={styles.card}>
           <TouchableOpacity
@@ -102,11 +92,14 @@
             }
             activeOpacity={0.7}
           >
-            {/* Image */}
+            {/* Image Section with Enhanced Badge */}
             <View style={styles.imageContainer}>
               <Image source={{ uri: item.image }} style={styles.image} />
 
-              {/* Category Badge */}
+              {/* Gradient Overlay */}
+              <View style={styles.imageOverlay} />
+
+              {/* Category Badge with Icon */}
               <View
                 style={[
                   styles.categoryBadge,
@@ -116,78 +109,111 @@
                   },
                 ]}
               >
-                <View style={styles.categoryDot} />
+                <Text style={styles.categoryIcon}>
+                  {item.category === "veg" ? "🌿" : "🍖"}
+                </Text>
+              </View>
+
+              {/* Meal Type Badge */}
+              <View style={styles.mealTypeBadge}>
+                <Text style={styles.mealTypeIcon}>
+                  {item.type === "breakfast" ? "☀️" :
+                   item.type === "lunch" ? "🌤️" :
+                   item.type === "dinner" ? "🌙" : "🍽️"}
+                </Text>
               </View>
             </View>
 
-            {/* Details */}
+            {/* Details Section */}
             <View style={styles.details}>
-              <Text style={styles.itemName} numberOfLines={1}>
-                {item.name}
-              </Text>
-
-              <Text style={styles.description} numberOfLines={2}>
-                {item.description}
-              </Text>
-
-              <View style={styles.priceRow}>
-                <Text style={styles.price}>₹{item.price}</Text>
+              {/* Name and Type Row */}
+              <View style={styles.nameRow}>
+                <Text style={styles.itemName} numberOfLines={2}>
+                  {item.name}
+                </Text>
                 <View style={styles.typeContainer}>
-                  <Text style={styles.typeText}>{item.type}</Text>
+                  <Text style={styles.typeText}>{item.type.replace('_', ' ')}</Text>
                 </View>
+              </View>
+
+              {/* Description */}
+              <Text style={styles.description} numberOfLines={2}>
+                {item.description || "Delicious and freshly prepared"}
+              </Text>
+
+              {/* Bottom Info Row */}
+              <View style={styles.bottomRow}>
+                {/* Price */}
+                <View style={styles.priceContainer}>
+                  <Text style={styles.priceSymbol}>₹</Text>
+                  <Text style={styles.price}>{item.price}</Text>
+                </View>
+
+                {/* Add to Cart / Counter */}
+                {quantity === 0 ? (
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      addToCart(item);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.addButtonIcon}>+</Text>
+                    <Text style={styles.addButtonText}>ADD</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.counter}>
+                    <TouchableOpacity
+                      style={styles.counterBtn}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        removeFromCart(item.id);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.counterBtnText}>−</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.quantity}>{quantity}</Text>
+
+                    <TouchableOpacity
+                      style={styles.counterBtn}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        addToCart(item);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.counterBtnText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
             </View>
           </TouchableOpacity>
-
-          {/* Add to Cart / Counter */}
-          <View style={styles.cartSection}>
-            {quantity === 0 ? (
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => addToCart(foodItem)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.addButtonText}>ADD</Text>
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.counter}>
-                <TouchableOpacity
-                  style={styles.counterBtn}
-                  onPress={() => removeFromCart(item.id)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.counterBtnText}>−</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.quantity}>{quantity}</Text>
-
-                <TouchableOpacity
-                  style={styles.counterBtn}
-                  onPress={() => addToCart(foodItem)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.counterBtnText}>+</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
         </View>
       );
     };
 
     if (loading) {
       return (
-        <View style={[styles.container, styles.centerContent]}>
-          <ActivityIndicator size="large" color="#10B981" />
-          <Text style={styles.loadingText}>Loading items...</Text>
-        </View>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+          <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+          <View style={[styles.container, styles.centerContent]}>
+            <ActivityIndicator size="large" color="#10B981" />
+            <Text style={styles.loadingText}>Loading items...</Text>
+          </View>
+        </SafeAreaView>
       );
     }
 
     return (
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -231,6 +257,7 @@
           </TouchableOpacity>
         )}
       </View>
+      </SafeAreaView>
     );
   }
 
@@ -296,28 +323,35 @@
 
     card: {
       backgroundColor: "#fff",
-      borderRadius: 16,
-      marginBottom: 16,
+      borderRadius: 20,
+      marginBottom: 20,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 3,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 6,
       overflow: "hidden",
+      borderWidth: 1,
+      borderColor: "#F3F4F6",
     },
 
     cardContent: {
       flexDirection: "row",
-      padding: 12,
+      padding: 14,
     },
 
     imageContainer: {
       position: "relative",
-      width: 100,
-      height: 100,
-      borderRadius: 12,
+      width: 130,
+      height: 130,
+      borderRadius: 16,
       overflow: "hidden",
-      backgroundColor: "#F3F4F6",
+      backgroundColor: "#F9FAFB",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 6,
+      elevation: 3,
     },
 
     image: {
@@ -326,70 +360,133 @@
       resizeMode: "cover",
     },
 
-    categoryBadge: {
+    imageOverlay: {
       position: "absolute",
-      top: 6,
-      left: 6,
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      borderWidth: 2,
-      borderColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: "35%",
+      backgroundColor: "rgba(0, 0, 0, 0.1)",
     },
 
-    categoryDot: {
-      width: 4,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: "#fff",
+    categoryBadge: {
+      position: "absolute",
+      top: 8,
+      left: 8,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+
+    categoryIcon: {
+      fontSize: 16,
+    },
+
+    mealTypeBadge: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+
+    mealTypeIcon: {
+      fontSize: 16,
     },
 
     details: {
       flex: 1,
-      marginLeft: 12,
+      marginLeft: 14,
       justifyContent: "space-between",
     },
 
+    nameRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 6,
+    },
+
     itemName: {
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 18,
+      fontWeight: "800",
       color: "#1A1A1A",
-      marginBottom: 4,
+      flex: 1,
+      marginRight: 8,
+      lineHeight: 22,
+      letterSpacing: -0.3,
+    },
+
+    typeContainer: {
+      backgroundColor: "#F0F9FF",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: "#BFDBFE",
+    },
+
+    typeText: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: "#1E40AF",
+      textTransform: "uppercase",
+      letterSpacing: 0.3,
     },
 
     description: {
       fontSize: 13,
       color: "#6B7280",
       lineHeight: 18,
-      marginBottom: 8,
+      marginBottom: 10,
+      fontWeight: "400",
     },
 
-    priceRow: {
+    bottomRow: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
     },
 
-    price: {
-      fontSize: 18,
-      fontWeight: "700",
+    priceContainer: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      backgroundColor: "#F0FDF4",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: "#D1FAE5",
+    },
+
+    priceSymbol: {
+      fontSize: 16,
+      fontWeight: "800",
       color: "#10B981",
+      marginRight: 2,
     },
 
-    typeContainer: {
-      backgroundColor: "#EFF6FF",
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 8,
-    },
-
-    typeText: {
-      fontSize: 12,
-      fontWeight: "600",
-      color: "#3B82F6",
-      textTransform: "capitalize",
+    price: {
+      fontSize: 22,
+      fontWeight: "900",
+      color: "#10B981",
+      letterSpacing: -0.5,
     },
 
     centerContent: {
@@ -403,29 +500,34 @@
       color: "#6B7280",
     },
 
-    cartSection: {
-      paddingHorizontal: 12,
-      paddingBottom: 12,
+    addButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 4,
+      backgroundColor: "#10B981",
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      shadowColor: "#10B981",
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: "#059669",
     },
 
-    addButton: {
-      backgroundColor: "#10B981",
-      paddingVertical: 10,
-      borderRadius: 10,
-      alignItems: "center",
-      shadowColor: "#10B981",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 3,
-      width : 100,
-      marginLeft : "70%",
+    addButtonIcon: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#fff",
     },
 
     addButtonText: {
       color: "#fff",
-      fontSize: 15,
-      fontWeight: "700",
+      fontSize: 14,
+      fontWeight: "800",
       letterSpacing: 0.5,
     },
 
@@ -433,41 +535,44 @@
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: "#F3F4F6",
-      borderRadius: 10,
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderWidth: 1,
-      borderColor: "#E5E7EB",
-      width : 100,
-      marginLeft : "70%",
+      backgroundColor: "#FFFFFF",
+      borderRadius: 12,
+      paddingVertical: 4,
+      paddingHorizontal: 6,
+      borderWidth: 2,
+      borderColor: "#10B981",
+      shadowColor: "#10B981",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
     },
 
     counterBtn: {
       width: 32,
       height: 32,
-      borderRadius: 8,
-      backgroundColor: "#fff",
+      borderRadius: 10,
+      backgroundColor: "#10B981",
       alignItems: "center",
       justifyContent: "center",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-      elevation: 1,
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 2,
     },
 
     counterBtnText: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: "#10B981",
+      fontSize: 20,
+      fontWeight: "800",
+      color: "#FFFFFF",
     },
 
     quantity: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: "#1A1A1A",
-      minWidth: 30,
+      fontSize: 18,
+      fontWeight: "800",
+      color: "#10B981",
+      minWidth: 32,
       textAlign: "center",
     },
 

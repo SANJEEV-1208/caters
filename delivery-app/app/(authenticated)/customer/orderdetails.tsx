@@ -4,41 +4,56 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { Order } from "@/src/types/order";
 import { getOrders } from "@/src/utils/orderStorage";
+import { formatTimeIST } from "@/src/utils/dateUtils";
 
 export default function OrderDetails() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const orderId = params.orderId as string;
   const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadOrderDetails();
   }, [orderId]);
 
   const loadOrderDetails = async () => {
-    const orders = await getOrders();
-    const foundOrder = orders.find((o) => o.orderId === orderId);
-    if (foundOrder) {
-      setOrder(foundOrder);
+    try {
+      setLoading(true);
+      const orders = await getOrders();
+      const foundOrder = orders.find((o) => o.orderId === orderId);
+      if (foundOrder) {
+        setOrder(foundOrder);
+      }
+    } catch (error) {
+      console.error("Error loading order details:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const formatDate = (dateString: string) => {
+    // Convert to IST date
     const date = new Date(dateString);
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(date.getTime() + istOffset);
+
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    const dayName = days[date.getDay()];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const dayName = days[istDate.getUTCDay()];
+    const day = istDate.getUTCDate();
+    const month = months[istDate.getUTCMonth()];
+    const year = istDate.getUTCFullYear();
+    const time = formatTimeIST(dateString);
 
     return {
       dayName,
@@ -78,20 +93,53 @@ export default function OrderDetails() {
     }
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Order Details</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading order details...</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (!order) {
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Order Details</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
+          <Text style={styles.errorTitle}>Order Not Found</Text>
+          <Text style={styles.errorText}>
+            We couldn't find the order you're looking for.
+          </Text>
+          <TouchableOpacity 
+            style={styles.backHomeButton}
+            onPress={() => router.push('/customer/caterer-selection')}
+          >
+            <Text style={styles.backHomeButtonText}>Back to Home</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Order Details</Text>
-          <View style={styles.placeholder} />
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading order details...</Text>
         </View>
       </View>
+      </SafeAreaView>
     );
   }
 
@@ -100,13 +148,15 @@ export default function OrderDetails() {
   const statusIcon = getStatusIcon(order.status);
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Order Details</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Order Details</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -145,7 +195,7 @@ export default function OrderDetails() {
           </View>
 
           {order.items.map((item, index) => (
-            <View key={item.id}>
+            <View key={`${item.id}-${index}`}>
               <View style={styles.itemRow}>
                 <View style={styles.itemInfo}>
                   <View style={styles.itemNameRow}>
@@ -239,6 +289,7 @@ export default function OrderDetails() {
         <View style={styles.bottomSpacing} />
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 }
 
@@ -280,6 +331,36 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: "#6B7280",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  backHomeButton: {
+    backgroundColor: "#10B981",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  backHomeButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
   statusCard: {
     backgroundColor: "#FFFFFF",

@@ -11,6 +11,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { CloudinaryImagePicker } from "./CloudinaryImagePicker";
 
 type QrCodePaymentModalProps = {
   visible: boolean;
@@ -18,7 +19,7 @@ type QrCodePaymentModalProps = {
   qrCodeUrl: string;
   amount: number;
   catererName: string;
-  onSuccess: (transactionId: string) => void;
+  onSuccess: (transactionId: string, paymentProofImage: string) => void;
 };
 
 export default function QrCodePaymentModal({
@@ -30,9 +31,15 @@ export default function QrCodePaymentModal({
   onSuccess,
 }: QrCodePaymentModalProps) {
   const [transactionId, setTransactionId] = useState("");
+  const [paymentProofImage, setPaymentProofImage] = useState("");
   const [isConfirming, setIsConfirming] = useState(false);
 
   const handleConfirmPayment = () => {
+    if (!paymentProofImage.trim()) {
+      Alert.alert("Error", "Please upload payment proof screenshot");
+      return;
+    }
+
     if (!transactionId.trim()) {
       Alert.alert("Error", "Please enter the transaction ID from your payment app");
       return;
@@ -42,13 +49,15 @@ export default function QrCodePaymentModal({
     // Simulate a brief delay
     setTimeout(() => {
       setIsConfirming(false);
-      onSuccess(transactionId.trim());
+      onSuccess(transactionId.trim(), paymentProofImage.trim());
       setTransactionId(""); // Reset for next time
+      setPaymentProofImage(""); // Reset payment proof
     }, 500);
   };
 
   const handleClose = () => {
     setTransactionId("");
+    setPaymentProofImage("");
     onClose();
   };
 
@@ -128,15 +137,34 @@ export default function QrCodePaymentModal({
               <View style={styles.instructionItem}>
                 <Text style={styles.stepNumber}>3.</Text>
                 <Text style={styles.stepText}>
-                  Copy the Transaction ID from your payment app
+                  Take a screenshot of the payment confirmation from your payment app
                 </Text>
               </View>
               <View style={styles.instructionItem}>
                 <Text style={styles.stepNumber}>4.</Text>
                 <Text style={styles.stepText}>
-                  Paste it below and confirm your order
+                  Upload the payment proof screenshot below
                 </Text>
               </View>
+              <View style={styles.instructionItem}>
+                <Text style={styles.stepNumber}>5.</Text>
+                <Text style={styles.stepText}>
+                  Enter the Transaction ID and confirm your order
+                </Text>
+              </View>
+            </View>
+
+            {/* Payment Proof Upload */}
+            <View style={styles.paymentProofSection}>
+              <CloudinaryImagePicker
+                label="Payment Proof Screenshot *"
+                onImageUploaded={(url) => setPaymentProofImage(url)}
+                currentImage={paymentProofImage}
+                disabled={isConfirming}
+              />
+              <Text style={styles.paymentProofHint}>
+                📸 Upload a screenshot showing the payment success message with transaction ID
+              </Text>
             </View>
 
             {/* Transaction ID Input */}
@@ -157,10 +185,10 @@ export default function QrCodePaymentModal({
             <TouchableOpacity
               style={[
                 styles.confirmButton,
-                (!transactionId.trim() || isConfirming) && styles.confirmButtonDisabled,
+                (!paymentProofImage.trim() || !transactionId.trim() || isConfirming) && styles.confirmButtonDisabled,
               ]}
               onPress={handleConfirmPayment}
-              disabled={!transactionId.trim() || isConfirming}
+              disabled={!paymentProofImage.trim() || !transactionId.trim() || isConfirming}
             >
               <Text style={styles.confirmButtonText}>
                 {isConfirming ? "Confirming..." : "Confirm Payment & Place Order"}
@@ -329,6 +357,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     lineHeight: 18,
+  },
+  paymentProofSection: {
+    marginBottom: 20,
+  },
+  paymentProofHint: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 8,
+    lineHeight: 16,
+    fontStyle: "italic",
   },
   transactionSection: {
     marginBottom: 20,

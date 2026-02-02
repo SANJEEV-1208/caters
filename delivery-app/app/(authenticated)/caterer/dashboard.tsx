@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +22,7 @@ import { Order } from "@/src/types/order";
 
 export default function Dashboard() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItemsCount, setMenuItemsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -57,6 +60,27 @@ export default function Dashboard() {
     loadDashboardData();
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: () => {
+            logout();
+            router.replace("/login");
+          },
+        },
+      ]
+    );
+  };
+
   // Calculate stats
   const today = new Date().toISOString().split('T')[0];
   // Today's orders = orders placed today (by orderDate)
@@ -78,17 +102,22 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10B981" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
@@ -99,8 +128,15 @@ export default function Dashboard() {
     >
       {/* Welcome Card */}
       <View style={styles.welcomeCard}>
-        <Text style={styles.welcomeText}>Welcome back,</Text>
-        <Text style={styles.businessName}>{user?.serviceName || user?.name}</Text>
+        <View style={styles.welcomeContent}>
+          <View style={styles.welcomeTextContainer}>
+            <Text style={styles.welcomeText}>Welcome back,</Text>
+            <Text style={styles.businessName}>{user?.serviceName || user?.name}</Text>
+          </View>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Stats Grid */}
@@ -243,7 +279,8 @@ export default function Dashboard() {
           ))
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -273,6 +310,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
+  welcomeContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  welcomeTextContainer: {
+    flex: 1,
+  },
   welcomeText: {
     fontSize: 14,
     color: "#6B7280",
@@ -282,6 +327,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1A1A1A",
     marginTop: 4,
+  },
+  logoutButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FEF2F2",
+    borderWidth: 1.5,
+    borderColor: "#FEE2E2",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   statsGrid: {
     marginBottom: 20,

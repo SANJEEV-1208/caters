@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -90,18 +92,23 @@ export default function CustomersScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10B981" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Customers</Text>
-        <View style={styles.statsRow}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Customers</Text>
+          <View style={styles.statsRow}>
           <Ionicons name="people" size={16} color="#6B7280" />
           <Text style={styles.statsText}>{customers.length} Total</Text>
         </View>
@@ -183,6 +190,7 @@ export default function CustomersScreen() {
         <Ionicons name="person-add" size={24} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 }
 

@@ -13,6 +13,17 @@ export const getCatererApartments = async (catererId: number): Promise<Apartment
   return await res.json();
 };
 
+// Fetch all customer-apartment links for a caterer
+export const getCustomerApartmentLinks = async (catererId: number): Promise<CustomerApartment[]> => {
+  const res = await fetch(`${BASE_URL}/apartments/links?catererId=${catererId}`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch customer apartment links");
+  }
+
+  return await res.json();
+};
+
 export const createApartment = async (data: Omit<Apartment, "id" | "createdAt">): Promise<Apartment> => {
   const res = await fetch(`${BASE_URL}/apartments`, {
     method: "POST",

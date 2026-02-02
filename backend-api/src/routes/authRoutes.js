@@ -8,6 +8,9 @@ router.post('/login', authController.loginUser);
 // POST /api/auth/signup - Signup caterer
 router.post('/signup', authController.signupCaterer);
 
+// POST /api/auth/restaurant-signup - Signup as restaurant (handles new & existing users)
+router.post('/restaurant-signup', authController.signupRestaurant);
+
 // POST /api/auth/create-customer - Create customer (used by caterers)
 router.post('/create-customer', authController.createCustomer);
 

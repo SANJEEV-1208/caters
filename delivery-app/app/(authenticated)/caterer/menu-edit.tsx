@@ -14,6 +14,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getMenuItemById, updateMenuItem } from "@/src/api/catererMenuApi";
 import { MenuItem } from "@/src/types/menu";
+import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
 type MealType = typeof MEAL_TYPES[number];
@@ -230,12 +231,11 @@ export default function MenuEditScreen() {
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>Image URL *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.image}
-            onChangeText={(text) => setFormData({ ...formData, image: text })}
-            autoCapitalize="none"
+          <CloudinaryImagePicker
+            label="Food Image *"
+            onImageUploaded={(url) => setFormData({ ...formData, image: url })}
+            currentImage={formData.image}
+            disabled={saving}
           />
         </View>
 

@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useState, useEffect, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +17,7 @@ import { getCustomerOrders } from "@/src/api/orderApi";
 import { getOrders as getLocalOrders } from "@/src/utils/orderStorage";
 import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
+import { getISTDate, formatTimeIST, formatDateIST } from "@/src/utils/dateUtils";
 
 export default function OrderHistory() {
   const router = useRouter();
@@ -86,19 +89,23 @@ export default function OrderHistory() {
   }, []);
 
   const formatDate = (dateString: string) => {
+    // Convert to IST date
     const date = new Date(dateString);
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(date.getTime() + istOffset);
+
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    const dayName = days[date.getDay()];
-    const day = date.getDate();
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
+    const dayName = days[istDate.getUTCDay()];
+    const day = istDate.getUTCDate();
+    const month = months[istDate.getUTCMonth()];
+    const year = istDate.getUTCFullYear();
 
     return {
       dayName,
       fullDate: `${day} ${month} ${year}`,
-      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      time: formatTimeIST(dateString),
     };
   };
 
@@ -222,7 +229,8 @@ export default function OrderHistory() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Order History</Text>
         </View>
@@ -230,12 +238,13 @@ export default function OrderHistory() {
           <ActivityIndicator size="large" color="#10B981" />
           <Text style={styles.loadingText}>Loading your orders...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Order History</Text>
@@ -274,7 +283,7 @@ export default function OrderHistory() {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

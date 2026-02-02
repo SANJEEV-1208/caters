@@ -4,6 +4,8 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
@@ -43,28 +45,36 @@ export default function CatererSelectionScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#10B981" />
-        <Text style={styles.loadingText}>Loading your caterers...</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text style={styles.loadingText}>Loading your caterers...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (caterers.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>📋</Text>
-        <Text style={styles.emptyTitle}>No Subscriptions</Text>
-        <Text style={styles.emptyText}>
-          Contact your caterer to get started with your subscription
-        </Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>📋</Text>
+          <Text style={styles.emptyTitle}>No Subscriptions</Text>
+          <Text style={styles.emptyText}>
+            Contact your caterer to get started with your subscription
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <View style={styles.container}>
+        <View style={styles.header}>
         <Text style={styles.title}>Select Your Caterer</Text>
         <Text style={styles.subtitle}>
           Choose a caterer to browse their menu
@@ -84,6 +94,7 @@ export default function CatererSelectionScreen() {
         showsVerticalScrollIndicator={false}
       />
     </View>
+    </SafeAreaView>
   );
 }
 

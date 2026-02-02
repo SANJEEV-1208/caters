@@ -2,18 +2,22 @@ import { Redirect } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 
 export default function Index() {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
 
-  // 1️⃣ Not logged in → Login
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
+  // If authenticated, redirect based on role
+  if (user) {
+    if (user.role === "customer") {
+      return <Redirect href="/(authenticated)/customer/caterer-selection" />;
+    } else if (user.role === "caterer") {
+      // Redirect to appropriate caterer dashboard based on caterType
+      const dashboardPath = user.caterType === "restaurant"
+        ? "/(authenticated)/caterer/restaurant/dashboard"
+        : "/(authenticated)/caterer/dashboard";
+      return <Redirect href={dashboardPath as any} />;
+    }
   }
 
-  // 2️⃣ Redirect based on role
-  if (user?.role === "customer") {
-    return <Redirect href="/(authenticated)/customer/caterer-selection" />;
-  }
-
-  // 3️⃣ Default to caterer dashboard (only customer and caterer roles exist)
-  return <Redirect href="/(authenticated)/caterer/dashboard" />;
+  // Not logged in → Login
+  return <Redirect href="/login" />;
 }
+

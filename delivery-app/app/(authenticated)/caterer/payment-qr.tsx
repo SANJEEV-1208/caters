@@ -14,27 +14,35 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { updatePaymentQrCode } from "@/src/api/authApi";
+import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 
 export default function PaymentQrScreen() {
   const router = useRouter();
   const { user, setUser } = useAuth();
   const [qrCodeUrl, setQrCodeUrl] = useState(user?.paymentQrCode || "");
   const [loading, setLoading] = useState(false);
+  const [uploadMethod, setUploadMethod] = useState<'gallery' | 'url'>('gallery');
+
+  const handleImageUploaded = (url: string) => {
+    setQrCodeUrl(url);
+  };
 
   const handleSave = async () => {
     if (!user?.id) return;
 
     if (!qrCodeUrl.trim()) {
-      Alert.alert("Error", "Please enter a QR code image URL");
+      Alert.alert("Error", "Please upload or enter a QR code image");
       return;
     }
 
-    // Basic URL validation
-    try {
-      new URL(qrCodeUrl);
-    } catch {
-      Alert.alert("Error", "Please enter a valid URL");
-      return;
+    // Basic URL validation (only if using URL method)
+    if (uploadMethod === 'url') {
+      try {
+        new URL(qrCodeUrl);
+      } catch {
+        Alert.alert("Error", "Please enter a valid URL");
+        return;
+      }
     }
 
     setLoading(true);
@@ -59,7 +67,7 @@ export default function PaymentQrScreen() {
 
     Alert.alert(
       "Remove QR Code",
-      "Are you sure you want to remove your payment QR code? Customers won't be able to pay via UPI.",
+      "Are you sure you want to remove your payment QR code? Customers won\'t be able to pay via UPI.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -121,25 +129,86 @@ export default function PaymentQrScreen() {
           </View>
         )}
 
+        {/* Upload Method Selector */}
+        {!user?.paymentQrCode && (
+          <View style={styles.methodSelector}>
+            <TouchableOpacity
+              style={[
+                styles.methodButton,
+                uploadMethod === 'gallery' && styles.methodButtonActive,
+              ]}
+              onPress={() => setUploadMethod('gallery')}
+            >
+              <Ionicons
+                name="image"
+                size={20}
+                color={uploadMethod === 'gallery' ? '#10B981' : '#6B7280'}
+              />
+              <Text
+                style={[
+                  styles.methodButtonText,
+                  uploadMethod === 'gallery' && styles.methodButtonTextActive,
+                ]}
+              >
+                Upload from Gallery
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.methodButton,
+                uploadMethod === 'url' && styles.methodButtonActive,
+              ]}
+              onPress={() => setUploadMethod('url')}
+            >
+              <Ionicons
+                name="link"
+                size={20}
+                color={uploadMethod === 'url' ? '#10B981' : '#6B7280'}
+              />
+              <Text
+                style={[
+                  styles.methodButtonText,
+                  uploadMethod === 'url' && styles.methodButtonTextActive,
+                ]}
+              >
+                Enter URL
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Upload from Gallery */}
+        {!user?.paymentQrCode && uploadMethod === 'gallery' && (
+          <View style={styles.field}>
+            <CloudinaryImagePicker
+              label="Upload QR Code from Gallery *"
+              onImageUploaded={handleImageUploaded}
+              currentImage={qrCodeUrl}
+              disabled={loading}
+              folder="kaaspro/qr-codes"
+            />
+          </View>
+        )}
+
         {/* QR Code URL Input */}
-        <View style={styles.field}>
-          <Text style={styles.label}>QR Code Image URL *</Text>
-          <Text style={styles.hint}>
-            {user?.paymentQrCode
-              ? "To change your QR code, remove the current one first"
-              : "Upload your QR code image to a service like Imgur or use a direct image link"}
-          </Text>
-          <TextInput
-            style={[styles.input, user?.paymentQrCode && styles.inputDisabled]}
-            placeholder="https://example.com/your-qr-code.jpg"
-            value={qrCodeUrl}
-            onChangeText={setQrCodeUrl}
-            autoCapitalize="none"
-            keyboardType="url"
-            multiline
-            editable={!user?.paymentQrCode}
-          />
-        </View>
+        {!user?.paymentQrCode && uploadMethod === 'url' && (
+          <View style={styles.field}>
+            <Text style={styles.label}>QR Code Image URL *</Text>
+            <Text style={styles.hint}>
+              Upload your QR code image to a service like Imgur or use a direct image link
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="https://example.com/your-qr-code.jpg"
+              value={qrCodeUrl}
+              onChangeText={setQrCodeUrl}
+              autoCapitalize="none"
+              keyboardType="url"
+              multiline
+            />
+          </View>
+        )}
 
         {/* Instructions */}
         <View style={styles.instructionsCard}>
@@ -366,5 +435,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#EF4444",
+  },
+  methodSelector: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 20,
+  },
+  methodButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 2,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 14,
+  },
+  methodButtonActive: {
+    borderColor: "#10B981",
+    backgroundColor: "#F0FDF4",
+  },
+  methodButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6B7280",
+  },
+  methodButtonTextActive: {
+    color: "#10B981",
+    fontWeight: "600",
   },
 });

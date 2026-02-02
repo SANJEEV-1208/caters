@@ -6,10 +6,12 @@
     Image,
     Pressable,
     TouchableOpacity,
+    SafeAreaView,
+    StatusBar,
   } from "react-native";
   import { useLocalSearchParams, useRouter } from "expo-router";
   import { useCart } from "@/src/context/CartContext";
-  import { FoodItem } from "@/src/components/FoodCard";
+  import { MenuItem } from "@/src/types/menu";
 
   export default function DetailsScreen() {
     const router = useRouter();
@@ -22,25 +24,31 @@
         ? rawCategory
         : "veg";
 
-    const item: FoodItem = {
+    const item: MenuItem = {
       id: Number(params.id),
+      catererId: 0,
       name: params.name as string,
       price: Number(params.price),
-      rating: params.rating as string,
-      image: params.image as string, // No JSON.parse needed, it's already a string URL
+      type: 'main_course',
+      image: params.image as string,
       description: params.description as string,
       category,
       cuisine : params.cuisine as string,
+      availableDates: [],
+      inStock: true,
+      createdAt: new Date().toISOString(),
     };
 
     const cartItem = cart.find((i) => i.id === item.id);
     const quantity = cartItem?.quantity ?? 0;
 
     return (
-      <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Image Section */}
-          <View style={styles.imageContainer}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <View style={styles.container}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Image Section */}
+            <View style={styles.imageContainer}>
             <Image source={{ uri: item.image }} style={styles.image} />
 
             {/* Back Button Overlay */}
@@ -74,7 +82,7 @@
               <Text style={styles.title}>{item.name}</Text>
               <View style={styles.ratingContainer}>
                 <Text style={styles.ratingStar}>⭐</Text>
-                <Text style={styles.rating}>{item.rating}</Text>
+                <Text style={styles.rating}>{item.rating}</Text> 
               </View>
             </View>
 
@@ -148,6 +156,7 @@
           )}
         </View>
       </View>
+      </SafeAreaView>
     );
   }
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Order } from "@/src/types/order";
 import { useRouter } from "expo-router";
+import { getISTDate } from "@/src/utils/dateUtils";
 
 type OrderCardProps = {
   order: Order;
@@ -29,11 +30,21 @@ const getStatusColor = (status: Order["status"]) => {
 };
 
 const getTimeAgo = (dateString: string) => {
-  const diff = Date.now() - new Date(dateString).getTime();
+  // Get current IST time
+  const nowIST = getISTDate();
+
+  // Convert order date to IST
+  const orderDate = new Date(dateString);
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const orderDateIST = new Date(orderDate.getTime() + istOffset);
+
+  // Calculate difference
+  const diff = nowIST.getTime() - orderDateIST.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
+  if (minutes < 1) return 'Just now';
   if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
   if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
   return `${days} day${days !== 1 ? 's' : ''} ago`;

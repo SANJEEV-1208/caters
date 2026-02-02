@@ -15,11 +15,26 @@ export const getMenuItemsByDate = async (
   catererId: number,
   date: string
 ): Promise<MenuItem[]> => {
-  const res = await fetch(`${BASE_URL}/menus/by-date?catererId=${catererId}&date=${date}`);
+  const url = `${BASE_URL}/menus/by-date?catererId=${catererId}&date=${date}`;
+  console.log('=== API: getMenuItemsByDate ===');
+  console.log('URL:', url);
+  console.log('CatererId:', catererId);
+  console.log('Date:', date);
+
+  const res = await fetch(url);
+  console.log('Response status:', res.status);
+
   if (!res.ok) {
+    console.error('❌ API Error - Status:', res.status);
+    const errorText = await res.text();
+    console.error('❌ API Error - Body:', errorText);
     throw new Error("Failed to fetch menu items");
   }
-  return await res.json();
+
+  const data = await res.json();
+  console.log('✅ API Response:', data);
+  console.log('✅ Number of items:', data.length);
+  return data;
 };
 
 export const getMenuItemById = async (id: number): Promise<MenuItem> => {

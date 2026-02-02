@@ -1,4 +1,4 @@
-import { View, ScrollView, StyleSheet, FlatList, Text, ActivityIndicator, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, FlatList, Text, ActivityIndicator, Pressable, SafeAreaView, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../../src/components/Header";
 import CategoryButton from "../../../src/components/CategoryButton";
@@ -7,10 +7,10 @@ import FoodCard from "../../../src/components/FoodCard";
 import DayFilterModal, { DayFilter } from "../../../src/components/DayFilterModal";
 import { useState, useEffect } from "react";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
-import { FoodItem } from "../../../src/components/FoodCard";
 import { useAuth } from "@/src/context/AuthContext";
 import { MenuItem } from "@/src/types/menu";
 import { useRouter } from "expo-router";
+import { getISTDate } from "@/src/utils/dateUtils";
 
 export default function HomeScreen() {
   const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const [selectedDay, setSelectedDay] = useState<DayFilter>({
     label: 'Today',
     value: 'today',
-    date: new Date(),
+    date: getISTDate(),
   });
   const { selectedCatererId, setSelectedDeliveryDate } = useAuth();
   const router = useRouter();
@@ -31,11 +31,12 @@ export default function HomeScreen() {
     loadFoods();
   }, [selectedCatererId, selectedDay]);
 
-  // Format date to YYYY-MM-DD
+  // Format date to YYYY-MM-DD (IST)
   const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    // Since date is already IST from getISTDate(), use UTC methods to avoid double conversion
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
@@ -108,21 +109,22 @@ export default function HomeScreen() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const date = selectedDay.date;
 
+    // Since date is already IST from getISTDate(), use UTC methods to avoid double conversion
     let label = '';
     if (selectedDay.value === 'today') {
       label = 'Today';
     } else if (selectedDay.value === 'tomorrow') {
       label = 'Tomorrow';
     } else {
-      label = days[date.getDay()];
+      label = days[date.getUTCDay()];
     }
 
     return {
       label,
-      day: days[date.getDay()],
-      date: date.getDate(),
-      month: months[date.getMonth()],
-      fullDate: `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`,
+      day: days[date.getUTCDay()],
+      date: date.getUTCDate(),
+      month: months[date.getUTCMonth()],
+      fullDate: `${date.getUTCDate()} ${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`,
     };
   };
 
@@ -130,7 +132,8 @@ export default function HomeScreen() {
 
   if (!selectedCatererId) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
         <Ionicons name="restaurant-outline" size={64} color="#E5E7EB" />
         <Text style={styles.emptyTitle}>No Caterer Selected</Text>
         <Text style={styles.emptyText}>
@@ -142,21 +145,23 @@ export default function HomeScreen() {
         >
           <Text style={styles.selectButtonText}>Select Caterer</Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (loading) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <SafeAreaView style={[styles.container, styles.centerContent]}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
         <ActivityIndicator size="large" color="#10B981" />
         <Text style={styles.loadingText}>Loading menu...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       <Header
         showFilter={true}
         onFilterPress={() => setFilterModalVisible(true)}
@@ -272,7 +277,7 @@ export default function HomeScreen() {
         }}
         selectedDay={selectedDay}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

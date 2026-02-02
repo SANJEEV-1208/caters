@@ -6,10 +6,15 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Pressable,
+  ScrollView,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
 import { useState } from "react";
 import { useRouter, Redirect } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [phone, setPhone] = useState("");
@@ -23,7 +28,10 @@ export default function LoginScreen() {
     if (user.role === "customer") {
       return <Redirect href="/(authenticated)/customer/caterer-selection" />;
     } else if (user.role === "caterer") {
-      return <Redirect href="/(authenticated)/caterer/dashboard" />;
+      const dashboardPath = user.caterType === "restaurant"
+        ? "/(authenticated)/caterer/restaurant/dashboard"
+        : "/(authenticated)/caterer/dashboard";
+      return <Redirect href={dashboardPath} />;
     }
   }
 
@@ -52,11 +60,35 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        {/* Header */}
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Enter your phone number</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          {/* Header */}
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Enter your phone number</Text>
+
+        {/* Scan Table QR Button - Guest Access Allowed */}
+        <Pressable
+          style={styles.scanQRCard}
+          onPress={() => router.push("/qr-scanner")}
+        >
+          <View style={styles.scanQRIcon}>
+            <Ionicons name="qr-code-outline" size={32} color="#FFFFFF" />
+          </View>
+          <View style={styles.scanQRContent}>
+            <Text style={styles.scanQRTitle}>Dining at a Restaurant?</Text>
+            <Text style={styles.scanQRText}>Scan table QR code to order</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#10B981" />
+        </Pressable>
+
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
 
         {/* Phone Number Input */}
         <View style={styles.inputSection}>
@@ -95,12 +127,13 @@ export default function LoginScreen() {
         {/* Register Link */}
         <View style={styles.registerSection}>
           <Text style={styles.registerText}>Not registered?</Text>
-          <TouchableOpacity onPress={() => router.push("/signup")}>
+          <TouchableOpacity onPress={() => router.push("/caterer-type-selection")}>
             <Text style={styles.registerLink}>Register as Caterer</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -109,10 +142,64 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F8F8",
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
     padding: 20,
     justifyContent: "center",
+  },
+  scanQRCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#10B981",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  scanQRIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  scanQRContent: {
+    flex: 1,
+  },
+  scanQRTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  scanQRText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.9)",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E5E7EB",
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
   },
   title: {
     fontSize: 28,

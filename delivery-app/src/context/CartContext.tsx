@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FoodItem } from "@/src/components/FoodCard";
+import { MenuItem } from "@/src/types/menu";
 
-export type CartItem = FoodItem & {
+export type CartItem = MenuItem & {
   quantity: number;
 };
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (item: FoodItem) => void;
+  addToCart: (item: MenuItem) => void;
   removeFromCart: (id: number) => void;
   removeMultipleItems: (ids: number[]) => void;
   clearCart: () => void;
@@ -55,7 +55,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addToCart = (item: FoodItem) => {
+  const addToCart = (item: MenuItem) => {
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id);
 

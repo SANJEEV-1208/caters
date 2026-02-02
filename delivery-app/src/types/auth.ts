@@ -4,8 +4,11 @@ export type User = {
   email?: string;        // For caterers (optional)
   role: "customer" | "caterer";
   name: string;
-  serviceName?: string;  // For caterers
-  address?: string;      // For caterers
+  serviceName?: string;  // For home kitchen caterers
+  address?: string;      // For home kitchen caterers
+  caterType?: "home" | "restaurant"; // Type of catering service (home or restaurant)
+  restaurantName?: string; // For restaurant caterers
+  restaurantAddress?: string; // For restaurant caterers
   paymentQrCode?: string; // For caterers - GPay/UPI QR code image URL
   createdAt?: string;
 };

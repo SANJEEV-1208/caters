@@ -32,6 +32,9 @@ exports.loginUser = async (req, res) => {
       name: user.name,
       serviceName: user.service_name,
       address: user.address,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: user.restaurant_address,
       paymentQrCode: user.payment_qr_code,
       createdAt: user.created_at
     };
@@ -66,8 +69,8 @@ exports.signupCaterer = async (req, res) => {
     }
 
     const result = await pool.query(
-      'INSERT INTO users (phone, role, name, service_name, address) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [phone, 'caterer', name, serviceName, address || null]
+      'INSERT INTO users (phone, role, name, cater_type, service_name, address) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [phone, 'caterer', name, 'home', serviceName, address || null]
     );
 
     const user = result.rows[0];
@@ -78,6 +81,9 @@ exports.signupCaterer = async (req, res) => {
       name: user.name,
       serviceName: user.service_name,
       address: user.address,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: user.restaurant_address,
       createdAt: user.created_at
     };
 
@@ -110,6 +116,9 @@ exports.getUserById = async (req, res) => {
       name: user.name,
       serviceName: user.service_name,
       address: user.address,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: user.restaurant_address,
       paymentQrCode: user.payment_qr_code,
       createdAt: user.created_at
     };
@@ -188,6 +197,9 @@ exports.updatePaymentQrCode = async (req, res) => {
       name: user.name,
       serviceName: user.service_name,
       address: user.address,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: user.restaurant_address,
       paymentQrCode: user.payment_qr_code,
       createdAt: user.created_at
     };
@@ -195,6 +207,65 @@ exports.updatePaymentQrCode = async (req, res) => {
     res.json(formattedUser);
   } catch (error) {
     console.error('Update QR code error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Signup as restaurant (handles both new users and existing users)
+exports.signupRestaurant = async (req, res) => {
+  try {
+    const { phone, name, restaurantName, restaurantAddress } = req.body;
+
+    if (!phone || !name || !restaurantName || !restaurantAddress) {
+      return res.status(400).json({ 
+        error: 'Phone, name, restaurant name, and restaurant address are required' 
+      });
+    }
+
+    // Normalize phone number
+    const normalizedPhone = phone.replace(/^\+91/, '');
+
+    // Check if user already exists
+    const existingUserResult = await pool.query(
+      'SELECT * FROM users WHERE phone = $1 OR phone = $2',
+      [phone, normalizedPhone]
+    );
+
+    let user;
+
+    if (existingUserResult.rows.length > 0) {
+      // Update existing user with restaurant info
+      const existingUser = existingUserResult.rows[0];
+      const updateResult = await pool.query(
+        'UPDATE users SET role = $1, name = $2, cater_type = $3, restaurant_name = $4, restaurant_address = $5 WHERE id = $6 RETURNING *',
+        ['caterer', name, 'restaurant', restaurantName, restaurantAddress, existingUser.id]
+      );
+      user = updateResult.rows[0];
+    } else {
+      // Create new user as restaurant caterer
+      const createResult = await pool.query(
+        'INSERT INTO users (phone, role, name, cater_type, restaurant_name, restaurant_address) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [phone, 'caterer', name, 'restaurant', restaurantName, restaurantAddress]
+      );
+      user = createResult.rows[0];
+    }
+
+    const formattedUser = {
+      id: user.id,
+      phone: user.phone,
+      role: user.role,
+      name: user.name,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: user.restaurant_address,
+      serviceName: user.restaurant_name, // Alias for backward compatibility
+      address: user.restaurant_address, // Alias for backward compatibility
+      createdAt: user.created_at
+    };
+
+    res.status(201).json(formattedUser);
+  } catch (error) {
+    console.error('Restaurant signup error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

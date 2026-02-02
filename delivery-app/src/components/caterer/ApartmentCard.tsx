@@ -61,7 +61,7 @@ export default function ApartmentCard({
 
       <View style={styles.actions}>
         {onEdit && (
-          <TouchableOpacity onPress={onEdit} style={styles.actionButton}>
+          <TouchableOpacity onPress={() => onEdit(apartment.id, apartment.name)} style={styles.actionButton}>
             <Ionicons name="create-outline" size={22} color="#3B82F6" />
           </TouchableOpacity>
         )}

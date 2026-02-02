@@ -22,7 +22,7 @@ type PaymentBottomSheetProps = {
   visible: boolean;
   onClose: () => void;
   totalAmount: number;
-  onConfirmOrder: (paymentMethod: PaymentMethod, transactionId?: string) => void;
+  onConfirmOrder: (paymentMethod: PaymentMethod, transactionId?: string, paymentProofImage?: string) => void;
   catererQrCode?: string;
   catererName?: string;
 };
@@ -75,7 +75,7 @@ export default function PaymentBottomSheet({
     opacity: backdropOpacity.value,
   }));
 
-  const handleQrPaymentSuccess = (transactionId: string) => {
+  const handleQrPaymentSuccess = (transactionId: string, paymentProofImage: string) => {
     setShowQrModal(false);
     onClose(); // Close the payment method sheet
     Alert.alert(
@@ -85,7 +85,7 @@ export default function PaymentBottomSheet({
         {
           text: 'OK',
           onPress: () => {
-            onConfirmOrder('upi', transactionId);
+            onConfirmOrder('upi', transactionId, paymentProofImage);
           },
         },
       ]

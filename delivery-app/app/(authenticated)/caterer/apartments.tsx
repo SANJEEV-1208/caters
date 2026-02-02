@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import ApartmentCard from "@/src/components/caterer/ApartmentCard";
-import { getCatererApartments, deleteApartment } from "@/src/api/apartmentApi";
+import { getCatererApartments, deleteApartment, getCustomerApartmentLinks } from "@/src/api/apartmentApi";
 
 type Apartment = {
   id: number;
@@ -40,8 +40,27 @@ export default function ApartmentsScreen() {
     if (!user?.id) return;
 
     try {
-      const data = await getCatererApartments(user.id);
-      setApartments(data);
+      // Fetch apartments and customer links
+      const [apartmentsData, customerLinks] = await Promise.all([
+        getCatererApartments(user.id),
+        getCustomerApartmentLinks(user.id)
+      ]);
+
+      // Count customers per apartment
+      const customerCounts: { [apartmentId: number]: number } = {};
+      customerLinks.forEach(link => {
+        if (link.apartmentId) {
+          customerCounts[link.apartmentId] = (customerCounts[link.apartmentId] || 0) + 1;
+        }
+      });
+
+      // Add customer count to each apartment
+      const apartmentsWithCounts = apartmentsData.map(apt => ({
+        ...apt,
+        customerCount: customerCounts[apt.id] || 0
+      }));
+
+      setApartments(apartmentsWithCounts);
     } catch (error) {
       console.error("Failed to load apartments:", error);
       Alert.alert("Error", "Failed to load apartments");

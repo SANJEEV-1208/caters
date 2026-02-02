@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import PaymentCard from "@/src/components/caterer/PaymentCard";
-import { getCatererOrders } from "@/src/api/orderApi";
+import { getCatererOrders, updateOrderStatus } from "@/src/api/orderApi";
 import { getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { User } from "@/src/types/auth";
@@ -69,6 +70,24 @@ export default function PaymentsScreen() {
     loadPayments();
   };
 
+  const handleMarkAsReceived = async (orderId: number) => {
+    try {
+      await updateOrderStatus(orderId, "delivered");
+
+      // Update local state
+      setOrders(prev =>
+        prev.map(order =>
+          order.id === orderId ? { ...order, status: "delivered" as const } : order
+        )
+      );
+
+      Alert.alert("Success", "Payment marked as received");
+    } catch (error) {
+      console.error("Failed to mark payment as received:", error);
+      Alert.alert("Error", "Failed to update payment status");
+    }
+  };
+
   // Filter orders based on selected filter
   const getFilteredOrders = () => {
     let filtered = orders;
@@ -81,14 +100,12 @@ export default function PaymentsScreen() {
         filtered = orders.filter((o) => o.paymentMethod === "cod");
         break;
       case "received":
-        filtered = orders.filter(
-          (o) => o.status === "delivered" && o.paymentMethod === "upi"
-        );
+        // Show all delivered orders (payment has been received - either UPI or COD)
+        filtered = orders.filter((o) => o.status === "delivered");
         break;
       case "pending":
-        filtered = orders.filter(
-          (o) => o.status !== "delivered" || o.paymentMethod === "cod"
-        );
+        // Show all non-delivered orders (payment not yet received)
+        filtered = orders.filter((o) => o.status !== "delivered");
         break;
     }
 
@@ -102,13 +119,18 @@ export default function PaymentsScreen() {
     .filter((o) => o.status === "delivered")
     .reduce((sum, o) => sum + o.totalAmount, 0);
   const receivedPayments = orders
-    .filter((o) => o.status === "delivered" && o.paymentMethod === "upi")
+    .filter((o) => o.status === "delivered")
     .reduce((sum, o) => sum + o.totalAmount, 0);
   const pendingPayments = orders
-    .filter((o) => o.status !== "delivered" || o.paymentMethod === "cod")
+    .filter((o) => o.status !== "delivered")
     .reduce((sum, o) => sum + o.totalAmount, 0);
+
+  // Filter counts
+  const allCount = orders.length;
   const upiCount = orders.filter((o) => o.paymentMethod === "upi").length;
   const codCount = orders.filter((o) => o.paymentMethod === "cod").length;
+  const receivedCount = orders.filter((o) => o.status === "delivered").length;
+  const pendingCount = orders.filter((o) => o.status !== "delivered").length;
 
   if (loading) {
     return (
@@ -149,15 +171,15 @@ export default function PaymentsScreen() {
             <Text style={styles.statSubtext}>{orders.length} orders</Text>
           </View>
           <View style={styles.statRow}>
-            <View style={[styles.statBoxSmall, { backgroundColor: "#DBEAFE" }]}>
-              <Ionicons name="card" size={20} color="#3B82F6" />
+            <View style={[styles.statBoxSmall, { backgroundColor: "#DCFCE7" }]}>
+              <Ionicons name="checkmark-circle" size={20} color="#10B981" />
               <Text style={styles.statSmallValue}>₹{receivedPayments.toLocaleString()}</Text>
-              <Text style={styles.statSmallLabel}>Received ({upiCount})</Text>
+              <Text style={styles.statSmallLabel}>Received ({receivedCount})</Text>
             </View>
             <View style={[styles.statBoxSmall, { backgroundColor: "#FEF3C7" }]}>
-              <Ionicons name="cash" size={20} color="#F59E0B" />
+              <Ionicons name="time" size={20} color="#F59E0B" />
               <Text style={styles.statSmallValue}>₹{pendingPayments.toLocaleString()}</Text>
-              <Text style={styles.statSmallLabel}>Pending ({codCount})</Text>
+              <Text style={styles.statSmallLabel}>Pending ({pendingCount})</Text>
             </View>
           </View>
         </View>
@@ -175,8 +197,23 @@ export default function PaymentsScreen() {
                   filter === "all" && styles.filterButtonTextActive,
                 ]}
               >
-                All ({orders.length})
+                All
               </Text>
+              <View
+                style={[
+                  styles.filterBadge,
+                  filter === "all" && styles.filterBadgeActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    filter === "all" && styles.filterBadgeTextActive,
+                  ]}
+                >
+                  {allCount}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "received" && styles.filterButtonActive]}
@@ -195,6 +232,21 @@ export default function PaymentsScreen() {
               >
                 Received
               </Text>
+              <View
+                style={[
+                  styles.filterBadge,
+                  filter === "received" && styles.filterBadgeActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    filter === "received" && styles.filterBadgeTextActive,
+                  ]}
+                >
+                  {receivedCount}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "pending" && styles.filterButtonActive]}
@@ -213,6 +265,21 @@ export default function PaymentsScreen() {
               >
                 Pending
               </Text>
+              <View
+                style={[
+                  styles.filterBadge,
+                  filter === "pending" && styles.filterBadgeActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    filter === "pending" && styles.filterBadgeTextActive,
+                  ]}
+                >
+                  {pendingCount}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "upi" && styles.filterButtonActive]}
@@ -231,6 +298,21 @@ export default function PaymentsScreen() {
               >
                 UPI
               </Text>
+              <View
+                style={[
+                  styles.filterBadge,
+                  filter === "upi" && styles.filterBadgeActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    filter === "upi" && styles.filterBadgeTextActive,
+                  ]}
+                >
+                  {upiCount}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "cod" && styles.filterButtonActive]}
@@ -249,6 +331,21 @@ export default function PaymentsScreen() {
               >
                 COD
               </Text>
+              <View
+                style={[
+                  styles.filterBadge,
+                  filter === "cod" && styles.filterBadgeActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterBadgeText,
+                    filter === "cod" && styles.filterBadgeTextActive,
+                  ]}
+                >
+                  {codCount}
+                </Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -275,9 +372,10 @@ export default function PaymentsScreen() {
                 }
                 onPress={() =>
                   router.push(
-                    `/(authenticated)/caterer/order-details?id=${order.id}`
+                    `/(authenticated)/caterer/order-details?orderId=${order.id}`
                   )
                 }
+                onMarkReceived={handleMarkAsReceived}
               />
             ))
           )}
@@ -398,6 +496,26 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   filterButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  filterBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#10B981",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 6,
+  },
+  filterBadgeActive: {
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  filterBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  filterBadgeTextActive: {
     color: "#FFFFFF",
   },
   listContainer: {

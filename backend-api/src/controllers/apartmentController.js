@@ -221,3 +221,25 @@ exports.getCustomerApartments = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Get customer apartment links by caterer (for counting customers per apartment)
+exports.getCustomerApartmentLinks = async (req, res) => {
+  try {
+    const { catererId } = req.query;
+
+    if (!catererId) {
+      return res.status(400).json({ error: 'Caterer ID is required' });
+    }
+
+    const result = await pool.query(
+      'SELECT * FROM customer_apartments WHERE caterer_id = $1 ORDER BY created_at DESC',
+      [catererId]
+    );
+
+    const formattedLinks = result.rows.map(formatCustomerApartment);
+    res.json(formattedLinks);
+  } catch (error) {
+    console.error('Get customer apartment links error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
