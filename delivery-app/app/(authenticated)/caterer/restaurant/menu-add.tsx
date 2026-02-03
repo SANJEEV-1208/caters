@@ -4,10 +4,8 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -17,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { createMenuItem } from "@/src/api/catererMenuApi";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
+import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
+import { validateMenuForm } from "@/src/utils/menuValidation";
 
 export default function RestaurantMenuAdd() {
   const router = useRouter();
@@ -31,26 +31,15 @@ export default function RestaurantMenuAdd() {
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-    // Validation
-    if (!name.trim()) {
-      Alert.alert("Required", "Please enter item name");
-      return;
-    }
-    if (!price.trim()) {
-      Alert.alert("Required", "Please enter price");
-      return;
-    }
-    if (!imageUrl.trim()) {
-      Alert.alert("Required", "Please enter image URL");
-      return;
-    }
+    // Validation using shared utility
+    const validation = validateMenuForm({
+      name,
+      price,
+      imageUrl,
+      requireDates: false,
+    });
 
-    const priceNum = Number.parseFloat(price);
-    if (Number.isNaN(priceNum) || priceNum <= 0) {
-      Alert.alert("Invalid", "Please enter a valid price");
-      return;
-    }
-
+    if (!validation.valid) return;
     if (!user?.id) return;
 
     setLoading(true);
@@ -60,7 +49,7 @@ export default function RestaurantMenuAdd() {
       await createMenuItem({
         catererId: user.id,
         name: name.trim(),
-        price: priceNum,
+        price: validation.priceNum!,
         category: category,
         cuisine: "Restaurant", // Default cuisine for restaurant
         type: "main_course", // Default type
@@ -99,117 +88,26 @@ export default function RestaurantMenuAdd() {
 
       {/* Form */}
       <View style={styles.form}>
-        {/* Item Name */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>
-            Item Name <Text style={styles.required}>*</Text>
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., Butter Chicken"
-            value={name}
-            onChangeText={setName}
-            editable={!loading}
-            placeholderTextColor="#A0AEC0"
-          />
-        </View>
-
-        {/* Price */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>
-            Price <Text style={styles.required}>*</Text>
-          </Text>
-          <View style={styles.priceWrapper}>
-            <Text style={styles.priceCurrency}>₹</Text>
-            <TextInput
-              style={styles.priceInput}
-              placeholder="250"
-              value={price}
-              onChangeText={setPrice}
-              keyboardType="decimal-pad"
-              editable={!loading}
-              placeholderTextColor="#A0AEC0"
-            />
-          </View>
-        </View>
-
-        {/* Category */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Category</Text>
-          <View style={styles.categoryButtonsGroup}>
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                category === "veg" && styles.categoryButtonActive,
-              ]}
-              onPress={() => { setCategory("veg"); }}
-              disabled={loading}
-            >
-              <View
-                style={[
-                  styles.categoryDot,
-                  category === "veg" && styles.categoryDotActive,
-                ]}
-              />
-              <Text
-                style={[
-                  styles.categoryButtonText,
-                  category === "veg" && styles.categoryButtonTextActive,
-                ]}
-              >
-                Vegetarian
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.categoryButton,
-                category === "non-veg" && styles.categoryButtonActive,
-              ]}
-              onPress={() => { setCategory("non-veg"); }}
-              disabled={loading}
-            >
-              <View
-                style={[
-                  styles.categoryDot,
-                  category === "non-veg" && styles.categoryDotActive,
-                ]}
-              />
-              <Text
-                style={[
-                  styles.categoryButtonText,
-                  category === "non-veg" && styles.categoryButtonTextActive,
-                ]}
-              >
-                Non-Veg
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Using shared form fields component */}
+        <MenuFormFields
+          name={name}
+          setName={setName}
+          price={price}
+          setPrice={setPrice}
+          category={category}
+          setCategory={setCategory}
+          description={description}
+          setDescription={setDescription}
+          disabled={loading}
+        />
 
         {/* Image Upload */}
         <View style={styles.formGroup}>
           <CloudinaryImagePicker
-            label="Food Image"
+            label="Food Image *"
             onImageUploaded={(url) => { setImageUrl(url); }}
             currentImage={imageUrl}
             disabled={loading}
-          />
-        </View>
-
-        {/* Description (Optional) */}
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Description (Optional)</Text>
-          <TextInput
-            style={[styles.input, styles.textAreaInput]}
-            placeholder="e.g., Tender chicken in creamy tomato sauce"
-            value={description}
-            onChangeText={setDescription}
-            editable={!loading}
-            multiline
-            numberOfLines={3}
-            placeholderTextColor="#A0AEC0"
-            textAlignVertical="top"
           />
         </View>
 
@@ -263,96 +161,9 @@ const styles = StyleSheet.create({
   formGroup: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
-  required: {
-    color: "#EF4444",
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: "#1A1A1A",
-  },
-  textAreaInput: {
-    minHeight: 80,
-    paddingTop: 12,
-  },
-  urlNote: {
-    fontSize: 12,
-    color: "#10B981",
-    marginTop: 4,
-  },
-  priceWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 8,
-    paddingLeft: 12,
-  },
-  priceCurrency: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginRight: 4,
-  },
-  priceInput: {
-    flex: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: "#1A1A1A",
-  },
-  categoryButtonsGroup: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  categoryButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F3F4F6",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 8,
-    paddingVertical: 12,
-    gap: 6,
-  },
-  categoryButtonActive: {
-    backgroundColor: "#DCFCE7",
-    borderColor: "#10B981",
-  },
-  categoryDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#9CA3AF",
-  },
-  categoryDotActive: {
-    backgroundColor: "#10B981",
-  },
-  categoryButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  categoryButtonTextActive: {
-    color: "#166534",
-  },
   createButton: {
     backgroundColor: "#F59E0B",
-    borderRadius: 8,
+    borderRadius: 12,
     paddingVertical: 14,
     flexDirection: "row",
     justifyContent: "center",
