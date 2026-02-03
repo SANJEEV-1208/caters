@@ -73,8 +73,8 @@ export default function PaymentCard({ order, customerName, onPress, onMarkReceiv
         <TouchableOpacity
           style={styles.markReceivedButton}
           onPress={() => {
-            if (order.id) {
-              void onMarkReceived(order.id);
+            if (order.id && onMarkReceived) {
+              onMarkReceived(order.id);
             }
           }}
         >

@@ -184,7 +184,7 @@ export default function TablesCreateScreen() {
         {/* Create Button */}
         <TouchableOpacity
           style={[styles.createButton, loading && styles.createButtonDisabled]}
-          onPress={() => { void handleCreate(); }}
+          onPress={handleCreate}
           disabled={loading}
         >
           {loading ? (

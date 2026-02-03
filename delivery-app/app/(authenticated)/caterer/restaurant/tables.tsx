@@ -173,7 +173,7 @@ export default function TablesScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.deleteButton]}
-            onPress={() => { void handleDelete(item); }}
+            onPress={() => { handleDelete(item); }}
           >
             <Ionicons name="trash-outline" size={18} color="#EF4444" />
           </TouchableOpacity>

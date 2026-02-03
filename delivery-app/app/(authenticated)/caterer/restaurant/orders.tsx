@@ -24,6 +24,38 @@ import { formatTimeIST } from "@/src/utils/dateUtils";
 type OrderStatus = "pending" | "confirmed" | "preparing" | "delivered";
 type FilterType = "status" | "table";
 
+// Filter Tab Component to reduce cognitive complexity
+interface FilterTabProps {
+  label: string;
+  count: number;
+  isActive: boolean;
+  onPress: () => void;
+  icon?: string;
+}
+
+const FilterTab: React.FC<FilterTabProps> = ({ label, count, isActive, onPress, icon }) => (
+  <TouchableOpacity
+    style={[styles.filterTab, isActive && styles.filterTabActive]}
+    onPress={onPress}
+  >
+    {icon && (
+      <Ionicons
+        name={icon as keyof typeof Ionicons.glyphMap}
+        size={14}
+        color={isActive ? "#FFFFFF" : "#6B7280"}
+      />
+    )}
+    <Text style={[styles.filterTabText, isActive && styles.filterTabTextActive]}>
+      {label}
+    </Text>
+    <View style={[styles.badge, isActive && styles.badgeActive]}>
+      <Text style={[styles.badgeText, isActive && styles.badgeTextActive]}>
+        {count}
+      </Text>
+    </View>
+  </TouchableOpacity>
+);
+
 // Helper functions extracted to reduce cognitive complexity
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -199,43 +231,15 @@ export default function RestaurantOrders() {
             style={styles.filterScroll}
           >
             {(["all", "pending", "confirmed", "preparing", "delivered"] as const).map(
-              (filter) => {
-                const count = getStatusCount(filter);
-                return (
-                  <TouchableOpacity
-                    key={filter}
-                    style={[
-                      styles.filterTab,
-                      activeStatusFilter === filter && styles.filterTabActive,
-                    ]}
-                    onPress={() => { setActiveStatusFilter(filter); }}
-                  >
-                    <Text
-                      style={[
-                        styles.filterTabText,
-                        activeStatusFilter === filter && styles.filterTabTextActive,
-                      ]}
-                    >
-                      {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                    </Text>
-                    <View
-                      style={[
-                        styles.badge,
-                        activeStatusFilter === filter && styles.badgeActive,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.badgeText,
-                          activeStatusFilter === filter && styles.badgeTextActive,
-                        ]}
-                      >
-                        {count}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }
+              (filter) => (
+                <FilterTab
+                  key={filter}
+                  label={filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  count={getStatusCount(filter)}
+                  isActive={activeStatusFilter === filter}
+                  onPress={() => { setActiveStatusFilter(filter); }}
+                />
+              )
             )}
           </ScrollView>
         </View>
@@ -249,79 +253,22 @@ export default function RestaurantOrders() {
             showsHorizontalScrollIndicator={false}
             style={styles.filterScroll}
           >
-            <TouchableOpacity
-              style={[
-                styles.filterTab,
-                activeTableFilter === "all" && styles.filterTabActive,
-              ]}
+            <FilterTab
+              label="All Tables"
+              count={orders.length}
+              isActive={activeTableFilter === "all"}
               onPress={() => { setActiveTableFilter("all"); }}
-            >
-              <Text
-                style={[
-                  styles.filterTabText,
-                  activeTableFilter === "all" && styles.filterTabTextActive,
-                ]}
-              >
-                All Tables
-              </Text>
-              <View
-                style={[
-                  styles.badge,
-                  activeTableFilter === "all" && styles.badgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.badgeText,
-                    activeTableFilter === "all" && styles.badgeTextActive,
-                  ]}
-                >
-                  {orders.length}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            {getUniqueTables().map((tableNum) => {
-              const count = getTableCount(tableNum);
-              return (
-                <TouchableOpacity
-                  key={tableNum}
-                  style={[
-                    styles.filterTab,
-                    activeTableFilter === tableNum && styles.filterTabActive,
-                  ]}
-                  onPress={() => { setActiveTableFilter(tableNum); }}
-                >
-                  <Ionicons
-                    name="layers"
-                    size={14}
-                    color={activeTableFilter === tableNum ? "#FFFFFF" : "#6B7280"}
-                  />
-                  <Text
-                    style={[
-                      styles.filterTabText,
-                      activeTableFilter === tableNum && styles.filterTabTextActive,
-                    ]}
-                  >
-                    Table {tableNum}
-                  </Text>
-                  <View
-                    style={[
-                      styles.badge,
-                      activeTableFilter === tableNum && styles.badgeActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.badgeText,
-                        activeTableFilter === tableNum && styles.badgeTextActive,
-                      ]}
-                    >
-                      {count}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+            />
+            {getUniqueTables(orders).map((tableNum) => (
+              <FilterTab
+                key={tableNum}
+                label={`Table ${tableNum}`}
+                count={getTableCount(tableNum)}
+                isActive={activeTableFilter === tableNum}
+                onPress={() => { setActiveTableFilter(tableNum); }}
+                icon="layers"
+              />
+            ))}
           </ScrollView>
         </View>
       )}

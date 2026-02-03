@@ -214,7 +214,7 @@ export default function RestaurantMenu() {
             {/* Delete Button - Outside pressable for better UX */}
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => { void handleDeleteItem(item.id); }}
+              onPress={() => { handleDeleteItem(item.id); }}
               disabled={deleting === item.id}
               activeOpacity={0.7}
             >

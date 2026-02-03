@@ -336,7 +336,7 @@ export default function MenuAddScreen() {
                   key={cuisine.id}
                   style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
                   onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
-                  onLongPress={() => { void handleDeleteCuisine(cuisine.id, cuisine.name); }}
+                  onLongPress={() => { handleDeleteCuisine(cuisine.id, cuisine.name); }}
                 >
                   <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
                     {cuisine.name}

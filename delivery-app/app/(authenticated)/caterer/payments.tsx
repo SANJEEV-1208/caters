@@ -20,6 +20,61 @@ import { User } from "@/src/types/auth";
 
 type PaymentFilter = "all" | "upi" | "cod" | "received" | "pending";
 
+// Filter Button Component to reduce cognitive complexity
+interface FilterButtonProps {
+  label: string;
+  count: number;
+  isActive: boolean;
+  onPress: () => void;
+  icon?: string;
+  iconColor?: string;
+}
+
+const FilterButtonComponent: React.FC<FilterButtonProps> = ({
+  label,
+  count,
+  isActive,
+  onPress,
+  icon,
+  iconColor
+}) => (
+  <TouchableOpacity
+    style={[styles.filterButton, isActive && styles.filterButtonActive]}
+    onPress={onPress}
+  >
+    {icon && (
+      <Ionicons
+        name={icon as keyof typeof Ionicons.glyphMap}
+        size={16}
+        color={isActive ? "#FFFFFF" : iconColor}
+      />
+    )}
+    <Text
+      style={[
+        styles.filterButtonText,
+        isActive && styles.filterButtonTextActive,
+      ]}
+    >
+      {label}
+    </Text>
+    <View
+      style={[
+        styles.filterBadge,
+        isActive && styles.filterBadgeActive,
+      ]}
+    >
+      <Text
+        style={[
+          styles.filterBadgeText,
+          isActive && styles.filterBadgeTextActive,
+        ]}
+      >
+        {count}
+      </Text>
+    </View>
+  </TouchableOpacity>
+);
+
 // Helper function to calculate payment stats
 const calculateStats = (orders: Order[]) => {
   const deliveredOrders = orders.filter((o) => o.status === "delivered");
@@ -190,166 +245,44 @@ export default function PaymentsScreen() {
         {/* Filter Buttons */}
         <View style={styles.filterContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === "all" && styles.filterButtonActive]}
+            <FilterButtonComponent
+              label="All"
+              count={allCount}
+              isActive={filter === "all"}
               onPress={() => { setFilter("all"); }}
-            >
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  filter === "all" && styles.filterButtonTextActive,
-                ]}
-              >
-                All
-              </Text>
-              <View
-                style={[
-                  styles.filterBadge,
-                  filter === "all" && styles.filterBadgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterBadgeText,
-                    filter === "all" && styles.filterBadgeTextActive,
-                  ]}
-                >
-                  {allCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === "received" && styles.filterButtonActive]}
+            />
+            <FilterButtonComponent
+              label="Received"
+              count={receivedCount}
+              isActive={filter === "received"}
               onPress={() => { setFilter("received"); }}
-            >
-              <Ionicons
-                name="checkmark-circle"
-                size={16}
-                color={filter === "received" ? "#FFFFFF" : "#10B981"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  filter === "received" && styles.filterButtonTextActive,
-                ]}
-              >
-                Received
-              </Text>
-              <View
-                style={[
-                  styles.filterBadge,
-                  filter === "received" && styles.filterBadgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterBadgeText,
-                    filter === "received" && styles.filterBadgeTextActive,
-                  ]}
-                >
-                  {receivedCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === "pending" && styles.filterButtonActive]}
+              icon="checkmark-circle"
+              iconColor="#10B981"
+            />
+            <FilterButtonComponent
+              label="Pending"
+              count={pendingCount}
+              isActive={filter === "pending"}
               onPress={() => { setFilter("pending"); }}
-            >
-              <Ionicons
-                name="time"
-                size={16}
-                color={filter === "pending" ? "#FFFFFF" : "#F59E0B"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  filter === "pending" && styles.filterButtonTextActive,
-                ]}
-              >
-                Pending
-              </Text>
-              <View
-                style={[
-                  styles.filterBadge,
-                  filter === "pending" && styles.filterBadgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterBadgeText,
-                    filter === "pending" && styles.filterBadgeTextActive,
-                  ]}
-                >
-                  {pendingCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === "upi" && styles.filterButtonActive]}
+              icon="time"
+              iconColor="#F59E0B"
+            />
+            <FilterButtonComponent
+              label="UPI"
+              count={upiCount}
+              isActive={filter === "upi"}
               onPress={() => { setFilter("upi"); }}
-            >
-              <Ionicons
-                name="card"
-                size={16}
-                color={filter === "upi" ? "#FFFFFF" : "#3B82F6"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  filter === "upi" && styles.filterButtonTextActive,
-                ]}
-              >
-                UPI
-              </Text>
-              <View
-                style={[
-                  styles.filterBadge,
-                  filter === "upi" && styles.filterBadgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterBadgeText,
-                    filter === "upi" && styles.filterBadgeTextActive,
-                  ]}
-                >
-                  {upiCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterButton, filter === "cod" && styles.filterButtonActive]}
+              icon="card"
+              iconColor="#3B82F6"
+            />
+            <FilterButtonComponent
+              label="COD"
+              count={codCount}
+              isActive={filter === "cod"}
               onPress={() => { setFilter("cod"); }}
-            >
-              <Ionicons
-                name="cash"
-                size={16}
-                color={filter === "cod" ? "#FFFFFF" : "#F59E0B"}
-              />
-              <Text
-                style={[
-                  styles.filterButtonText,
-                  filter === "cod" && styles.filterButtonTextActive,
-                ]}
-              >
-                COD
-              </Text>
-              <View
-                style={[
-                  styles.filterBadge,
-                  filter === "cod" && styles.filterBadgeActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterBadgeText,
-                    filter === "cod" && styles.filterBadgeTextActive,
-                  ]}
-                >
-                  {codCount}
-                </Text>
-              </View>
-            </TouchableOpacity>
+              icon="cash"
+              iconColor="#F59E0B"
+            />
           </ScrollView>
         </View>
 
@@ -366,21 +299,25 @@ export default function PaymentsScreen() {
               </Text>
             </View>
           ) : (
-            filteredOrders.map((order) => (
-              <PaymentCard
-                key={order.id}
-                order={order}
-                customerName={
-                  order.customerId ? customers.get(order.customerId)?.name ?? "Customer" : "Customer"
-                }
-                onPress={() =>
-                  router.push(
-                    `/(authenticated)/caterer/order-details?orderId=${order.id}`
-                  )
-                }
-                onMarkReceived={handleMarkAsReceived}
-              />
-            ))
+            filteredOrders.map((order) => {
+              const customerName = order.customerId
+                ? customers.get(order.customerId)?.name ?? "Customer"
+                : "Customer";
+
+              return (
+                <PaymentCard
+                  key={order.id}
+                  order={order}
+                  customerName={customerName}
+                  onPress={() =>
+                    router.push(
+                      `/(authenticated)/caterer/order-details?orderId=${order.id}`
+                    )
+                  }
+                  onMarkReceived={handleMarkAsReceived}
+                />
+              );
+            })
           )}
         </View>
       </ScrollView>
