@@ -26,7 +26,7 @@ export default function RestaurantMenuBrowser() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<"veg" | "non-veg" | "all">("all");
-  const [cart, setCart] = useState<{ [key: number]: number }>({}); // itemId -> quantity
+  const [cart, setCart] = useState<Map<number, number>>(new Map()); // itemId -> quantity
 
   useEffect(() => {
     console.log('Loading restaurant menu - CatererId:', catererId);
@@ -73,42 +73,44 @@ export default function RestaurantMenuBrowser() {
   };
 
   const getCartTotal = () => {
-    return Object.entries(cart).reduce((total, [itemId, quantity]) => {
-      const item = menuItems.find((i) => i.id === Number(itemId));
+    return Array.from(cart.entries()).reduce((total, [itemId, quantity]) => {
+      const item = menuItems.find((i) => i.id === itemId);
       return total + (item ? item.price * quantity : 0);
     }, 0);
   };
 
   const getCartItemCount = () => {
-    return Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+    return Array.from(cart.values()).reduce((sum, qty) => sum + qty, 0);
   };
 
   const handleAddToCart = (item: MenuItem) => {
-    setCart((prev) => ({
-      ...prev,
-      [item.id]: (prev[item.id] || 0) + 1,
-    }));
+    setCart((prev) => {
+      const newCart = new Map(prev);
+      const currentQty = newCart.get(item.id) ?? 0;
+      newCart.set(item.id, currentQty + 1);
+      return newCart;
+    });
   };
 
   const handleRemoveFromCart = (itemId: number) => {
     setCart((prev) => {
-      const newCart = { ...prev };
-      if (itemId in newCart && typeof newCart[itemId] === 'number' && newCart[itemId] > 1) {
-        newCart[itemId]--;
-        return newCart;
+      const newCart = new Map(prev);
+      const currentQty = newCart.get(itemId) ?? 0;
+      if (currentQty > 1) {
+        newCart.set(itemId, currentQty - 1);
       } else {
-        const { [itemId]: _, ...rest } = newCart;
-        return rest;
+        newCart.delete(itemId);
       }
+      return newCart;
     });
   };
 
   const handleCheckout = () => {
     const cartItems = menuItems
-      .filter((item) => cart[item.id] > 0)
+      .filter((item) => (cart.get(item.id) ?? 0) > 0)
       .map((item) => ({
         ...item,
-        quantity: cart[item.id],
+        quantity: cart.get(item.id) ?? 0,
       }));
 
     if (cartItems.length === 0) {
@@ -208,7 +210,7 @@ export default function RestaurantMenuBrowser() {
         data={filteredItems}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => {
-          const itemQuantity = cart[item.id] || 0;
+          const itemQuantity = cart.get(item.id) ?? 0;
 
           return (
             <View style={styles.menuCard}>

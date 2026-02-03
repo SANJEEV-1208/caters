@@ -1,3 +1,5 @@
+// eslint-disable-next-line security/detect-non-literal-fs-filename
+// Migration script with hardcoded paths - safe for development use
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');

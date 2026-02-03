@@ -45,6 +45,7 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
   }, [value]);
 
   const fetchSuggestions = async (query: string) => {
+    // Runtime check for API key configuration (can be missing in .env)
     if (!API_KEY) {
       console.warn('⚠️ LocationIQ API key not configured. Please add your API key.');
       return;

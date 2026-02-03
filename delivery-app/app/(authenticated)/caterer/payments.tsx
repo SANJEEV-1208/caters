@@ -24,7 +24,7 @@ export default function PaymentsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [customers, setCustomers] = useState<{ [key: number]: User }>({});
+  const [customers, setCustomers] = useState<Map<number, User>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<PaymentFilter>("all");
@@ -46,12 +46,12 @@ export default function PaymentsScreen() {
         ...new Set(ordersData.map((order) => order.customerId).filter(Boolean)),
       ] as number[];
 
-      const customerData: { [key: number]: User } = {};
+      const customerData = new Map<number, User>();
       await Promise.all(
         uniqueCustomerIds.map(async (customerId) => {
           const customer = await getUserById(customerId);
           if (customer && customerId) {
-            customerData[customerId] = customer;
+            customerData.set(customerId, customer);
           }
         })
       );
@@ -368,7 +368,7 @@ export default function PaymentsScreen() {
                 key={order.id}
                 order={order}
                 customerName={
-                  order.customerId ? customers[order.customerId]?.name : "Customer"
+                  order.customerId ? customers.get(order.customerId)?.name ?? "Customer" : "Customer"
                 }
                 onPress={() =>
                   router.push(

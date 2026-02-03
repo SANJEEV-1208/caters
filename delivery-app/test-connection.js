@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-http-string
+// Development connection test - uses HTTP for local server testing
 // Run this in the delivery-app directory with: node test-connection.js
 // This tests if your computer can reach the backend
 

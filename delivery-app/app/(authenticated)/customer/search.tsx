@@ -78,14 +78,17 @@ export default function Search() {
     try {
       // Get search tracking data
       const trackingData = await AsyncStorage.getItem(SEARCH_TRACKING_KEY);
-      const searchCounts: Record<string, number> = trackingData
+      const searchCountsObj: Record<string, number> = trackingData
         ? JSON.parse(trackingData)
         : {};
+
+      // Convert to Map for safe access
+      const searchCounts = new Map<string, number>(Object.entries(searchCountsObj));
 
       // Calculate search count for each menu item
       const itemsWithCounts = menuItems.map(item => ({
         ...item,
-        searchCount: searchCounts[item.name.toLowerCase()] || 0
+        searchCount: searchCounts.get(item.name.toLowerCase()) ?? 0
       }));
 
       // Sort by search count and get top 5
@@ -106,18 +109,20 @@ export default function Search() {
 
     try {
       const trackingData = await AsyncStorage.getItem(SEARCH_TRACKING_KEY);
-      const searchCounts: Record<string, number> = trackingData
+      const searchCountsObj: Record<string, number> = trackingData
         ? JSON.parse(trackingData)
         : {};
 
-      const lowerTerm = searchTerm.toLowerCase();
-      if (Object.hasOwn(searchCounts, lowerTerm)) {
-        searchCounts[lowerTerm]++;
-      } else {
-        searchCounts[lowerTerm] = 1;
-      }
+      // Convert to Map for safe manipulation
+      const searchCounts = new Map<string, number>(Object.entries(searchCountsObj));
 
-      await AsyncStorage.setItem(SEARCH_TRACKING_KEY, JSON.stringify(searchCounts));
+      const lowerTerm = searchTerm.toLowerCase();
+      const currentCount = searchCounts.get(lowerTerm) ?? 0;
+      searchCounts.set(lowerTerm, currentCount + 1);
+
+      // Convert back to object for AsyncStorage
+      const updatedObj = Object.fromEntries(searchCounts);
+      await AsyncStorage.setItem(SEARCH_TRACKING_KEY, JSON.stringify(updatedObj));
     } catch (error) {
       console.error("Failed to track search:", error);
     }

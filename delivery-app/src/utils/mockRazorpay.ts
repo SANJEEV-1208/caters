@@ -39,45 +39,12 @@ export const MockRazorpayCheckout = {
     return new Promise((resolve, reject) => {
       // Simulate a delay for payment processing
       setTimeout(() => {
-        // For testing, you can change this to simulate different scenarios
-        const shouldSucceed = true; // Set to false to test failure
-        const shouldCancel = false; // Set to true to test cancellation
-
-        // Note: shouldCancel is always false in current implementation
-        if (shouldCancel) {
-          // Simulate user cancellation
-          reject(new Error('Payment cancelled by user'));
-        } else {
-          // Simulate successful payment
-          const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          resolve({
-            razorpay_payment_id: mockPaymentId,
-            razorpay_order_id: `order_mock_${Date.now()}`,
-          });
-        }
-
-        // Payment failure case (unreachable due to shouldSucceed always being true)
-        /* else {
-          // Simulate payment failure
-          reject({
-            code: 0,
-            description: 'Payment processing failed',
-            source: 'gateway',
-            step: 'payment_authorization',
-            reason: 'payment_failed',
-            metadata: {},
-          });
-        } */
-          // Simulate payment failure
-          reject({
-            code: 0,
-            description: 'Payment processing failed',
-            source: 'gateway',
-            step: 'payment_authorization',
-            reason: 'payment_failed',
-            metadata: {},
-          });
-        }
+        // Simulate payment success (for cancellation testing, manually reject in code)
+        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        resolve({
+          razorpay_payment_id: mockPaymentId,
+          razorpay_order_id: `order_mock_${Date.now()}`,
+        });
       }, 2000); // 2 second delay to simulate real payment processing
     });
   },

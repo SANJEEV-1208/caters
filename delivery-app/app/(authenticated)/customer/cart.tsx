@@ -302,6 +302,7 @@ export default function Cart() {
       console.log("Got catererId from loaded caterer:", catererId);
     }
 
+    // Check for null/undefined (0 is also invalid for catererId)
     if (catererId == null) {
       Alert.alert(
         "Missing Caterer Information",

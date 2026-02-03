@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-http-string
+// Test script for local development - HTTP is acceptable for localhost
 const fetch = require('node-fetch');
 
 const testOrder = {

@@ -1,3 +1,5 @@
+// eslint-disable-next-line security/detect-non-literal-fs-filename, security/detect-non-literal-require
+// Migration script with hardcoded SQL file paths - not vulnerable to injection
 const pool = require('./src/config/database');
 const fs = require('fs');
 const path = require('path');

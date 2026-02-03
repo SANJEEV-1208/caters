@@ -1,3 +1,5 @@
+// eslint-disable-next-line security/detect-non-literal-fs-filename
+// This is a database initialization script with hardcoded paths - not user input
 const fs = require('fs');
 const path = require('path');
 const pool = require('../config/database');

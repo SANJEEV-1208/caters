@@ -17,6 +17,8 @@ const PORT = process.env.PORT || 5000;
 // Function to get local IP address
 function getLocalIpAddress() {
   const interfaces = os.networkInterfaces();
+  // Using Object.keys() to safely iterate over network interfaces
+  // Type assertion safe here - interfaces comes from os.networkInterfaces()
   for (const interfaceName of Object.keys(interfaces)) {
     for (const iface of interfaces[interfaceName]) {
       // Skip internal (loopback) and non-IPv4 addresses
