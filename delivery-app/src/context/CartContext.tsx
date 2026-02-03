@@ -20,6 +20,33 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | null>(null);
 const CART_STORAGE_KEY = "@delivery_app_cart";
 
+// Helper: Merge a single order item into cart array
+const mergeOrderItemIntoCart = (cart: CartItem[], orderItem: CartItem): CartItem[] => {
+  const existingIndex = cart.findIndex(i => i.id === orderItem.id);
+
+  if (existingIndex >= 0) {
+    const updated = [...cart];
+    updated[existingIndex] = {
+      ...updated[existingIndex],
+      quantity: updated[existingIndex].quantity + orderItem.quantity
+    };
+    return updated;
+  }
+
+  return [...cart, { ...orderItem }];
+};
+
+// Helper: Merge multiple order items into cart
+const mergeOrderItemsIntoCart = (cart: CartItem[], items: CartItem[]): CartItem[] => {
+  let updatedCart = [...cart];
+
+  for (const orderItem of items) {
+    updatedCart = mergeOrderItemIntoCart(updatedCart, orderItem);
+  }
+
+  return updatedCart;
+};
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -92,21 +119,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
    * Adds past order items with exact quantities
    */
   const reorderItems = (items: CartItem[]) => {
-    setCart(prevCart => {
-      const updatedCart = [...prevCart];
-
-      items.forEach(orderItem => {
-        const existing = updatedCart.find(i => i.id === orderItem.id);
-
-        if (existing) {
-          existing.quantity += orderItem.quantity;
-        } else {
-          updatedCart.push({ ...orderItem });
-        }
-      });
-
-      return updatedCart;
-    });
+    setCart(prevCart => mergeOrderItemsIntoCart(prevCart, items));
   };
 
   const totalAmount = cart.reduce(
