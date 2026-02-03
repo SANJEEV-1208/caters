@@ -171,7 +171,7 @@ export default function PaymentBottomSheet({
               styles.optionCard,
               selectedMethod === "upi" && styles.optionCardSelected,
             ]}
-            onPress={() => handleSelectMethod("upi")}
+            onPress={() => { handleSelectMethod("upi"); }}
             activeOpacity={0.8}
           >
             <View style={styles.optionContent}>
@@ -196,7 +196,7 @@ export default function PaymentBottomSheet({
               styles.optionCard,
               selectedMethod === "cod" && styles.optionCardSelected,
             ]}
-            onPress={() => handleSelectMethod("cod")}
+            onPress={() => { handleSelectMethod("cod"); }}
             activeOpacity={0.8}
           >
             <View style={styles.optionContent}>

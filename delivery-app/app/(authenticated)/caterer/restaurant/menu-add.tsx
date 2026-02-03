@@ -90,7 +90,7 @@ export default function RestaurantMenuAdd() {
       <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => { router.back(); }}>
           <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
         </Pressable>
         <Text style={styles.headerTitle}>Add Menu Item</Text>
@@ -142,7 +142,7 @@ export default function RestaurantMenuAdd() {
                 styles.categoryButton,
                 category === "veg" && styles.categoryButtonActive,
               ]}
-              onPress={() => setCategory("veg")}
+              onPress={() => { setCategory("veg"); }}
               disabled={loading}
             >
               <View
@@ -166,7 +166,7 @@ export default function RestaurantMenuAdd() {
                 styles.categoryButton,
                 category === "non-veg" && styles.categoryButtonActive,
               ]}
-              onPress={() => setCategory("non-veg")}
+              onPress={() => { setCategory("non-veg"); }}
               disabled={loading}
             >
               <View

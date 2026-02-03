@@ -31,7 +31,7 @@ export default function OrderDetailsScreen() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    loadOrder();
+    void loadOrder();
   }, []);
 
   const loadOrder = async () => {

@@ -44,7 +44,7 @@ export default function QRScannerScreen() {
         Alert.alert(
           'Invalid QR Code',
           'This QR code is not valid for restaurant ordering. Please scan the QR code on your table.',
-          [{ text: 'Try Again', onPress: () => setScanned(false) }]
+          [{ text: 'Try Again', onPress: () => { setScanned(false); } }]
         );
         return;
       }
@@ -69,16 +69,16 @@ export default function QRScannerScreen() {
           },
           {
             text: 'Cancel',
-            onPress: () => setScanned(false),
+            onPress: () => { setScanned(false); },
             style: 'cancel',
           },
         ]
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       Alert.alert(
         'Invalid QR Code',
         'This QR code cannot be read. Please try scanning again or contact restaurant staff.',
-        [{ text: 'Scan Again', onPress: () => setScanned(false) }]
+        [{ text: 'Scan Again', onPress: () => { setScanned(false); } }]
       );
     }
   };
@@ -136,7 +136,7 @@ export default function QRScannerScreen() {
             <Ionicons name="close" size={28} color="#FFFFFF" />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setFlashOn(!flashOn)}
+            onPress={() => { setFlashOn(!flashOn); }}
             style={styles.flashButton}
           >
             <Ionicons
@@ -179,7 +179,7 @@ export default function QRScannerScreen() {
           ) : (
             <TouchableOpacity
               style={styles.resetButton}
-              onPress={() => setScanned(false)}
+              onPress={() => { setScanned(false); }}
             >
               <Ionicons name="refresh" size={20} color="#FFFFFF" />
               <Text style={styles.resetButtonText}>Scan Again</Text>

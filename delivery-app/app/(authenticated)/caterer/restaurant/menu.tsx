@@ -27,7 +27,7 @@ export default function RestaurantMenu() {
 
   useFocusEffect(
     React.useCallback(() => {
-      loadMenuItems();
+      void loadMenuItems();
     }, [])
   );
 

@@ -31,7 +31,7 @@ export default function TablesScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadTables();
+    void loadTables();
   }, [user?.id]);
 
   const loadTables = async () => {
@@ -112,7 +112,7 @@ export default function TablesScreen() {
     <View style={styles.tableCard}>
       {/* QR Code Thumbnail */}
       <TouchableOpacity
-        onPress={() => handleViewQR(item)}
+        onPress={() => { handleViewQR(item); }}
         style={styles.qrThumbnailContainer}
       >
         <Image source={{ uri: item.qrCodeUrl }} style={styles.qrThumbnail} />
@@ -151,7 +151,7 @@ export default function TablesScreen() {
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => handleViewQR(item)}
+            onPress={() => { handleViewQR(item); }}
           >
             <Ionicons name="qr-code-outline" size={18} color="#4F46E5" />
             <Text style={styles.actionButtonText}>View QR</Text>
@@ -161,7 +161,7 @@ export default function TablesScreen() {
             <Text style={styles.toggleLabel}>Active</Text>
             <Switch
               value={item.isActive}
-              onValueChange={() => handleToggleActive(item)}
+              onValueChange={() => { handleToggleActive(item); }}
               trackColor={{ false: '#E5E7EB', true: '#10B981' }}
               thumbColor="#FFFFFF"
             />
@@ -169,7 +169,7 @@ export default function TablesScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.deleteButton]}
-            onPress={() => handleDelete(item)}
+            onPress={() => { handleDelete(item); }}
           >
             <Ionicons name="trash-outline" size={18} color="#EF4444" />
           </TouchableOpacity>
@@ -215,7 +215,7 @@ export default function TablesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => { router.back(); }}
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />

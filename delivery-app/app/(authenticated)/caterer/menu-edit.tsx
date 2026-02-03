@@ -40,7 +40,7 @@ export default function MenuEditScreen() {
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
 
   useEffect(() => {
-    loadMenuItem();
+    void loadMenuItem();
   }, []);
 
   const getDates = () => {
@@ -146,7 +146,7 @@ export default function MenuEditScreen() {
           <TextInput
             style={styles.input}
             value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            onChangeText={(text) => { setFormData({ ...formData, name: text }); }}
           />
         </View>
 
@@ -155,7 +155,7 @@ export default function MenuEditScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.description}
-            onChangeText={(text) => setFormData({ ...formData, description: text })}
+            onChangeText={(text) => { setFormData({ ...formData, description: text }); }}
             multiline
             numberOfLines={3}
           />
@@ -166,7 +166,7 @@ export default function MenuEditScreen() {
           <TextInput
             style={styles.input}
             value={formData.price}
-            onChangeText={(text) => setFormData({ ...formData, price: text })}
+            onChangeText={(text) => { setFormData({ ...formData, price: text }); }}
             keyboardType="numeric"
           />
         </View>
@@ -176,7 +176,7 @@ export default function MenuEditScreen() {
           <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[styles.radioButton, formData.category === "veg" && styles.radioButtonActive]}
-              onPress={() => setFormData({ ...formData, category: "veg" })}
+              onPress={() => { setFormData({ ...formData, category: "veg" }); }}
             >
               <View style={[styles.vegDot, { backgroundColor: "#10B981" }]} />
               <Text style={[styles.radioText, formData.category === "veg" && styles.radioTextActive]}>
@@ -186,7 +186,7 @@ export default function MenuEditScreen() {
 
             <TouchableOpacity
               style={[styles.radioButton, formData.category === "non-veg" && styles.radioButtonActive]}
-              onPress={() => setFormData({ ...formData, category: "non-veg" })}
+              onPress={() => { setFormData({ ...formData, category: "non-veg" }); }}
             >
               <View style={[styles.vegDot, { backgroundColor: "#EF4444" }]} />
               <Text style={[styles.radioText, formData.category === "non-veg" && styles.radioTextActive]}>
@@ -203,7 +203,7 @@ export default function MenuEditScreen() {
               <TouchableOpacity
                 key={cuisine}
                 style={[styles.chip, formData.cuisine === cuisine && styles.chipActive]}
-                onPress={() => setFormData({ ...formData, cuisine })}
+                onPress={() => { setFormData({ ...formData, cuisine }); }}
               >
                 <Text style={[styles.chipText, formData.cuisine === cuisine && styles.chipTextActive]}>
                   {cuisine}
@@ -220,7 +220,7 @@ export default function MenuEditScreen() {
               <TouchableOpacity
                 key={type}
                 style={[styles.chip, formData.type === type && styles.chipActive]}
-                onPress={() => setFormData({ ...formData, type})}
+                onPress={() => { setFormData({ ...formData, type}); }}
               >
                 <Text style={[styles.chipText, formData.type === type && styles.chipTextActive]}>
                   {type.replace('_', ' ')}
@@ -233,7 +233,7 @@ export default function MenuEditScreen() {
         <View style={styles.field}>
           <CloudinaryImagePicker
             label="Food Image *"
-            onImageUploaded={(url) => setFormData({ ...formData, image: url })}
+            onImageUploaded={(url) => { setFormData({ ...formData, image: url }); }}
             currentImage={formData.image}
             disabled={saving}
           />
@@ -249,7 +249,7 @@ export default function MenuEditScreen() {
                   styles.dateChip,
                   selectedDates.includes(date.value) && styles.dateChipActive,
                 ]}
-                onPress={() => toggleDate(date.value)}
+                onPress={() => { toggleDate(date.value); }}
               >
                 <Ionicons
                   name={selectedDates.includes(date.value) ? "checkmark-circle" : "ellipse-outline"}
@@ -277,7 +277,7 @@ export default function MenuEditScreen() {
             </View>
             <Switch
               value={formData.inStock}
-              onValueChange={(value) => setFormData({ ...formData, inStock: value })}
+              onValueChange={(value) => { setFormData({ ...formData, inStock: value }); }}
               trackColor={{ false: "#E5E7EB", true: "#10B981" }}
               thumbColor="#FFFFFF"
             />

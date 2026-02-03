@@ -22,7 +22,7 @@ export default function OrderDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadOrderDetails();
+    void loadOrderDetails();
   }, [orderId]);
 
   const loadOrderDetails = async () => {
@@ -165,7 +165,7 @@ export default function OrderDetails() {
         <View style={[styles.statusCard, { borderLeftColor: statusColor }]}>
           <View style={styles.statusHeader}>
             <View style={[styles.statusIconContainer, { backgroundColor: `${statusColor}20` }]}>
-              <Ionicons name={statusIcon as any} size={32} color={statusColor} />
+              <Ionicons name={statusIcon as unknown} size={32} color={statusColor} />
             </View>
             <View style={styles.statusInfo}>
               <Text style={[styles.statusText, { color: statusColor }]}>

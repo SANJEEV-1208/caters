@@ -150,7 +150,7 @@ export default function RestaurantMenuEdit() {
                 styles.categoryButton,
                 category === "veg" && styles.categoryButtonActive,
               ]}
-              onPress={() => setCategory("veg")}
+              onPress={() => { setCategory("veg"); }}
               disabled={loading}
             >
               <View
@@ -174,7 +174,7 @@ export default function RestaurantMenuEdit() {
                 styles.categoryButton,
                 category === "non-veg" && styles.categoryButtonActive,
               ]}
-              onPress={() => setCategory("non-veg")}
+              onPress={() => { setCategory("non-veg"); }}
               disabled={loading}
             >
               <View
@@ -199,7 +199,7 @@ export default function RestaurantMenuEdit() {
         <View style={styles.formGroup}>
           <CloudinaryImagePicker
             label="Food Image"
-            onImageUploaded={(url) => setImageUrl(url)}
+            onImageUploaded={(url) => { setImageUrl(url); }}
             currentImage={imageUrl}
             disabled={loading}
           />

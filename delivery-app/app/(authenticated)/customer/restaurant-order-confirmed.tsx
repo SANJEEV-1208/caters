@@ -28,126 +28,126 @@ export default function RestaurantOrderConfirmed() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-      <ScrollView style={styles.container as any} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container as unknown} showsVerticalScrollIndicator={false}>
       {/* Success Icon Section */}
-      <View style={styles.successSection as any}>
-        <View style={styles.successIconContainer as any}>
-          <Text style={styles.successIcon as any}>✓</Text>
+      <View style={styles.successSection as unknown}>
+        <View style={styles.successIconContainer as unknown}>
+          <Text style={styles.successIcon as unknown}>✓</Text>
         </View>
-        <Text style={styles.successTitle as any}>Order Placed!</Text>
-        <Text style={styles.successSubtitle as any}>
+        <Text style={styles.successTitle as unknown}>Order Placed!</Text>
+        <Text style={styles.successSubtitle as unknown}>
           Your order will be prepared and served at your table
         </Text>
       </View>
 
       {/* Order Summary Card */}
-      <View style={styles.summaryCard as any}>
-        <Text style={styles.summaryTitle as any}>Order Details</Text>
+      <View style={styles.summaryCard as unknown}>
+        <Text style={styles.summaryTitle as unknown}>Order Details</Text>
 
-        <View style={styles.divider as any} />
+        <View style={styles.divider as unknown} />
 
         {/* Order Details */}
-        <View style={styles.detailRow as any}>
-          <Text style={styles.detailLabel as any}>Order ID</Text>
-          <Text style={styles.detailValue as any}>{orderId}</Text>
+        <View style={styles.detailRow as unknown}>
+          <Text style={styles.detailLabel as unknown}>Order ID</Text>
+          <Text style={styles.detailValue as unknown}>{orderId}</Text>
         </View>
 
-        <View style={styles.detailRow as any}>
-          <Text style={styles.detailLabel as any}>Restaurant</Text>
-          <Text style={styles.detailValue as any}>{restaurantName}</Text>
+        <View style={styles.detailRow as unknown}>
+          <Text style={styles.detailLabel as unknown}>Restaurant</Text>
+          <Text style={styles.detailValue as unknown}>{restaurantName}</Text>
         </View>
 
-        <View style={styles.detailRow as any}>
-          <View style={styles.tableBadge as any}>
+        <View style={styles.detailRow as unknown}>
+          <View style={styles.tableBadge as unknown}>
             <Ionicons name="layers" size={16} color="#F59E0B" />
-            <Text style={styles.tableText as any}>Table {tableNumber}</Text>
+            <Text style={styles.tableText as unknown}>Table {tableNumber}</Text>
           </View>
         </View>
 
-        <View style={styles.divider as any} />
+        <View style={styles.divider as unknown} />
 
-        <View style={styles.statusSection as any}>
-          <Text style={styles.statusLabel as any}>Order Status</Text>
-          <View style={styles.statusBadge as any}>
-            <View style={styles.statusDot as any} />
-            <Text style={styles.statusText as any}>Pending</Text>
+        <View style={styles.statusSection as unknown}>
+          <Text style={styles.statusLabel as unknown}>Order Status</Text>
+          <View style={styles.statusBadge as unknown}>
+            <View style={styles.statusDot as unknown} />
+            <Text style={styles.statusText as unknown}>Pending</Text>
           </View>
         </View>
       </View>
 
       {/* Info Box */}
-      <View style={styles.infoBox as any}>
+      <View style={styles.infoBox as unknown}>
         <Ionicons name="information-circle" size={20} color="#10B981" />
-        <View style={styles.infoContent as any}>
-          <Text style={styles.infoTitle as any}>What&apos;s Next?</Text>
-          <Text style={styles.infoText as any}>
+        <View style={styles.infoContent as unknown}>
+          <Text style={styles.infoTitle as unknown}>What&apos;s Next?</Text>
+          <Text style={styles.infoText as unknown}>
             Our kitchen staff will prepare your order and serve it at Table {tableNumber}. You can track your order status below.
           </Text>
         </View>
       </View>
 
       {/* Order Status Timeline */}
-      <View style={styles.statusTimelineCard as any}>
-        <Text style={styles.statusTimelineTitle as any}>Order Timeline</Text>
+      <View style={styles.statusTimelineCard as unknown}>
+        <Text style={styles.statusTimelineTitle as unknown}>Order Timeline</Text>
         
-        <View style={styles.timelineItem as any}>
-          <View style={[styles.timelineDot as any, styles.timelineDotActive as any]} />
-          <View style={styles.timelineContent as any}>
-            <Text style={styles.timelineLabel as any}>Order Placed</Text>
-            <Text style={styles.timelineTime as any}>Just now</Text>
+        <View style={styles.timelineItem as unknown}>
+          <View style={[styles.timelineDot as unknown, styles.timelineDotActive as unknown]} />
+          <View style={styles.timelineContent as unknown}>
+            <Text style={styles.timelineLabel as unknown}>Order Placed</Text>
+            <Text style={styles.timelineTime as unknown}>Just now</Text>
           </View>
         </View>
 
-        <View style={styles.timelineLine as any} />
+        <View style={styles.timelineLine as unknown} />
 
-        <View style={styles.timelineItem as any}>
-          <View style={[styles.timelineDot as any, styles.timelineDotInactive as any]} />
-          <View style={styles.timelineContent as any}>
-            <Text style={styles.timelineLabel as any}>Confirmed</Text>
-            <Text style={styles.timelineTime as any}>Waiting...</Text>
+        <View style={styles.timelineItem as unknown}>
+          <View style={[styles.timelineDot as unknown, styles.timelineDotInactive as unknown]} />
+          <View style={styles.timelineContent as unknown}>
+            <Text style={styles.timelineLabel as unknown}>Confirmed</Text>
+            <Text style={styles.timelineTime as unknown}>Waiting...</Text>
           </View>
         </View>
 
-        <View style={styles.timelineLine as any} />
+        <View style={styles.timelineLine as unknown} />
 
-        <View style={styles.timelineItem as any}>
-          <View style={[styles.timelineDot as any, styles.timelineDotInactive as any]} />
-          <View style={styles.timelineContent as any}>
-            <Text style={styles.timelineLabel as any}>Preparing</Text>
-            <Text style={styles.timelineTime as any}>Waiting...</Text>
+        <View style={styles.timelineItem as unknown}>
+          <View style={[styles.timelineDot as unknown, styles.timelineDotInactive as unknown]} />
+          <View style={styles.timelineContent as unknown}>
+            <Text style={styles.timelineLabel as unknown}>Preparing</Text>
+            <Text style={styles.timelineTime as unknown}>Waiting...</Text>
           </View>
         </View>
 
-        <View style={styles.timelineLine as any} />
+        <View style={styles.timelineLine as unknown} />
 
-        <View style={styles.timelineItem as any}>
-          <View style={[styles.timelineDot as any, styles.timelineDotInactive as any]} />
-          <View style={styles.timelineContent as any}>
-            <Text style={styles.timelineLabel as any}>Ready</Text>
-            <Text style={styles.timelineTime as any}>Waiting...</Text>
+        <View style={styles.timelineItem as unknown}>
+          <View style={[styles.timelineDot as unknown, styles.timelineDotInactive as unknown]} />
+          <View style={styles.timelineContent as unknown}>
+            <Text style={styles.timelineLabel as unknown}>Ready</Text>
+            <Text style={styles.timelineTime as unknown}>Waiting...</Text>
           </View>
         </View>
       </View>
 
       {/* Action Buttons */}
       <TouchableOpacity
-        style={styles.viewOrderButton as any}
+        style={styles.viewOrderButton as unknown}
         onPress={() => {
           router.push("/(authenticated)/customer/orders");
         }}
       >
         <Ionicons name="eye-outline" size={18} color="#F59E0B" />
-        <Text style={styles.viewOrderButtonText as any}>View Order Status</Text>
+        <Text style={styles.viewOrderButtonText as unknown}>View Order Status</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.continueButton as any}
+        style={styles.continueButton as unknown}
         onPress={handleContinue}
       >
-        <Text style={styles.continueButtonText as any}>Back to Home</Text>
+        <Text style={styles.continueButtonText as unknown}>Back to Home</Text>
       </TouchableOpacity>
 
-      <View style={styles.spacer as any} />
+      <View style={styles.spacer as unknown} />
       </ScrollView>
     </SafeAreaView>
   );

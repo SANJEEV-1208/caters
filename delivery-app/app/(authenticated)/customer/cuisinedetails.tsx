@@ -28,7 +28,7 @@
     const cuisineName = params.cuisine as string;
 
     useEffect(() => {
-      loadCuisineItems();
+      void loadCuisineItems();
     }, [cuisineName, selectedCatererId]);
 
     const loadCuisineItems = async () => {

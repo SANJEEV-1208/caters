@@ -21,7 +21,7 @@ export default function CatererSelectionScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    loadCaterers();
+    void loadCaterers();
   }, []);
 
   const loadCaterers = async () => {
@@ -87,7 +87,7 @@ export default function CatererSelectionScreen() {
         renderItem={({ item }) => (
           <CatererCard
             caterer={item}
-            onPress={() => handleSelectCaterer(item.id)}
+            onPress={() => { handleSelectCaterer(item.id); }}
           />
         )}
         contentContainerStyle={styles.listContent}

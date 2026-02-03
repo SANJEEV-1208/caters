@@ -119,14 +119,14 @@ export default function MenuItemCard({
         {/* Action Buttons */}
         <View style={styles.actions}>
           {onEdit && (
-            <TouchableOpacity onPress={() => onEdit(item)} style={styles.editButton}>
+            <TouchableOpacity onPress={() => { onEdit(item); }} style={styles.editButton}>
               <Ionicons name="create" size={16} color="#3B82F6" />
               <Text style={styles.editButtonText}>Edit</Text>
             </TouchableOpacity>
           )}
           {onDelete && (
             <TouchableOpacity
-              onPress={() => onDelete(item.id)}
+              onPress={() => { onDelete(item.id); }}
               style={styles.deleteButton}
             >
               <Ionicons name="trash" size={16} color="#EF4444" />
@@ -146,7 +146,7 @@ export default function MenuItemCard({
             <Text style={styles.stockLabel}>Available</Text>
             <Switch
               value={item.inStock}
-              onValueChange={(value) => onToggleStock(item.id, value)}
+              onValueChange={(value) => { onToggleStock(item.id, value); }}
               trackColor={{ false: "#E5E7EB", true: "#10B981" }}
               thumbColor="#FFFFFF"
               style={styles.switch}

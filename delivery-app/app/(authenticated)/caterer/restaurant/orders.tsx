@@ -35,7 +35,7 @@ export default function RestaurantOrders() {
   const [activeTableFilter, setActiveTableFilter] = useState<number | "all">("all");
 
   useEffect(() => {
-    loadOrders();
+    void loadOrders();
   }, []);
 
   const loadOrders = async () => {
@@ -138,7 +138,7 @@ export default function RestaurantOrders() {
       <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => { router.back(); }}>
           <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
         </Pressable>
         <Text style={styles.headerTitle}>Orders</Text>
@@ -152,7 +152,7 @@ export default function RestaurantOrders() {
             styles.filterTypeButton,
             filterType === "status" && styles.filterTypeButtonActive,
           ]}
-          onPress={() => setFilterType("status")}
+          onPress={() => { setFilterType("status"); }}
         >
           <Ionicons
             name="list"
@@ -173,7 +173,7 @@ export default function RestaurantOrders() {
             styles.filterTypeButton,
             filterType === "table" && styles.filterTypeButtonActive,
           ]}
-          onPress={() => setFilterType("table")}
+          onPress={() => { setFilterType("table"); }}
         >
           <Ionicons
             name="layers"
@@ -209,7 +209,7 @@ export default function RestaurantOrders() {
                       styles.filterTab,
                       activeStatusFilter === filter && styles.filterTabActive,
                     ]}
-                    onPress={() => setActiveStatusFilter(filter)}
+                    onPress={() => { setActiveStatusFilter(filter); }}
                   >
                     <Text
                       style={[
@@ -255,7 +255,7 @@ export default function RestaurantOrders() {
                 styles.filterTab,
                 activeTableFilter === "all" && styles.filterTabActive,
               ]}
-              onPress={() => setActiveTableFilter("all")}
+              onPress={() => { setActiveTableFilter("all"); }}
             >
               <Text
                 style={[
@@ -290,7 +290,7 @@ export default function RestaurantOrders() {
                     styles.filterTab,
                     activeTableFilter === tableNum && styles.filterTabActive,
                   ]}
-                  onPress={() => setActiveTableFilter(tableNum)}
+                  onPress={() => { setActiveTableFilter(tableNum); }}
                 >
                   <Ionicons
                     name="layers"

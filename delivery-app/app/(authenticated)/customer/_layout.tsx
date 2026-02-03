@@ -36,7 +36,7 @@ export default function CustomerLayout() {
               key={tab.path}
               style={styles.tab}
               onPress={() => {
-                if (!active) router.replace(tab.path as any);
+                if (!active) router.replace(tab.path as unknown);
               }}
               activeOpacity={0.7}
             >
@@ -44,7 +44,7 @@ export default function CustomerLayout() {
                 {/* Icon with badge */}
                 <View style={styles.iconContainer}>
                   <Ionicons
-                    name={active ? tab.icon : `${tab.icon}-outline` as any}
+                    name={active ? tab.icon : `${tab.icon}-outline` as unknown}
                     size={24}
                     color={active ? "#10B981" : "#9CA3AF"}
                   />

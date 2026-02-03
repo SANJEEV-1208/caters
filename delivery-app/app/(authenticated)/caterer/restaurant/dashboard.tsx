@@ -29,7 +29,7 @@ export default function RestaurantDashboard() {
   const [totalOrders, setTotalOrders] = useState(0);
 
   useEffect(() => {
-    loadDashboardData();
+    void loadDashboardData();
   }, []);
 
   const loadDashboardData = async () => {

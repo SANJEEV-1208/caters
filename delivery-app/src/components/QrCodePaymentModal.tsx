@@ -158,7 +158,7 @@ export default function QrCodePaymentModal({
             <View style={styles.paymentProofSection}>
               <CloudinaryImagePicker
                 label="Payment Proof Screenshot *"
-                onImageUploaded={(url) => setPaymentProofImage(url)}
+                onImageUploaded={(url) => { setPaymentProofImage(url); }}
                 currentImage={paymentProofImage}
                 disabled={isConfirming}
               />

@@ -119,7 +119,7 @@ export const removeCustomerFromApartment = async (id: number): Promise<void> => 
 };
 
 // Get all customers for a caterer with their apartment info
-export const getCustomersByCaterer = async (catererId: number): Promise<any[]> => {
+export const getCustomersByCaterer = async (catererId: number): Promise<unknown[]> => {
   try {
     // This would require a custom backend endpoint or multiple API calls
     // For now, return empty array
@@ -132,7 +132,7 @@ export const getCustomersByCaterer = async (catererId: number): Promise<any[]> =
 };
 
 // Get customers by specific apartment
-export const getCustomersByApartment = async (apartmentId: number): Promise<any[]> => {
+export const getCustomersByApartment = async (apartmentId: number): Promise<unknown[]> => {
   try {
     // This would require a custom backend endpoint
     console.warn("getCustomersByApartment not fully implemented with new backend");

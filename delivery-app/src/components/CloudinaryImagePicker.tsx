@@ -73,7 +73,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
     }
   };
 
-  const uploadToCloudinary = async (asset: any) => {
+  const uploadToCloudinary = async (asset: unknown) => {
     if (!asset.base64) {
       Alert.alert('Error', 'Image data not available. Please try again.');
       return;
@@ -136,7 +136,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
       xhr.open('POST', uploadUrl);
       xhr.send(formData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Cloudinary upload error:', error);
       setUploading(false);
       setSelectedImageUri(currentImage || null);

@@ -49,7 +49,7 @@ export default function RestaurantCheckout() {
     };
 
     if (catererId) {
-      fetchCatererQrCode();
+      void fetchCatererQrCode();
     }
   }, [catererId]);
 
@@ -174,7 +174,7 @@ export default function RestaurantCheckout() {
       {/* Header with Gradient */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => { router.back(); }} style={styles.backButton}>
             <Ionicons name="arrow-back" size={26} color="#FFFFFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Complete Your Order</Text>
@@ -253,7 +253,7 @@ export default function RestaurantCheckout() {
                   styles.paymentOption,
                   paymentMethod === "upi" && styles.paymentOptionActive,
                 ]}
-                onPress={() => handlePaymentMethodSelect("upi")}
+                onPress={() => { handlePaymentMethodSelect("upi"); }}
               >
                 <View style={styles.paymentOptionContent}>
                   <Ionicons
@@ -285,7 +285,7 @@ export default function RestaurantCheckout() {
                   styles.paymentOption,
                   paymentMethod === "cod" && styles.paymentOptionActive,
                 ]}
-                onPress={() => handlePaymentMethodSelect("cod")}
+                onPress={() => { handlePaymentMethodSelect("cod"); }}
               >
                 <View style={styles.paymentOptionContent}>
                   <Ionicons

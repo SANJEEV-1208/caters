@@ -95,7 +95,7 @@ export default function PaymentQrScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => { router.back(); }} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Payment QR Code</Text>
@@ -137,7 +137,7 @@ export default function PaymentQrScreen() {
                 styles.methodButton,
                 uploadMethod === 'gallery' && styles.methodButtonActive,
               ]}
-              onPress={() => setUploadMethod('gallery')}
+              onPress={() => { setUploadMethod('gallery'); }}
             >
               <Ionicons
                 name="image"
@@ -159,7 +159,7 @@ export default function PaymentQrScreen() {
                 styles.methodButton,
                 uploadMethod === 'url' && styles.methodButtonActive,
               ]}
-              onPress={() => setUploadMethod('url')}
+              onPress={() => { setUploadMethod('url'); }}
             >
               <Ionicons
                 name="link"

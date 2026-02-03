@@ -56,7 +56,7 @@ export default function Cart() {
         setCaterer(null);
       }
     };
-    fetchCaterer();
+    void fetchCaterer();
   }, [selectedCatererId, cart]);
 
   // --- Validate cart items on mount (for stale items from previous sessions) ---
@@ -108,7 +108,7 @@ export default function Cart() {
       }
     };
 
-    validateOnMount();
+    void validateOnMount();
   }, []); // Run only once on mount
 
   // --- Validate cart items when delivery date changes ---
@@ -155,7 +155,7 @@ export default function Cart() {
       }
     };
 
-    validateCartItems();
+    void validateCartItems();
   }, [selectedDeliveryDate]); // Run when delivery date changes
 
   // --- Handle Re-Order from previous order ---
@@ -192,12 +192,12 @@ export default function Cart() {
             const availableItemIds = new Set(availableItems.map(item => item.id));
 
             // Filter order items - only add items that are available today
-            const availableOrderItems = order.items.filter((item: any) =>
-              availableItemIds.has(item.id)
+            const availableOrderItems = order.items.filter((item: unknown) =>
+              availableItemIds.has((item as { id: number }).id)
             );
 
-            const unavailableItems = order.items.filter((item: any) =>
-              !availableItemIds.has(item.id)
+            const unavailableItems = order.items.filter((item: unknown) =>
+              !availableItemIds.has((item as { id: number }).id)
             );
 
             clearCart();
@@ -261,7 +261,7 @@ export default function Cart() {
         }
       }
     };
-    loadPreviousOrder();
+    void loadPreviousOrder();
   }, [orderId]);
 
   // --- Handle new order confirmation ---

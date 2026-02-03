@@ -37,7 +37,7 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
     const result = await res.json();
     console.log('✅ Order created successfully:', result);
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ createOrder error:', error);
 
     if (error.message?.includes('fetch')) {

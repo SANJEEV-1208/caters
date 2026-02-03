@@ -34,7 +34,7 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
   useEffect(() => {
     const timer = setTimeout(() => {
       if (value.length > 2) {
-        fetchSuggestions(value);
+        void fetchSuggestions(value);
       } else {
         setSuggestions([]);
         setShowSuggestions(false);
@@ -118,7 +118,7 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
               <TouchableOpacity
                 key={item.place_id}
                 style={styles.suggestionItem}
-                onPress={() => handleSelectSuggestion(item)}
+                onPress={() => { handleSelectSuggestion(item); }}
                 activeOpacity={0.7}
               >
                 <Ionicons name="location-outline" size={18} color="#10B981" />

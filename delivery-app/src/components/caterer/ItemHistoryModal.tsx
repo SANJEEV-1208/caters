@@ -32,7 +32,7 @@ export default function ItemHistoryModal({
 
   useEffect(() => {
     if (visible && catererId) {
-      fetchItems();
+      void fetchItems();
     }
   }, [visible, catererId]);
 
@@ -103,7 +103,7 @@ export default function ItemHistoryModal({
                 <TouchableOpacity
                   key={item.id}
                   style={styles.itemCard}
-                  onPress={() => handleSelectItem(item)}
+                  onPress={() => { handleSelectItem(item); }}
                 >
                   {/* Item Image */}
                   <Image source={{ uri: item.image }} style={styles.itemImage} />

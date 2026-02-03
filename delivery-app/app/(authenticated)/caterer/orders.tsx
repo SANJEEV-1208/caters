@@ -41,7 +41,7 @@ export default function CatererOrdersScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadOrders();
+    void loadOrders();
   }, []);
 
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function CatererOrdersScreen() {
                 styles.dateFilterButton,
                 selectedDateFilter === item && styles.dateFilterButtonActive,
               ]}
-              onPress={() => setSelectedDateFilter(item)}
+              onPress={() => { setSelectedDateFilter(item); }}
             >
               <Text
                 style={[
@@ -179,7 +179,7 @@ export default function CatererOrdersScreen() {
                   styles.statusTab,
                   selectedStatus === item && styles.statusTabActive,
                 ]}
-                onPress={() => setSelectedStatus(item)}
+                onPress={() => { setSelectedStatus(item); }}
               >
                 <Text
                   style={[

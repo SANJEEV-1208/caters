@@ -32,7 +32,7 @@ export type FoodItem = {
   name: string;
   rating?: string;
   price: number;
-  image: any;
+  image: unknown;
   description: string;
   category: "veg" | "non-veg";
   cuisine: string;

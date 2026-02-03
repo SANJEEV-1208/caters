@@ -46,7 +46,7 @@ export default function CustomerAddScreen() {
   const [customerAddress, setCustomerAddress] = useState("");
 
   useEffect(() => {
-    loadApartments();
+    void loadApartments();
   }, []);
 
   const loadApartments = async () => {
@@ -158,14 +158,14 @@ export default function CustomerAddScreen() {
       });
 
       // Step 2: Create subscription (customer-caterer relationship)
-      await createSubscription(newCustomer.id, user!.id);
+      await createSubscription(newCustomer.id, user?.id);
 
       // Step 3: Link to apartment if selected
       if (selectedApartmentId || addDirectly) {
         await addCustomerToApartment({
           customerId: newCustomer.id,
           apartmentId: selectedApartmentId || null,
-          catererId: user!.id,
+          catererId: user?.id,
           addedVia: "manual",
         });
       }
@@ -175,7 +175,7 @@ export default function CustomerAddScreen() {
         `Customer created successfully!\n\n${newCustomer.name} can now place orders from your service.`,
         [{ text: "OK", onPress: () => router.back() }]
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create customer:", error);
       Alert.alert(
         "Error",

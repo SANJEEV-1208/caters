@@ -5,7 +5,7 @@
   export type CuisineItem = {
       id: number;
       name: string;
-      image: any;
+      image: unknown;
   }
 
   type Props = {

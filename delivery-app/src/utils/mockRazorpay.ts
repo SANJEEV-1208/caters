@@ -30,7 +30,7 @@ export interface RazorpayError {
   source: string;
   step: string;
   reason: string;
-  metadata: any;
+  metadata: unknown;
 }
 
 // Mock Razorpay Checkout

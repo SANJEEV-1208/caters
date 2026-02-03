@@ -30,7 +30,7 @@ export default function PaymentsScreen() {
   const [filter, setFilter] = useState<PaymentFilter>("all");
 
   useEffect(() => {
-    loadPayments();
+    void loadPayments();
   }, []);
 
   const loadPayments = async () => {
@@ -189,7 +189,7 @@ export default function PaymentsScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <TouchableOpacity
               style={[styles.filterButton, filter === "all" && styles.filterButtonActive]}
-              onPress={() => setFilter("all")}
+              onPress={() => { setFilter("all"); }}
             >
               <Text
                 style={[
@@ -217,7 +217,7 @@ export default function PaymentsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "received" && styles.filterButtonActive]}
-              onPress={() => setFilter("received")}
+              onPress={() => { setFilter("received"); }}
             >
               <Ionicons
                 name="checkmark-circle"
@@ -250,7 +250,7 @@ export default function PaymentsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "pending" && styles.filterButtonActive]}
-              onPress={() => setFilter("pending")}
+              onPress={() => { setFilter("pending"); }}
             >
               <Ionicons
                 name="time"
@@ -283,7 +283,7 @@ export default function PaymentsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "upi" && styles.filterButtonActive]}
-              onPress={() => setFilter("upi")}
+              onPress={() => { setFilter("upi"); }}
             >
               <Ionicons
                 name="card"
@@ -316,7 +316,7 @@ export default function PaymentsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.filterButton, filter === "cod" && styles.filterButtonActive]}
-              onPress={() => setFilter("cod")}
+              onPress={() => { setFilter("cod"); }}
             >
               <Ionicons
                 name="cash"

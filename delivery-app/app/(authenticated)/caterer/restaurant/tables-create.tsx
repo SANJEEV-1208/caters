@@ -76,7 +76,7 @@ export default function TablesCreateScreen() {
                   },
                 ]
               );
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.error('Create tables error:', error);
               Alert.alert(
                 'Error',

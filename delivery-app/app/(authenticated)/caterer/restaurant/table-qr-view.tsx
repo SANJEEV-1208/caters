@@ -42,7 +42,7 @@ export default function TableQRViewScreen() {
 
       // Download file
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
+      const fileUri = `${(FileSystem as unknown).documentDirectory}${filename}`;
 
       const downloadResult = await FileSystem.downloadAsync(
         qrCodeUrl as string,
@@ -61,7 +61,7 @@ export default function TableQRViewScreen() {
         'Success',
         `QR code saved to gallery!\nLook for "${filename}" in the KaasproFoods QR album.`
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Download error:', error);
       Alert.alert('Download Failed', error.message || 'Failed to save QR code');
     } finally {
@@ -83,7 +83,7 @@ export default function TableQRViewScreen() {
 
       // Download file to temp directory
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
+      const fileUri = `${(FileSystem as unknown).cacheDirectory}${filename}`;
 
       const downloadResult = await FileSystem.downloadAsync(
         qrCodeUrl as string,

@@ -20,7 +20,7 @@ export default function Search() {
   const { selectedCatererId } = useAuth();
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [selectedCatererId]);
 
   const loadData = async () => {

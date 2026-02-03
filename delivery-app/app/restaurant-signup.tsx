@@ -66,7 +66,7 @@ export default function RestaurantSignupScreen() {
       setUser(userWithType);
       
       // Will be redirected to (authenticated) by root layout
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message && error.message.includes("already exists")) {
         Alert.alert("Already Registered", "This phone number is already registered. Please login to upgrade your account to restaurant.");
       } else {
@@ -134,7 +134,7 @@ export default function RestaurantSignupScreen() {
               style={styles.phoneInput}
               placeholder="10-digit number"
               value={phone}
-              onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, "").slice(0, 10))}
+              onChangeText={(text) => { setPhone(text.replace(/[^0-9]/g, "").slice(0, 10)); }}
               editable={!loading}
               keyboardType="phone-pad"
               maxLength={10}

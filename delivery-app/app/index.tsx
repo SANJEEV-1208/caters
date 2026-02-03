@@ -13,7 +13,7 @@ export default function Index() {
       const dashboardPath = user.caterType === "restaurant"
         ? "/(authenticated)/caterer/restaurant/dashboard"
         : "/(authenticated)/caterer/dashboard";
-      return <Redirect href={dashboardPath as any} />;
+      return <Redirect href={dashboardPath as unknown} />;
     }
   }
 

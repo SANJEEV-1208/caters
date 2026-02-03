@@ -41,7 +41,7 @@ export default function QRScannerScreen() {
         Alert.alert(
           'Invalid QR Code',
           'This is not a valid restaurant table QR code. Please scan a table QR code.',
-          [{ text: 'OK', onPress: () => setScanned(false) }]
+          [{ text: 'OK', onPress: () => { setScanned(false); } }]
         );
         return;
       }
@@ -60,7 +60,7 @@ export default function QRScannerScreen() {
       Alert.alert(
         'Invalid QR Code',
         'Could not read this QR code. Please make sure you are scanning a restaurant table QR code.',
-        [{ text: 'Try Again', onPress: () => setScanned(false) }]
+        [{ text: 'Try Again', onPress: () => { setScanned(false); } }]
       );
     }
   };
@@ -118,7 +118,7 @@ export default function QRScannerScreen() {
             <Ionicons name="close" size={28} color="#FFFFFF" />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setFlashOn(!flashOn)}
+            onPress={() => { setFlashOn(!flashOn); }}
             style={styles.flashButton}
           >
             <Ionicons

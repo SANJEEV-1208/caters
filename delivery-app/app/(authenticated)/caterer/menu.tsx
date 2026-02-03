@@ -46,7 +46,7 @@ export default function MenuScreen() {
   const dates = getDates();
 
   useEffect(() => {
-    loadMenuItems();
+    void loadMenuItems();
   }, []);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function MenuScreen() {
                 styles.dateButton,
                 selectedDate === item.value && styles.dateButtonActive,
               ]}
-              onPress={() => setSelectedDate(item.value)}
+              onPress={() => { setSelectedDate(item.value); }}
             >
               <Text
                 style={[
@@ -191,7 +191,7 @@ export default function MenuScreen() {
               styles.filterButton,
               selectedCategory === category && styles.filterButtonActive,
             ]}
-            onPress={() => setSelectedCategory(category)}
+            onPress={() => { setSelectedCategory(category); }}
           >
             <Text
               style={[

@@ -32,7 +32,7 @@ export default function RestaurantOrderDetails() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    loadOrderDetails();
+    void loadOrderDetails();
   }, []);
 
   const loadOrderDetails = async () => {

@@ -56,7 +56,7 @@ export default function MenuAddScreen() {
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
 
   useEffect(() => {
-    loadCatererCuisines();
+    void loadCatererCuisines();
   }, [user?.id]);
 
   const loadCatererCuisines = async () => {
@@ -242,7 +242,7 @@ export default function MenuAddScreen() {
         {/* Reuse Item Button */}
         <TouchableOpacity
           style={styles.historyButton}
-          onPress={() => setShowHistoryModal(true)}
+          onPress={() => { setShowHistoryModal(true); }}
         >
           <Ionicons name="time-outline" size={20} color="#10B981" />
           <Text style={styles.historyButtonText}>Reuse Previous Item</Text>
@@ -256,7 +256,7 @@ export default function MenuAddScreen() {
             style={styles.input}
             placeholder="e.g., Chicken Biryani"
             value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            onChangeText={(text) => { setFormData({ ...formData, name: text }); }}
           />
         </View>
 
@@ -267,7 +267,7 @@ export default function MenuAddScreen() {
             style={[styles.input, styles.textArea]}
             placeholder="Describe your dish..."
             value={formData.description}
-            onChangeText={(text) => setFormData({ ...formData, description: text })}
+            onChangeText={(text) => { setFormData({ ...formData, description: text }); }}
             multiline
             numberOfLines={3}
           />
@@ -280,7 +280,7 @@ export default function MenuAddScreen() {
             style={styles.input}
             placeholder="e.g., 180"
             value={formData.price}
-            onChangeText={(text) => setFormData({ ...formData, price: text })}
+            onChangeText={(text) => { setFormData({ ...formData, price: text }); }}
             keyboardType="numeric"
           />
         </View>
@@ -291,7 +291,7 @@ export default function MenuAddScreen() {
           <View style={styles.radioGroup}>
             <TouchableOpacity
               style={[styles.radioButton, formData.category === "veg" && styles.radioButtonActive]}
-              onPress={() => setFormData({ ...formData, category: "veg" })}
+              onPress={() => { setFormData({ ...formData, category: "veg" }); }}
             >
               <View style={[styles.vegDot, { backgroundColor: "#10B981" }]} />
               <Text style={[styles.radioText, formData.category === "veg" && styles.radioTextActive]}>
@@ -301,7 +301,7 @@ export default function MenuAddScreen() {
 
             <TouchableOpacity
               style={[styles.radioButton, formData.category === "non-veg" && styles.radioButtonActive]}
-              onPress={() => setFormData({ ...formData, category: "non-veg" })}
+              onPress={() => { setFormData({ ...formData, category: "non-veg" }); }}
             >
               <View style={[styles.vegDot, { backgroundColor: "#EF4444" }]} />
               <Text style={[styles.radioText, formData.category === "non-veg" && styles.radioTextActive]}>
@@ -317,7 +317,7 @@ export default function MenuAddScreen() {
             <Text style={styles.label}>Cuisine *</Text>
             <TouchableOpacity
               style={styles.addCuisineButton}
-              onPress={() => setShowAddCuisineModal(true)}
+              onPress={() => { setShowAddCuisineModal(true); }}
             >
               <Ionicons name="add-circle" size={20} color="#10B981" />
               <Text style={styles.addCuisineButtonText}>Add</Text>
@@ -331,8 +331,8 @@ export default function MenuAddScreen() {
                 <TouchableOpacity
                   key={cuisine.id}
                   style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
-                  onPress={() => setFormData({ ...formData, cuisine: cuisine.name })}
-                  onLongPress={() => handleDeleteCuisine(cuisine.id, cuisine.name)}
+                  onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
+                  onLongPress={() => { handleDeleteCuisine(cuisine.id, cuisine.name); }}
                 >
                   <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
                     {cuisine.name}
@@ -357,7 +357,7 @@ export default function MenuAddScreen() {
               <TouchableOpacity
                 key={type}
                 style={[styles.chip, formData.type === type && styles.chipActive]}
-                onPress={() => setFormData({ ...formData, type: type as any })}
+                onPress={() => { setFormData({ ...formData, type: type as unknown }); }}
               >
                 <Text style={[styles.chipText, formData.type === type && styles.chipTextActive]}>
                   {type.replace('_', ' ')}
@@ -371,7 +371,7 @@ export default function MenuAddScreen() {
         <View style={styles.field}>
           <CloudinaryImagePicker
             label="Food Image *"
-            onImageUploaded={(url) => setFormData({ ...formData, image: url })}
+            onImageUploaded={(url) => { setFormData({ ...formData, image: url }); }}
             currentImage={formData.image}
             disabled={loading}
           />
@@ -388,7 +388,7 @@ export default function MenuAddScreen() {
                   styles.dateChip,
                   selectedDates.includes(date.value) && styles.dateChipActive,
                 ]}
-                onPress={() => toggleDate(date.value)}
+                onPress={() => { toggleDate(date.value); }}
               >
                 <Ionicons
                   name={selectedDates.includes(date.value) ? "checkmark-circle" : "ellipse-outline"}
@@ -417,7 +417,7 @@ export default function MenuAddScreen() {
             </View>
             <Switch
               value={formData.inStock}
-              onValueChange={(value) => setFormData({ ...formData, inStock: value })}
+              onValueChange={(value) => { setFormData({ ...formData, inStock: value }); }}
               trackColor={{ false: "#E5E7EB", true: "#10B981" }}
               thumbColor="#FFFFFF"
             />
@@ -441,7 +441,7 @@ export default function MenuAddScreen() {
       {/* Item History Modal */}
       <ItemHistoryModal
         visible={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
+        onClose={() => { setShowHistoryModal(false); }}
         onSelectItem={handleSelectHistoryItem}
         catererId={user?.id || 0}
       />
@@ -472,7 +472,7 @@ export default function MenuAddScreen() {
           >
             <Pressable
               style={styles.modalContent}
-              onPress={(e) => e.stopPropagation()}
+              onPress={(e) => { e.stopPropagation(); }}
             >
               {/* Modern Header with Icon */}
               <View style={styles.modalHeader}>
@@ -535,7 +535,7 @@ export default function MenuAddScreen() {
                 <View style={styles.imagePickerCard}>
                   <CloudinaryImagePicker
                     label=""
-                    onImageUploaded={(url) => setNewCuisineImage(url)}
+                    onImageUploaded={(url) => { setNewCuisineImage(url); }}
                     currentImage={newCuisineImage}
                     disabled={loadingCuisines}
                   />

@@ -124,7 +124,7 @@ export default function ApartmentAddScreen() {
             style={styles.input}
             placeholder="e.g., Sunrise Apartments"
             value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            onChangeText={(text) => { setFormData({ ...formData, name: text }); }}
           />
         </View>
 
@@ -133,7 +133,7 @@ export default function ApartmentAddScreen() {
           <Text style={styles.label}>Address *</Text>
           <LocationAutocomplete
             value={formData.address}
-            onSelect={(address) => setFormData({ ...formData, address })}
+            onSelect={(address) => { setFormData({ ...formData, address }); }}
             placeholder="Enter complete address with landmark"
           />
         </View>
@@ -177,7 +177,7 @@ export default function ApartmentAddScreen() {
                 styles.codeTypeButton,
                 useCustomCode && styles.codeTypeButtonActive,
               ]}
-              onPress={() => setUseCustomCode(true)}
+              onPress={() => { setUseCustomCode(true); }}
             >
               <Ionicons
                 name={useCustomCode ? "radio-button-on" : "radio-button-off"}
@@ -202,7 +202,7 @@ export default function ApartmentAddScreen() {
               placeholder="Enter custom access code (min 4 chars)"
               value={formData.accessCode}
               onChangeText={(text) =>
-                setFormData({ ...formData, accessCode: text.toUpperCase() })
+                { setFormData({ ...formData, accessCode: text.toUpperCase() }); }
               }
               autoCapitalize="characters"
               maxLength={10}

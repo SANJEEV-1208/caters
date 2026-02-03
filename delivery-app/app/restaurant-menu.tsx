@@ -30,7 +30,7 @@ export default function RestaurantMenuBrowser() {
 
   useEffect(() => {
     console.log('Loading restaurant menu - CatererId:', catererId);
-    loadMenuItems();
+    void loadMenuItems();
   }, [catererId]);
 
   const loadMenuItems = async () => {
@@ -51,7 +51,7 @@ export default function RestaurantMenuBrowser() {
       console.log('In stock items:', availableItems.length);
 
       setMenuItems(availableItems);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load menu:", error);
       Alert.alert(
         "Error",
@@ -146,7 +146,7 @@ export default function RestaurantMenuBrowser() {
       {/* Header with Gradient */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => { router.back(); }} style={styles.backButton}>
             <Ionicons name="arrow-back" size={26} color="#FFFFFF" />
           </TouchableOpacity>
           <View style={styles.headerInfo}>
@@ -172,7 +172,7 @@ export default function RestaurantMenuBrowser() {
                 styles.filterPill,
                 selectedCategory === cat && styles.filterPillActive,
               ]}
-              onPress={() => setSelectedCategory(cat)}
+              onPress={() => { setSelectedCategory(cat); }}
               activeOpacity={0.7}
             >
               {cat !== "all" && (
@@ -246,7 +246,7 @@ export default function RestaurantMenuBrowser() {
                     {itemQuantity === 0 ? (
                       <TouchableOpacity
                         style={styles.addButton}
-                        onPress={() => handleAddToCart(item)}
+                        onPress={() => { handleAddToCart(item); }}
                         activeOpacity={0.8}
                       >
                         <Ionicons name="add-circle" size={22} color="#FF6B35" />
@@ -256,7 +256,7 @@ export default function RestaurantMenuBrowser() {
                       <View style={styles.quantityControl}>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => handleRemoveFromCart(item.id)}
+                          onPress={() => { handleRemoveFromCart(item.id); }}
                           activeOpacity={0.7}
                         >
                           <Ionicons name="remove-circle" size={28} color="#FF6B35" />
@@ -264,7 +264,7 @@ export default function RestaurantMenuBrowser() {
                         <Text style={styles.quantityText}>{itemQuantity}</Text>
                         <TouchableOpacity
                           style={styles.quantityButton}
-                          onPress={() => handleAddToCart(item)}
+                          onPress={() => { handleAddToCart(item); }}
                           activeOpacity={0.7}
                         >
                           <Ionicons name="add-circle" size={28} color="#FF6B35" />

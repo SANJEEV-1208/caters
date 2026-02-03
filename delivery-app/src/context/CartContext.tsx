@@ -25,12 +25,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    loadCart();
+    void loadCart();
   }, []);
 
   useEffect(() => {
     if (isLoaded) {
-      saveCart();
+      void saveCart();
     }
   }, [cart, isLoaded]);
 
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart(prev => prev.filter(item => !ids.includes(item.id)));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => { setCart([]); };
 
   /**
    * ⭐ RE-ORDER LOGIC

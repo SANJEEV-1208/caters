@@ -28,7 +28,7 @@ export default function OrderHistory() {
   const {reorderItems} = useCart();
 
   useEffect(() => {
-    loadOrders();
+    void loadOrders();
   }, []);
 
   const loadOrders = async () => {
@@ -158,7 +158,7 @@ export default function OrderHistory() {
             </View>
           </View>
           <View style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}>
-            <Ionicons name={statusIcon as any} size={16} color={statusColor} />
+            <Ionicons name={statusIcon as unknown} size={16} color={statusColor} />
             <Text style={[styles.statusText, { color: statusColor }]}>
               {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
             </Text>

@@ -33,7 +33,7 @@ export default function ApartmentsScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadApartments();
+    void loadApartments();
   }, []);
 
   const loadApartments = async () => {

@@ -40,7 +40,7 @@ export default function CustomersScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadCustomers();
+    void loadCustomers();
   }, []);
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function CustomersScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <TouchableOpacity onPress={() => { setSearchQuery(""); }}>
               <Ionicons name="close-circle" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           )}
@@ -141,7 +141,7 @@ export default function CustomersScreen() {
               styles.filterTab,
               selectedFilter === filter && styles.filterTabActive,
             ]}
-            onPress={() => setSelectedFilter(filter)}
+            onPress={() => { setSelectedFilter(filter); }}
           >
             <Text
               style={[

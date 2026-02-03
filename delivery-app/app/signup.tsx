@@ -58,7 +58,7 @@ export default function SignupScreen() {
       if (success) {
         // Will be redirected to (authenticated) by root layout
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.message === "Phone number already registered") {
         Alert.alert("Already Registered", "This phone number is already registered. Please login instead.");
       } else {

@@ -28,7 +28,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    loadFoods();
+    void loadFoods();
   }, [selectedCatererId, selectedDay]);
 
   // Format date to YYYY-MM-DD (IST)
@@ -141,7 +141,7 @@ export default function HomeScreen() {
         </Text>
         <Pressable
           style={styles.selectButton}
-          onPress={() => router.push("/(authenticated)/customer/caterer-selection")}
+          onPress={() => { router.push("/(authenticated)/customer/caterer-selection"); }}
         >
           <Text style={styles.selectButtonText}>Select Caterer</Text>
         </Pressable>
@@ -199,27 +199,27 @@ export default function HomeScreen() {
         <MealTypeButton
           title="All Meals"
           active={selectedMealType === "all"}
-          onPress={() => handleMealType("all")}
+          onPress={() => { handleMealType("all"); }}
         />
         <MealTypeButton
           title="Breakfast"
           active={selectedMealType === "breakfast"}
-          onPress={() => handleMealType("breakfast")}
+          onPress={() => { handleMealType("breakfast"); }}
         />
         <MealTypeButton
           title="Lunch"
           active={selectedMealType === "lunch"}
-          onPress={() => handleMealType("lunch")}
+          onPress={() => { handleMealType("lunch"); }}
         />
         <MealTypeButton
           title="Dinner"
           active={selectedMealType === "dinner"}
-          onPress={() => handleMealType("dinner")}
+          onPress={() => { handleMealType("dinner"); }}
         />
         <MealTypeButton
           title="Snacks"
           active={selectedMealType === "snack"}
-          onPress={() => handleMealType("snack")}
+          onPress={() => { handleMealType("snack"); }}
         />
       </ScrollView>
 
@@ -234,19 +234,19 @@ export default function HomeScreen() {
             <CategoryButton
               title="All"
               active={selectedCategory === "all"}
-              onPress={() => handleCategory("all")}
+              onPress={() => { handleCategory("all"); }}
             />
 
             <CategoryButton
               title="Veg"
               active={selectedCategory === "veg"}
-              onPress={() => handleCategory("veg")}
+              onPress={() => { handleCategory("veg"); }}
             />
 
             <CategoryButton
               title="Non-Veg"
               active={selectedCategory === "non-veg"}
-              onPress={() => handleCategory("non-veg")}
+              onPress={() => { handleCategory("non-veg"); }}
             />
           </View>
         </>

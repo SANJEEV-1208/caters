@@ -173,7 +173,7 @@ export default function UpiPaymentModal({
                     <TouchableOpacity
                       key={app.id}
                       style={styles.appCard}
-                      onPress={() => handleAppSelect(app.id)}
+                      onPress={() => { handleAppSelect(app.id); }}
                       activeOpacity={0.7}
                     >
                       <Text style={styles.appIcon}>{app.icon}</Text>

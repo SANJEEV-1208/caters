@@ -40,7 +40,7 @@ export default function RestaurantCheckout() {
     };
 
     if (catererId) {
-      fetchCatererQrCode();
+      void fetchCatererQrCode();
     }
   }, [catererId]);
 
@@ -52,7 +52,7 @@ export default function RestaurantCheckout() {
         Alert.alert(
           "UPI Not Available",
           "This restaurant doesn't accept UPI payments. Please use Cash on Delivery.",
-          [{ text: "OK", onPress: () => setPaymentMethod("cod") }]
+          [{ text: "OK", onPress: () => { setPaymentMethod("cod"); } }]
         );
         return;
       }
@@ -150,11 +150,11 @@ export default function RestaurantCheckout() {
                 tableNumber: String(tableNumber),
                 restaurantName,
               },
-            } as any);
+            } as unknown);
           },
         },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ Order placement error:", error);
       console.error("❌ Error message:", error?.message);
       console.error("❌ Error details:", JSON.stringify(error, null, 2));
@@ -171,23 +171,23 @@ export default function RestaurantCheckout() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
         <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-        <View style={styles.container as any}>
-        <View style={styles.header as any}>
+        <View style={styles.container as unknown}>
+        <View style={styles.header as unknown}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle as any}>Order Review</Text>
+          <Text style={styles.headerTitle as unknown}>Order Review</Text>
           <View style={{ width: 24 }} />
         </View>
 
-        <View style={styles.emptyState as any}>
+        <View style={styles.emptyState as unknown}>
           <Ionicons name="cart-outline" size={56} color="#D1D5DB" />
-          <Text style={styles.emptyText as any}>Your cart is empty</Text>
+          <Text style={styles.emptyText as unknown}>Your cart is empty</Text>
           <TouchableOpacity
-            style={styles.backButton as any}
+            style={styles.backButton as unknown}
             onPress={() => router.back()}
           >
-            <Text style={styles.backButtonText as any}>Back to Menu</Text>
+            <Text style={styles.backButtonText as unknown}>Back to Menu</Text>
           </TouchableOpacity>
         </View>
         </View>
@@ -198,54 +198,54 @@ export default function RestaurantCheckout() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-      <View style={styles.container as any}>
+      <View style={styles.container as unknown}>
       {/* Header */}
-      <View style={styles.header as any}>
+      <View style={styles.header as unknown}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle as any}>Order Review</Text>
+        <Text style={styles.headerTitle as unknown}>Order Review</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content as any}>
+      <ScrollView style={styles.content as unknown}>
         {/* Restaurant & Table Info */}
-        <View style={styles.infoCard as any}>
-          <Text style={styles.restaurantName as any}>{restaurantName}</Text>
-          <View style={styles.tableInfo as any}>
+        <View style={styles.infoCard as unknown}>
+          <Text style={styles.restaurantName as unknown}>{restaurantName}</Text>
+          <View style={styles.tableInfo as unknown}>
             <Ionicons name="layers" size={18} color="#F59E0B" />
-            <Text style={styles.tableNumber as any}>Table {tableNumber}</Text>
+            <Text style={styles.tableNumber as unknown}>Table {tableNumber}</Text>
           </View>
         </View>
 
         {/* Payment Method Selection */}
-        <View style={styles.section as any}>
-          <Text style={styles.sectionTitle as any}>Payment Method</Text>
+        <View style={styles.section as unknown}>
+          <Text style={styles.sectionTitle as unknown}>Payment Method</Text>
 
-          <View style={styles.paymentOptions as any}>
+          <View style={styles.paymentOptions as unknown}>
             <TouchableOpacity
               style={[
-                styles.paymentOption as any,
-                paymentMethod === "upi" && (styles.paymentOptionActive as any),
+                styles.paymentOption as unknown,
+                paymentMethod === "upi" && (styles.paymentOptionActive as unknown),
               ]}
               onPress={() => handlePaymentMethodSelect("upi")}
             >
-              <View style={styles.paymentOptionContent as any}>
+              <View style={styles.paymentOptionContent as unknown}>
                 <Ionicons
                   name="qr-code"
                   size={24}
                   color={paymentMethod === "upi" ? "#8B5CF6" : "#94A3B8"}
                 />
-                <View style={styles.paymentOptionText as any}>
+                <View style={styles.paymentOptionText as unknown}>
                   <Text
                     style={[
-                      styles.paymentOptionTitle as any,
-                      paymentMethod === "upi" && (styles.paymentOptionTitleActive as any),
+                      styles.paymentOptionTitle as unknown,
+                      paymentMethod === "upi" && (styles.paymentOptionTitleActive as unknown),
                     ]}
                   >
                     UPI Payment
                   </Text>
-                  <Text style={styles.paymentOptionSubtitle as any}>
+                  <Text style={styles.paymentOptionSubtitle as unknown}>
                     Pay via GPay/PhonePe/Paytm
                   </Text>
                 </View>
@@ -257,27 +257,27 @@ export default function RestaurantCheckout() {
 
             <TouchableOpacity
               style={[
-                styles.paymentOption as any,
-                paymentMethod === "cod" && (styles.paymentOptionActive as any),
+                styles.paymentOption as unknown,
+                paymentMethod === "cod" && (styles.paymentOptionActive as unknown),
               ]}
               onPress={() => handlePaymentMethodSelect("cod")}
             >
-              <View style={styles.paymentOptionContent as any}>
+              <View style={styles.paymentOptionContent as unknown}>
                 <Ionicons
                   name="cash"
                   size={24}
                   color={paymentMethod === "cod" ? "#22C55E" : "#94A3B8"}
                 />
-                <View style={styles.paymentOptionText as any}>
+                <View style={styles.paymentOptionText as unknown}>
                   <Text
                     style={[
-                      styles.paymentOptionTitle as any,
-                      paymentMethod === "cod" && (styles.paymentOptionTitleActive as any),
+                      styles.paymentOptionTitle as unknown,
+                      paymentMethod === "cod" && (styles.paymentOptionTitleActive as unknown),
                     ]}
                   >
                     Cash on Delivery
                   </Text>
-                  <Text style={styles.paymentOptionSubtitle as any}>
+                  <Text style={styles.paymentOptionSubtitle as unknown}>
                     Pay at the counter
                   </Text>
                 </View>
@@ -290,9 +290,9 @@ export default function RestaurantCheckout() {
 
           {/* Show transaction ID if UPI was used */}
           {paymentMethod === "upi" && transactionId && (
-            <View style={styles.transactionInfo as any}>
+            <View style={styles.transactionInfo as unknown}>
               <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-              <Text style={styles.transactionText as any}>
+              <Text style={styles.transactionText as unknown}>
                 Transaction ID: {transactionId}
               </Text>
             </View>
@@ -300,25 +300,25 @@ export default function RestaurantCheckout() {
         </View>
 
         {/* Order Items */}
-        <View style={styles.section as any}>
-          <Text style={styles.sectionTitle as any}>Order Items</Text>
+        <View style={styles.section as unknown}>
+          <Text style={styles.sectionTitle as unknown}>Order Items</Text>
           <FlatList
             data={cart}
             keyExtractor={(item) => item.id?.toString() || item.name}
             scrollEnabled={false}
             renderItem={({ item }) => (
-              <View style={styles.itemRow as any}>
-                <View style={styles.itemDetails as any}>
-                  <Text style={styles.itemName as any}>{item.name}</Text>
-                  <Text style={styles.itemQuantity as any}>Qty: {item.quantity}</Text>
+              <View style={styles.itemRow as unknown}>
+                <View style={styles.itemDetails as unknown}>
+                  <Text style={styles.itemName as unknown}>{item.name}</Text>
+                  <Text style={styles.itemQuantity as unknown}>Qty: {item.quantity}</Text>
                 </View>
-                <View style={styles.itemPriceSection as any}>
-                  <Text style={styles.itemPrice as any}>
+                <View style={styles.itemPriceSection as unknown}>
+                  <Text style={styles.itemPrice as unknown}>
                     ₹{item.price * item.quantity}
                   </Text>
                   <TouchableOpacity
                     onPress={() => removeFromCart(item.id!)}
-                    style={styles.removeButton as any}
+                    style={styles.removeButton as unknown}
                   >
                     <Ionicons name="trash-outline" size={16} color="#EF4444" />
                   </TouchableOpacity>
@@ -329,24 +329,24 @@ export default function RestaurantCheckout() {
         </View>
 
         {/* Total */}
-        <View style={styles.totalSection as any}>
-          <Text style={styles.totalLabel as any}>Total Amount</Text>
-          <Text style={styles.totalAmount as any}>₹{totalAmount}</Text>
+        <View style={styles.totalSection as unknown}>
+          <Text style={styles.totalLabel as unknown}>Total Amount</Text>
+          <Text style={styles.totalAmount as unknown}>₹{totalAmount}</Text>
         </View>
 
         {/* Info Box */}
-        <View style={styles.infoBox as any}>
+        <View style={styles.infoBox as unknown}>
           <Ionicons name="information-circle" size={18} color="#10B981" />
-          <Text style={styles.infoText as any}>
+          <Text style={styles.infoText as unknown}>
             Order will be prepared and served at your table
           </Text>
         </View>
       </ScrollView>
 
       {/* Place Order Button */}
-      <View style={styles.footer as any}>
+      <View style={styles.footer as unknown}>
         <TouchableOpacity
-          style={[styles.placeOrderButton as any, loading && (styles.placeOrderButtonDisabled as any)]}
+          style={[styles.placeOrderButton as unknown, loading && (styles.placeOrderButtonDisabled as unknown)]}
           onPress={handlePlaceOrder}
           disabled={loading}
         >

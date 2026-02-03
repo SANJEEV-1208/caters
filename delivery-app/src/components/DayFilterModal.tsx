@@ -99,7 +99,7 @@ export default function DayFilterModal({
         <TouchableOpacity
           activeOpacity={1}
           style={styles.modalContainer}
-          onPress={(e) => e.stopPropagation()}
+          onPress={(e) => { e.stopPropagation(); }}
         >
           <View style={styles.header}>
             <Text style={styles.title}>Select Day</Text>
@@ -115,7 +115,7 @@ export default function DayFilterModal({
                 styles.option,
                 selectedDay.value === 'today' && styles.selectedOption,
               ]}
-              onPress={() => handleSelectDay(getToday())}
+              onPress={() => { handleSelectDay(getToday()); }}
             >
               <View style={styles.optionContent}>
                 <Text style={styles.optionLabel}>Today</Text>
@@ -132,7 +132,7 @@ export default function DayFilterModal({
                 styles.option,
                 selectedDay.value === 'tomorrow' && styles.selectedOption,
               ]}
-              onPress={() => handleSelectDay(getTomorrow())}
+              onPress={() => { handleSelectDay(getTomorrow()); }}
             >
               <View style={styles.optionContent}>
                 <Text style={styles.optionLabel}>Tomorrow</Text>
@@ -147,7 +147,7 @@ export default function DayFilterModal({
             <View style={styles.weekContainer}>
               <TouchableOpacity
                 style={styles.weekHeader}
-                onPress={() => setExpandedWeek(!expandedWeek)}
+                onPress={() => { setExpandedWeek(!expandedWeek); }}
               >
                 <Text style={styles.optionLabel}>This Week</Text>
                 <Ionicons
@@ -166,7 +166,7 @@ export default function DayFilterModal({
                         styles.weekDayOption,
                         selectedDay.value === day.value && styles.selectedOption,
                       ]}
-                      onPress={() => handleSelectDay(day)}
+                      onPress={() => { handleSelectDay(day); }}
                     >
                       <View style={styles.optionContent}>
                         <Text style={styles.weekDayLabel}>{day.label}</Text>
