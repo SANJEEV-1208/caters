@@ -4,34 +4,25 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Switch,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { createMenuItem } from "@/src/api/catererMenuApi";
-import {
-  getAllCuisines,
-  getCatererCuisines,
-  createCatererCuisine,
-  deleteCatererCuisine,
-} from "@/src/api/foodApi";
+import { getCatererCuisines } from "@/src/api/foodApi";
 import { MenuItem } from "@/src/types/menu";
 import ItemHistoryModal from "@/src/components/caterer/ItemHistoryModal";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
+import { MealTypeSelector } from "@/src/components/caterer/MealTypeSelector";
+import { DateSelector } from "@/src/components/caterer/DateSelector";
+import { CuisineSelector } from "@/src/components/caterer/CuisineSelector";
 import { validateMenuForm } from "@/src/utils/menuValidation";
 
-const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
-type MealType = typeof MEAL_TYPES[number];
 
 export default function MenuAddScreen() {
   const router = useRouter();
@@ -39,10 +30,6 @@ export default function MenuAddScreen() {
   const [loading, setLoading] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [catererCuisines, setCatererCuisines] = useState<Array<{ id: number; name: string; image?: string }>>([]);
-  const [showAddCuisineModal, setShowAddCuisineModal] = useState(false);
-  const [newCuisineName, setNewCuisineName] = useState("");
-  const [newCuisineImage, setNewCuisineImage] = useState("");
-  const [loadingCuisines, setLoadingCuisines] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,7 +51,6 @@ export default function MenuAddScreen() {
   const loadCatererCuisines = async () => {
     if (!user?.id) return;
     try {
-      setLoadingCuisines(true);
       const cuisines = await getCatererCuisines(user.id);
       setCatererCuisines(cuisines || []);
       // Set first cuisine as default if available, otherwise use default
@@ -75,77 +61,7 @@ export default function MenuAddScreen() {
       console.error("Failed to load caterer cuisines:", error);
       // Set empty array on error instead of failing
       setCatererCuisines([]);
-    } finally {
-      setLoadingCuisines(false);
     }
-  };
-
-  const handleAddCuisine = async () => {
-    if (!newCuisineName.trim()) {
-      Alert.alert("Error", "Please enter a cuisine name");
-      return;
-    }
-
-    if (!newCuisineImage.trim()) {
-      Alert.alert("Error", "Please upload a cuisine image");
-      return;
-    }
-
-    if (!user?.id) {
-      Alert.alert("Error", "User ID not found");
-      return;
-    }
-
-    try {
-      setLoadingCuisines(true);
-      const newCuisine = await createCatererCuisine(user.id, newCuisineName.trim(), newCuisineImage.trim());
-      setCatererCuisines([...catererCuisines, newCuisine]);
-      setNewCuisineName("");
-      setNewCuisineImage("");
-      setShowAddCuisineModal(false);
-      Alert.alert("Success", "Cuisine added successfully");
-    } catch (error) {
-      console.error("Failed to add cuisine:", error);
-      Alert.alert("Error", `Failed to add cuisine: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setLoadingCuisines(false);
-    }
-  };
-
-  const performDeleteCuisine = async (cuisineId: number, cuisineName: string) => {
-    try {
-      setLoadingCuisines(true);
-      await deleteCatererCuisine(cuisineId);
-      setCatererCuisines(prev => prev.filter(c => c.id !== cuisineId));
-      // If deleted cuisine was selected, select the first available
-      if (formData.cuisine === cuisineName && catererCuisines.length > 1) {
-        const remaining = catererCuisines.find(c => c.id !== cuisineId);
-        setFormData(prev => ({ ...prev, cuisine: remaining?.name || '' }));
-      }
-      Alert.alert("Success", "Cuisine deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete cuisine:", error);
-      Alert.alert("Error", "Failed to delete cuisine");
-    } finally {
-      setLoadingCuisines(false);
-    }
-  };
-
-  const handleDeleteCuisine = (cuisineId: number, cuisineName: string) => {
-    Alert.alert(
-      "Delete Cuisine",
-      `Are you sure you want to delete "${cuisineName}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            performDeleteCuisine(cuisineId, cuisineName).catch(console.error);
-          },
-        },
-      ]
-    );
   };
 
   const handleSelectHistoryItem = (item: MenuItem) => {
@@ -163,32 +79,6 @@ export default function MenuAddScreen() {
     // Reset selected dates so the user can choose new dates
     setSelectedDates([]);
   };
-
-  // Generate next 7 days
-  const getDates = () => {
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      // Generate label for date
-      let label;
-      if (i === 0) {
-        label = "Today";
-      } else if (i === 1) {
-        label = "Tomorrow";
-      } else {
-        label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      }
-
-      dates.push({
-        label,
-        value: date.toISOString().split('T')[0],
-      });
-    }
-    return dates;
-  };
-
-  const dates = getDates();
 
   const toggleDate = (date: string) => {
     setSelectedDates(prev =>
@@ -270,65 +160,27 @@ export default function MenuAddScreen() {
           disabled={loading}
         />
 
-        {/* Cuisine */}
-        <View style={styles.field}>
-          <View style={styles.cuisineHeader}>
-            <Text style={styles.label}>Cuisine *</Text>
-            <TouchableOpacity
-              style={styles.addCuisineButton}
-              onPress={() => { setShowAddCuisineModal(true); }}
-            >
-              <Ionicons name="add-circle" size={20} color="#10B981" />
-              <Text style={styles.addCuisineButtonText}>Add</Text>
-            </TouchableOpacity>
-          </View>
-          {loadingCuisines ? (
-            <ActivityIndicator color="#10B981" size="small" />
-          ) : (
-            <>
-              {catererCuisines.length > 0 ? (
-                <View style={styles.chipGroup}>
-                  {catererCuisines.map(cuisine => (
-                    <TouchableOpacity
-                      key={cuisine.id}
-                      style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
-                      onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
-                      onLongPress={() => { handleDeleteCuisine(cuisine.id, cuisine.name); }}
-                    >
-                      <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
-                        {cuisine.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ) : (
-                <View style={styles.emptyCuisineContainer}>
-                  <Ionicons name="alert-circle-outline" size={24} color="#9CA3AF" />
-                  <Text style={styles.emptyCuisineText}>No cuisines added yet</Text>
-                  <Text style={styles.emptyCuisineSubtext}>Tap the Add button to create one</Text>
-                </View>
-              )}
-            </>
-          )}
-        </View>
+        {/* Using shared Cuisine Selector component */}
+        <CuisineSelector
+          cuisines={catererCuisines}
+          selectedCuisine={formData.cuisine}
+          onSelectCuisine={(cuisine) => { setFormData({ ...formData, cuisine }); }}
+          onCuisinesUpdated={(cuisines) => {
+            setCatererCuisines(cuisines);
+            if (cuisines.length > 0 && !formData.cuisine) {
+              setFormData({ ...formData, cuisine: cuisines[0].name });
+            }
+          }}
+          catererId={user?.id || 0}
+          disabled={loading}
+        />
 
-        {/* Meal Type */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Meal Type *</Text>
-          <View style={styles.chipGroup}>
-            {MEAL_TYPES.map(type => (
-              <TouchableOpacity
-                key={type}
-                style={[styles.chip, formData.type === type && styles.chipActive]}
-                onPress={() => { setFormData({ ...formData, type: type as unknown }); }}
-              >
-                <Text style={[styles.chipText, formData.type === type && styles.chipTextActive]}>
-                  {type.replace('_', ' ')}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        {/* Using shared Meal Type Selector component */}
+        <MealTypeSelector
+          selectedType={formData.type}
+          onSelectType={(type) => { setFormData({ ...formData, type: type as unknown }); }}
+          disabled={loading}
+        />
 
         {/* Image Upload */}
         <View style={styles.field}>
@@ -340,36 +192,12 @@ export default function MenuAddScreen() {
           />
         </View>
 
-        {/* Available Dates */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Available Dates * (Select at least one)</Text>
-          <View style={styles.datesGrid}>
-            {dates.map(date => (
-              <TouchableOpacity
-                key={date.value}
-                style={[
-                  styles.dateChip,
-                  selectedDates.includes(date.value) && styles.dateChipActive,
-                ]}
-                onPress={() => { toggleDate(date.value); }}
-              >
-                <Ionicons
-                  name={selectedDates.includes(date.value) ? "checkmark-circle" : "ellipse-outline"}
-                  size={20}
-                  color={selectedDates.includes(date.value) ? "#10B981" : "#9CA3AF"}
-                />
-                <Text
-                  style={[
-                    styles.dateChipText,
-                    selectedDates.includes(date.value) && styles.dateChipTextActive,
-                  ]}
-                >
-                  {date.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        {/* Using shared Date Selector component */}
+        <DateSelector
+          selectedDates={selectedDates}
+          onToggleDate={toggleDate}
+          disabled={loading}
+        />
 
         {/* In Stock */}
         <View style={styles.field}>
@@ -408,143 +236,6 @@ export default function MenuAddScreen() {
         onSelectItem={handleSelectHistoryItem}
         catererId={user?.id || 0}
       />
-
-      {/* Add Cuisine Modal */}
-      <Modal
-        visible={showAddCuisineModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => {
-          setShowAddCuisineModal(false);
-          setNewCuisineName("");
-          setNewCuisineImage("");
-        }}
-      >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => {
-            setShowAddCuisineModal(false);
-            setNewCuisineName("");
-            setNewCuisineImage("");
-          }}
-        >
-          <KeyboardAvoidingView
-            behavior="position"
-            style={styles.keyboardAvoidingView}
-            keyboardVerticalOffset={-100}
-          >
-            <Pressable
-              style={styles.modalContent}
-              onPress={(e) => { e.stopPropagation(); }}
-            >
-              {/* Modern Header with Icon */}
-              <View style={styles.modalHeader}>
-                <View style={styles.modalHeaderLeft}>
-                  <View style={styles.modalIconContainer}>
-                    <Ionicons name="restaurant" size={24} color="#10B981" />
-                  </View>
-                  <View>
-                    <Text style={styles.modalTitle}>Add New Cuisine</Text>
-                    <Text style={styles.modalSubtitle}>Create a new cuisine category</Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.modalCloseButton}
-                  onPress={() => {
-                    setShowAddCuisineModal(false);
-                    setNewCuisineName("");
-                    setNewCuisineImage("");
-                  }}
-                >
-                  <Ionicons name="close-circle" size={28} color="#9CA3AF" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Divider */}
-              <View style={styles.modalDivider} />
-
-              {/* Cuisine Name Input with Icon */}
-              <View style={styles.modalInputContainer}>
-                <View style={styles.inputLabelRow}>
-                  <Ionicons name="text-outline" size={18} color="#10B981" />
-                  <Text style={styles.inputLabel}>Cuisine Name</Text>
-                  <View style={styles.requiredBadge}>
-                    <Text style={styles.requiredText}>Required</Text>
-                  </View>
-                </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="fast-food-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="e.g., Shawarma, Biryani, Pasta"
-                    value={newCuisineName}
-                    onChangeText={setNewCuisineName}
-                    placeholderTextColor="#9CA3AF"
-                    autoFocus
-                    returnKeyType="done"
-                  />
-                </View>
-              </View>
-
-              {/* Cuisine Image Upload with Enhanced Styling */}
-              <View style={styles.cuisineImageUpload}>
-                <View style={styles.inputLabelRow}>
-                  <Ionicons name="image-outline" size={18} color="#10B981" />
-                  <Text style={styles.inputLabel}>Cuisine Image</Text>
-                  <View style={styles.requiredBadge}>
-                    <Text style={styles.requiredText}>Required</Text>
-                  </View>
-                </View>
-                <View style={styles.imagePickerCard}>
-                  <CloudinaryImagePicker
-                    label=""
-                    onImageUploaded={(url) => { setNewCuisineImage(url); }}
-                    currentImage={newCuisineImage}
-                    disabled={loadingCuisines}
-                  />
-                </View>
-              </View>
-
-              {/* Info Card */}
-              <View style={styles.modalInfoCard}>
-                <Ionicons name="information-circle" size={20} color="#3B82F6" />
-                <Text style={styles.modalInfoText}>
-                  This cuisine will be available for all your menu items
-                </Text>
-              </View>
-
-              {/* Action Buttons */}
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalCancelButton}
-                  onPress={() => {
-                    setShowAddCuisineModal(false);
-                    setNewCuisineName("");
-                    setNewCuisineImage("");
-                  }}
-                >
-                  <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
-                  <Text style={styles.modalCancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalAddButton, loadingCuisines && styles.modalAddButtonDisabled]}
-                  onPress={() => { void handleAddCuisine(); }}
-                  disabled={loadingCuisines}
-                >
-                  {loadingCuisines ? (
-                    <ActivityIndicator color="#FFFFFF" />
-                  ) : (
-                    <>
-                      <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                      <Text style={styles.modalAddButtonText}>Add Cuisine</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </Pressable>
-          </KeyboardAvoidingView>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
@@ -607,60 +298,6 @@ const styles = StyleSheet.create({
     color: "#1A1A1A",
     marginBottom: 8,
   },
-  chipGroup: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  chipActive: {
-    backgroundColor: "#10B981",
-    borderColor: "#10B981",
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#6B7280",
-    textTransform: "capitalize",
-  },
-  chipTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  datesGrid: {
-    gap: 8,
-  },
-  dateChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 12,
-  },
-  dateChipActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  dateChipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-    flex: 1,
-  },
-  dateChipTextActive: {
-    color: "#10B981",
-    fontWeight: "600",
-  },
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -683,230 +320,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#FFFFFF",
-  },
-  cuisineHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  addCuisineButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#F0FDF4",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#10B981",
-  },
-  addCuisineButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#10B981",
-  },
-  emptyCuisineContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#F9FAFB",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    gap: 8,
-  },
-  emptyCuisineText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  emptyCuisineSubtext: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    justifyContent: "flex-end",
-  },
-  keyboardAvoidingView: {
-    width: "100%",
-  },
-  modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    maxHeight: "85%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  modalHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  modalIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "#F0FDF4",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#D1FAE5",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    letterSpacing: -0.3,
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    fontWeight: "400",
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  modalCloseButton: {
-    padding: 4,
-  },
-  modalDivider: {
-    height: 1,
-    backgroundColor: "#F3F4F6",
-    marginBottom: 24,
-  },
-  modalInputContainer: {
-    marginBottom: 24,
-  },
-  inputLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 10,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-    flex: 1,
-  },
-  requiredBadge: {
-    backgroundColor: "#FEF2F2",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#FECACA",
-  },
-  requiredText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#EF4444",
-    textTransform: "uppercase",
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F9FAFB",
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  modalInput: {
-    flex: 1,
-    fontSize: 15,
-    color: "#1A1A1A",
-    paddingVertical: 10,
-    fontWeight: "500",
-  },
-  imagePickerCard: {
-    backgroundColor: "#FAFAFA",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  modalInfoCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-  },
-  modalInfoText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#1E40AF",
-    flex: 1,
-    lineHeight: 18,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  modalCancelButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#FEE2E2",
-    backgroundColor: "#FEF2F2",
-  },
-  modalCancelButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#EF4444",
-  },
-  modalAddButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#10B981",
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  modalAddButtonDisabled: {
-    opacity: 0.6,
-  },
-  modalAddButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  cuisineImageUpload: {
-    marginBottom: 24,
   },
 });

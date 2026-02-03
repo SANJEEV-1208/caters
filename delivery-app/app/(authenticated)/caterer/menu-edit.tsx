@@ -15,10 +15,10 @@ import { getMenuItemById, updateMenuItem } from "@/src/api/catererMenuApi";
 import { MenuItem } from "@/src/types/menu";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
+import { MealTypeSelector } from "@/src/components/caterer/MealTypeSelector";
+import { DateSelector } from "@/src/components/caterer/DateSelector";
 import { validateMenuForm } from "@/src/utils/menuValidation";
-
-const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
-type MealType = typeof MEAL_TYPES[number];
+import { getCatererCuisines } from "@/src/api/foodApi";
 
 export default function MenuEditScreen() {
   const router = useRouter();
@@ -26,6 +26,7 @@ export default function MenuEditScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [item, setItem] = useState<MenuItem | null>(null);
+  const [catererCuisines, setCatererCuisines] = useState<Array<{ id: number; name: string; image?: string }>>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,7 +34,7 @@ export default function MenuEditScreen() {
     price: "",
     category: "veg" as "veg" | "non-veg",
     cuisine: "Biryani",
-    type: "main_course" as MealType,
+    type: "main_course" as "breakfast" | "lunch" | "dinner" | "snack" | "main_course",
     image: "",
     inStock: true,
   });
@@ -44,35 +45,21 @@ export default function MenuEditScreen() {
     void loadMenuItem();
   }, []);
 
-  const getDates = () => {
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      // Generate label for date
-      let label;
-      if (i === 0) {
-        label = "Today";
-      } else if (i === 1) {
-        label = "Tomorrow";
-      } else {
-        label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      }
-
-      dates.push({
-        label,
-        value: date.toISOString().split('T')[0],
-      });
-    }
-    return dates;
-  };
-
-  const dates = getDates();
-
   const loadMenuItem = async () => {
     try {
       const data = await getMenuItemById(Number(itemId));
       setItem(data);
+
+      // Load caterer cuisines
+      if (data.catererId) {
+        try {
+          const cuisines = await getCatererCuisines(data.catererId);
+          setCatererCuisines(cuisines || []);
+        } catch (error) {
+          console.error("Failed to load cuisines:", error);
+        }
+      }
+
       setFormData({
         name: data.name,
         description: data.description,
@@ -170,39 +157,31 @@ export default function MenuEditScreen() {
           disabled={saving}
         />
 
+        {/* Display cuisines as read-only chips (no add/delete in edit mode) */}
         <View style={styles.field}>
           <Text style={styles.label}>Cuisine *</Text>
           <View style={styles.chipGroup}>
-            {["Biryani", "Dosa", "Pizza", "Noodles", "Fried Rice", "Curry", "Paratha", "Meals"].map(cuisine => (
+            {catererCuisines.map(cuisine => (
               <TouchableOpacity
-                key={cuisine}
-                style={[styles.chip, formData.cuisine === cuisine && styles.chipActive]}
-                onPress={() => { setFormData({ ...formData, cuisine }); }}
+                key={cuisine.id}
+                style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
+                onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
+                disabled={saving}
               >
-                <Text style={[styles.chipText, formData.cuisine === cuisine && styles.chipTextActive]}>
-                  {cuisine}
+                <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
+                  {cuisine.name}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Meal Type *</Text>
-          <View style={styles.chipGroup}>
-            {MEAL_TYPES.map(type => (
-              <TouchableOpacity
-                key={type}
-                style={[styles.chip, formData.type === type && styles.chipActive]}
-                onPress={() => { setFormData({ ...formData, type}); }}
-              >
-                <Text style={[styles.chipText, formData.type === type && styles.chipTextActive]}>
-                  {type.replace('_', ' ')}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        {/* Using shared Meal Type Selector component */}
+        <MealTypeSelector
+          selectedType={formData.type}
+          onSelectType={(type) => { setFormData({ ...formData, type }); }}
+          disabled={saving}
+        />
 
         <View style={styles.field}>
           <CloudinaryImagePicker
@@ -213,35 +192,12 @@ export default function MenuEditScreen() {
           />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Available Dates *</Text>
-          <View style={styles.datesGrid}>
-            {dates.map(date => (
-              <TouchableOpacity
-                key={date.value}
-                style={[
-                  styles.dateChip,
-                  selectedDates.includes(date.value) && styles.dateChipActive,
-                ]}
-                onPress={() => { toggleDate(date.value); }}
-              >
-                <Ionicons
-                  name={selectedDates.includes(date.value) ? "checkmark-circle" : "ellipse-outline"}
-                  size={20}
-                  color={selectedDates.includes(date.value) ? "#10B981" : "#9CA3AF"}
-                />
-                <Text
-                  style={[
-                    styles.dateChipText,
-                    selectedDates.includes(date.value) && styles.dateChipTextActive,
-                  ]}
-                >
-                  {date.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        {/* Using shared Date Selector component */}
+        <DateSelector
+          selectedDates={selectedDates}
+          onToggleDate={toggleDate}
+          disabled={saving}
+        />
 
         <View style={styles.field}>
           <View style={styles.switchRow}>
@@ -344,33 +300,6 @@ const styles = StyleSheet.create({
   },
   chipTextActive: {
     color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  datesGrid: {
-    gap: 8,
-  },
-  dateChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 12,
-  },
-  dateChipActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  dateChipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-    flex: 1,
-  },
-  dateChipTextActive: {
-    color: "#10B981",
     fontWeight: "600",
   },
   switchRow: {
