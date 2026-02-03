@@ -22,7 +22,6 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const params = useLocalSearchParams();
   const { signup } = useAuth();
 
   const handleSignup = async () => {

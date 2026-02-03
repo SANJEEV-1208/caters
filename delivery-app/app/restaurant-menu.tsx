@@ -195,7 +195,11 @@ export default function RestaurantMenuBrowser() {
                   selectedCategory === cat && styles.filterPillTextActive,
                 ]}
               >
-                {cat === "all" ? "All Items" : cat === "veg" ? "Vegetarian" : "Non-Veg"}
+                {(() => {
+                  if (cat === "all") return "All Items";
+                  if (cat === "veg") return "Vegetarian";
+                  return "Non-Veg";
+                })()}
               </Text>
               {selectedCategory === cat && (
                 <Ionicons name="checkmark-circle" size={16} color="#FFFFFF" />
@@ -287,9 +291,11 @@ export default function RestaurantMenuBrowser() {
             </View>
             <Text style={styles.emptyText}>No items available</Text>
             <Text style={styles.emptySubtext}>
-              {selectedCategory === "all"
-                ? "Menu is currently being updated"
-                : `No ${selectedCategory === "veg" ? "vegetarian" : "non-veg"} items available`}
+              {(() => {
+                if (selectedCategory === "all") return "Menu is currently being updated";
+                const categoryType = selectedCategory === "veg" ? "vegetarian" : "non-veg";
+                return `No ${categoryType} items available`;
+              })()}
             </Text>
           </View>
         }

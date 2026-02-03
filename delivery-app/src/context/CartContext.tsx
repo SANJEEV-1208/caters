@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MenuItem } from "@/src/types/menu";
 
@@ -132,19 +132,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     0
   );
 
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      removeMultipleItems,
+      clearCart,
+      reorderItems,
+      totalAmount,
+      totalItems,
+    }),
+    [cart, addToCart, removeFromCart, removeMultipleItems, clearCart, reorderItems, totalAmount, totalItems]
+  );
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        removeMultipleItems,
-        clearCart,
-        reorderItems,
-        totalAmount,
-        totalItems,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

@@ -154,7 +154,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {Boolean(label) && <Text style={styles.label}>{label}</Text>}
 
       <TouchableOpacity
         style={[

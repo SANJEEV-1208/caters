@@ -181,7 +181,11 @@ export default function RestaurantMenuBrowser() {
                   selectedCategory === cat && styles.filterButtonTextActive,
                 ]}
               >
-                {cat === "all" ? "All Items" : cat === "veg" ? "Vegetarian" : "Non-Veg"}
+                {(() => {
+                  if (cat === "all") return "All Items";
+                  if (cat === "veg") return "Vegetarian";
+                  return "Non-Veg";
+                })()}
               </Text>
             </TouchableOpacity>
           ))}
@@ -267,9 +271,11 @@ export default function RestaurantMenuBrowser() {
             <Ionicons name="restaurant-outline" size={64} color="#D1D5DB" />
             <Text style={styles.emptyText}>No items available</Text>
             <Text style={styles.emptySubtext}>
-              {selectedCategory === "all"
-                ? "Menu is currently empty"
-                : `No ${selectedCategory === "veg" ? "vegetarian" : "non-veg"} items available`}
+              {(() => {
+                if (selectedCategory === "all") return "Menu is currently empty";
+                const categoryType = selectedCategory === "veg" ? "vegetarian" : "non-veg";
+                return `No ${categoryType} items available`;
+              })()}
             </Text>
           </View>
         }

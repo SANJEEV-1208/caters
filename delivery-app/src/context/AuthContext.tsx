@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useMemo, ReactNode } from "react";
 import { User, SignupData } from "@/src/types/auth";
 import {
   loginUser as apiLoginUser,
@@ -67,21 +67,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSelectedDeliveryDate(new Date().toISOString().split('T')[0]);
   };
 
+  const value = useMemo(
+    () => ({
+      user,
+      setUser,
+      isAuthenticated,
+      login,
+      signup,
+      logout,
+      selectedCatererId,
+      setSelectedCatererId,
+      selectedDeliveryDate,
+      setSelectedDeliveryDate,
+    }),
+    [user, isAuthenticated, selectedCatererId, selectedDeliveryDate, login, signup, logout]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        setUser,
-        isAuthenticated,
-        login,
-        signup,
-        logout,
-        selectedCatererId,
-        setSelectedCatererId,
-        selectedDeliveryDate,
-        setSelectedDeliveryDate,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

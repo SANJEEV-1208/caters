@@ -26,7 +26,6 @@ export default function ItemHistoryModal({
   onSelectItem,
   catererId,
 }: ItemHistoryModalProps) {
-  const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [uniqueItems, setUniqueItems] = useState<MenuItem[]>([]);
 
@@ -53,7 +52,6 @@ export default function ItemHistoryModal({
       }, []);
 
       setUniqueItems(unique);
-      setItems(menuItems);
     } catch (error) {
       console.error("Failed to fetch menu items:", error);
     } finally {
@@ -84,21 +82,30 @@ export default function ItemHistoryModal({
           </View>
 
           {/* Content */}
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#10B981" />
-              <Text style={styles.loadingText}>Loading your items...</Text>
-            </View>
-          ) : uniqueItems.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="restaurant-outline" size={64} color="#D1D5DB" />
-              <Text style={styles.emptyText}>No items found</Text>
-              <Text style={styles.emptySubtext}>
-                Create your first menu item to get started
-              </Text>
-            </View>
-          ) : (
-            <ScrollView style={styles.itemsList} contentContainerStyle={styles.itemsListContent}>
+          {(() => {
+            if (loading) {
+              return (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color="#10B981" />
+                  <Text style={styles.loadingText}>Loading your items...</Text>
+                </View>
+              );
+            }
+
+            if (uniqueItems.length === 0) {
+              return (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="restaurant-outline" size={64} color="#D1D5DB" />
+                  <Text style={styles.emptyText}>No items found</Text>
+                  <Text style={styles.emptySubtext}>
+                    Create your first menu item to get started
+                  </Text>
+                </View>
+              );
+            }
+
+            return (
+              <ScrollView style={styles.itemsList} contentContainerStyle={styles.itemsListContent}>
               {uniqueItems.map((item) => (
                 <TouchableOpacity
                   key={item.id}
@@ -149,8 +156,9 @@ export default function ItemHistoryModal({
                   <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               ))}
-            </ScrollView>
-          )}
+              </ScrollView>
+            );
+          })()}
         </View>
       </View>
     </Modal>

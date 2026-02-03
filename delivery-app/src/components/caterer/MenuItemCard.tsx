@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { MenuItem } from "@/src/types/menu";
-import { useRouter } from "expo-router";
 
 type MenuItemCardProps = {
   item: MenuItem;
@@ -25,7 +24,6 @@ export default function MenuItemCard({
   onEdit,
   onDelete,
 }: MenuItemCardProps) {
-  const router = useRouter();
 
   return (
     <View style={styles.card}>
@@ -89,12 +87,12 @@ export default function MenuItemCard({
             </View>
             <View style={styles.typeBadge}>
               <Ionicons
-                name={
-                  item.type === "breakfast" ? "sunny" :
-                  item.type === "lunch" ? "partly-sunny" :
-                  item.type === "dinner" ? "moon" :
-                  "fast-food"
-                }
+                name={(() => {
+                  if (item.type === "breakfast") return "sunny";
+                  if (item.type === "lunch") return "partly-sunny";
+                  if (item.type === "dinner") return "moon";
+                  return "fast-food";
+                })()}
                 size={12}
                 color="#6B7280"
               />

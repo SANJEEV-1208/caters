@@ -3,7 +3,7 @@
 // Run this in the delivery-app directory with: node test-connection.js
 // This tests if your computer can reach the backend
 
-const http = require('http');
+const http = require('node:http');
 
 const BASE_URL_IP = '192.168.0.101';
 const PORT = '5000';

@@ -35,8 +35,7 @@ export default function Search() {
 
       // Filter to only items available today
       const availableToday = todayMenuItems.filter(item =>
-        item.availableDates &&
-        item.availableDates.includes(today) &&
+        item.availableDates?.includes(today) &&
         item.inStock
       );
 
@@ -93,7 +92,7 @@ export default function Search() {
 
       // Sort by search count and get top 5
       const topItems = itemsWithCounts
-        .sort((a, b) => b.searchCount - a.searchCount)
+        .toSorted((a, b) => b.searchCount - a.searchCount)
         .slice(0, 5);
 
       setTrending(topItems);

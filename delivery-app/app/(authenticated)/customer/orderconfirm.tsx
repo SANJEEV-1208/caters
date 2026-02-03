@@ -63,7 +63,7 @@ export default function OrderConfirm() {
           <Text style={styles.detailValue}>{paymentMethodDisplay}</Text>
         </View>
 
-        {transactionId && transactionId !== 'N/A' && (
+        {Boolean(transactionId) && transactionId !== 'N/A' && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Transaction ID</Text>
             <Text style={[styles.detailValue, styles.transactionId]} numberOfLines={1}>

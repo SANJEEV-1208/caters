@@ -63,7 +63,7 @@ export default function FoodCard({ item }: Props) {
         </View>
 
         {/* Cuisine Badge */}
-        {item.cuisine && (
+        {Boolean(item.cuisine) && (
           <View style={styles.cuisineBadge}>
             <Text style={styles.cuisineText}>{item.cuisine}</Text>
           </View>
@@ -71,7 +71,14 @@ export default function FoodCard({ item }: Props) {
 
         {/* Description/Type indicator */}
         <Text style={styles.subtitle} numberOfLines={1}>
-          {item.type ? `${item.type.charAt(0).toUpperCase() + item.type.slice(1)} • ${item.category === 'veg' ? 'Vegetarian' : 'Non-Vegetarian'}` : item.category === 'veg' ? 'Vegetarian' : 'Non-Vegetarian'}
+          {(() => {
+            const categoryLabel = item.category === 'veg' ? 'Vegetarian' : 'Non-Vegetarian';
+            if (item.type) {
+              const capitalizedType = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+              return `${capitalizedType} • ${categoryLabel}`;
+            }
+            return categoryLabel;
+          })()}
         </Text>
 
         {/* Footer with Price */}

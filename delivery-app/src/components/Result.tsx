@@ -53,7 +53,7 @@
             {item.name}
           </Text>
 
-          {item.description && (
+          {Boolean(item.description) && (
             <Text style={styles.description} numberOfLines={1}>
               {item.description}
             </Text>

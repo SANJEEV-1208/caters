@@ -25,7 +25,6 @@ export default function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const {reorderItems} = useCart();
 
   useEffect(() => {
     void loadOrders();

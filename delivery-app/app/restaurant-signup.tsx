@@ -22,7 +22,6 @@ export default function RestaurantSignupScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
-  const params = useLocalSearchParams();
 
   const handleSignup = async () => {
     // Validate all fields
@@ -67,10 +66,10 @@ export default function RestaurantSignupScreen() {
       
       // Will be redirected to (authenticated) by root layout
     } catch (error: unknown) {
-      if (error.message && error.message.includes("already exists")) {
+      if (error?.message?.includes("already exists")) {
         Alert.alert("Already Registered", "This phone number is already registered. Please login to upgrade your account to restaurant.");
       } else {
-        Alert.alert("Error", error.message || "An error occurred during registration. Please try again.");
+        Alert.alert("Error", error?.message || "An error occurred during registration. Please try again.");
       }
     } finally {
       setLoading(false);
