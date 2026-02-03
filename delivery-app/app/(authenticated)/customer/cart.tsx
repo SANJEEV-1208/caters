@@ -284,7 +284,7 @@ export default function Cart() {
     const finalDeliveryDate = deliveryDate || selectedDeliveryDate || getTodayIST();
 
     // Try multiple sources for caterer ID
-    let catererId = null;
+    let catererId: number | null = null;
 
     // 1. Try from cart items (most reliable for current session)
     if (cart.length > 0 && cart[0].catererId) {
@@ -302,7 +302,7 @@ export default function Cart() {
       console.log("Got catererId from loaded caterer:", catererId);
     }
 
-    // Check for null/undefined (0 is also invalid for catererId)
+    // Runtime check: catererId can be null if none of the above sources provided a value
     if (catererId == null) {
       Alert.alert(
         "Missing Caterer Information",
