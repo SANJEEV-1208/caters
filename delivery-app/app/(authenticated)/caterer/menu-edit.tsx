@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Switch,
   Alert,
@@ -15,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { getMenuItemById, updateMenuItem } from "@/src/api/catererMenuApi";
 import { MenuItem } from "@/src/types/menu";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
+import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
+import { validateMenuForm } from "@/src/utils/menuValidation";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
 type MealType = typeof MEAL_TYPES[number];
@@ -100,11 +101,16 @@ export default function MenuEditScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name.trim() || !formData.price || selectedDates.length === 0) {
-      Alert.alert("Error", "Please fill all required fields");
-      return;
-    }
+    // Validation using shared utility
+    const validation = validateMenuForm({
+      name: formData.name,
+      price: formData.price,
+      imageUrl: formData.image,
+      requireDates: true,
+      selectedDates,
+    });
 
+    if (!validation.valid) return;
     if (!item) return;
 
     setSaving(true);
@@ -112,7 +118,7 @@ export default function MenuEditScreen() {
       await updateMenuItem(item.id, {
         name: formData.name.trim(),
         description: formData.description.trim(),
-        price: Number(formData.price),
+        price: validation.priceNum!,
         category: formData.category,
         cuisine: formData.cuisine,
         type: formData.type,
@@ -151,60 +157,18 @@ export default function MenuEditScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Item Name *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.name}
-            onChangeText={(text) => { setFormData({ ...formData, name: text }); }}
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Description</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={formData.description}
-            onChangeText={(text) => { setFormData({ ...formData, description: text }); }}
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Price (₹) *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.price}
-            onChangeText={(text) => { setFormData({ ...formData, price: text }); }}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Category *</Text>
-          <View style={styles.radioGroup}>
-            <TouchableOpacity
-              style={[styles.radioButton, formData.category === "veg" && styles.radioButtonActive]}
-              onPress={() => { setFormData({ ...formData, category: "veg" }); }}
-            >
-              <View style={[styles.vegDot, { backgroundColor: "#10B981" }]} />
-              <Text style={[styles.radioText, formData.category === "veg" && styles.radioTextActive]}>
-                Vegetarian
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.radioButton, formData.category === "non-veg" && styles.radioButtonActive]}
-              onPress={() => { setFormData({ ...formData, category: "non-veg" }); }}
-            >
-              <View style={[styles.vegDot, { backgroundColor: "#EF4444" }]} />
-              <Text style={[styles.radioText, formData.category === "non-veg" && styles.radioTextActive]}>
-                Non-Vegetarian
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Using shared form fields component */}
+        <MenuFormFields
+          name={formData.name}
+          setName={(text) => { setFormData({ ...formData, name: text }); }}
+          price={formData.price}
+          setPrice={(text) => { setFormData({ ...formData, price: text }); }}
+          category={formData.category}
+          setCategory={(cat) => { setFormData({ ...formData, category: cat }); }}
+          description={formData.description}
+          setDescription={(text) => { setFormData({ ...formData, description: text }); }}
+          disabled={saving}
+        />
 
         <View style={styles.field}>
           <Text style={styles.label}>Cuisine *</Text>
@@ -354,57 +318,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1A1A1A",
     marginBottom: 8,
-  },
-  hint: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    color: "#1A1A1A",
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  radioGroup: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  radioButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-  },
-  radioButtonActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  vegDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  radioText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-  },
-  radioTextActive: {
-    color: "#10B981",
-    fontWeight: "600",
   },
   chipGroup: {
     flexDirection: "row",
