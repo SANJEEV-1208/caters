@@ -74,7 +74,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   };
 
   const uploadToCloudinary = async (asset: unknown) => {
-    if (!asset.base64) {
+    if (!asset?.base64) {
       Alert.alert('Error', 'Image data not available. Please try again.');
       return;
     }
@@ -95,7 +95,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
     try {
       // Get file extension from URI
-      const uriParts = asset.uri.split('.');
+      const uriParts = asset?.uri?.split('.') || [];
       const fileType = uriParts[uriParts.length - 1];
       const mimeType = `image/${fileType === 'jpg' ? 'jpeg' : fileType}`;
 
@@ -143,7 +143,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
       Alert.alert(
         'Upload Failed',
-        error.message || 'Failed to upload image. Please try again.',
+        error?.message || 'Failed to upload image. Please try again.',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Retry', onPress: () => { void uploadToCloudinary(asset); } },

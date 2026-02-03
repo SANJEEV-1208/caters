@@ -116,7 +116,7 @@ export default function RestaurantCheckout() {
         console.log('✅ Found existing customer:', customer);
       }
 
-      if (!customer || !customer.id || customer.id === 0) {
+      if (!customer?.id || customer.id === 0) {
         throw new Error('Failed to create or find customer account');
       }
 
@@ -332,8 +332,8 @@ export default function RestaurantCheckout() {
             </View>
 
             <View style={styles.itemsList}>
-              {cartData.map((item: unknown, index: number) => (
-                <View key={index} style={styles.orderItem}>
+              {cartData.map((item: unknown) => (
+                <View key={item.id} style={styles.orderItem}>
                   <View style={styles.itemLeft}>
                     <View style={[
                       styles.vegIndicator,
