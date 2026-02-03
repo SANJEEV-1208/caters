@@ -427,7 +427,7 @@ export default function MenuAddScreen() {
         {/* Submit Button */}
         <TouchableOpacity
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
+          onPress={() => { void handleSubmit(); }}
           disabled={loading}
         >
           {loading ? (
@@ -565,7 +565,7 @@ export default function MenuAddScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalAddButton, loadingCuisines && styles.modalAddButtonDisabled]}
-                  onPress={handleAddCuisine}
+                  onPress={() => { void handleAddCuisine(); }}
                   disabled={loadingCuisines}
                 >
                   {loadingCuisines ? (

@@ -161,7 +161,7 @@ export default function TablesScreen() {
             <Text style={styles.toggleLabel}>Active</Text>
             <Switch
               value={item.isActive}
-              onValueChange={() => { handleToggleActive(item); }}
+              onValueChange={() => { void handleToggleActive(item); }}
               trackColor={{ false: '#E5E7EB', true: '#10B981' }}
               thumbColor="#FFFFFF"
             />
@@ -169,7 +169,7 @@ export default function TablesScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.deleteButton]}
-            onPress={() => { handleDelete(item); }}
+            onPress={() => { void handleDelete(item); }}
           >
             <Ionicons name="trash-outline" size={18} color="#EF4444" />
           </TouchableOpacity>

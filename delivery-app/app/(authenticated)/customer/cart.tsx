@@ -551,14 +551,6 @@ export default function Cart() {
       )}
 
       {/* Payment Modal */}
-      {showPaymentModal && (
-        <>
-          {console.log('📦 Rendering PaymentBottomSheet with props:')}
-          {console.log('   caterer:', caterer)}
-          {console.log('   catererQrCode:', caterer?.paymentQrCode)}
-          {console.log('   catererName:', caterer?.serviceName || caterer?.name)}
-        </>
-      )}
       <PaymentBottomSheet
         visible={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
