@@ -19,11 +19,11 @@ const formatOrder = (order) => {
     customerId: order.customer_id,
     catererId: order.caterer_id,
     items: order.items,
-    totalAmount: parseFloat(order.total_amount),
+    totalAmount: Number.parseFloat(order.total_amount),
     paymentMethod: order.payment_method,
     transactionId: order.transaction_id,
     deliveryAddress: order.delivery_address,
-    tableNumber: order.table_number ? parseInt(order.table_number, 10) : null, // Parse as integer
+    tableNumber: order.table_number ? Number.parseInt(order.table_number, 10) : null, // Parse as integer
     itemCount: order.item_count,
     orderDate: order.order_date,
     deliveryDate: deliveryDateStr,

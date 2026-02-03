@@ -24,38 +24,34 @@ const testOrder = {
   tableNumber: 5
 };
 
-async function testOrderCreation() {
-  console.log('🧪 Testing Order Creation...\n');
-  console.log('Test Order Data:');
-  console.log(JSON.stringify(testOrder, null, 2));
-  console.log('\n');
+console.log('🧪 Testing Order Creation...\n');
+console.log('Test Order Data:');
+console.log(JSON.stringify(testOrder, null, 2));
+console.log('\n');
 
-  try {
-    const response = await fetch('http://localhost:5000/api/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testOrder)
-    });
+try {
+  const response = await fetch('http://localhost:5000/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(testOrder)
+  });
 
-    console.log('Response Status:', response.status);
-    console.log('Response Status Text:', response.statusText);
+  console.log('Response Status:', response.status);
+  console.log('Response Status Text:', response.statusText);
 
-    const responseText = await response.text();
-    console.log('Response Body:', responseText);
+  const responseText = await response.text();
+  console.log('Response Body:', responseText);
 
-    if (response.ok) {
-      console.log('\n✅ Order created successfully!');
-      const data = JSON.parse(responseText);
-      console.log('Created Order:', data);
-    } else {
-      console.log('\n❌ Failed to create order');
-    }
-  } catch (error) {
-    console.error('❌ Error:', error.message);
-    console.error('Full error:', error);
+  if (response.ok) {
+    console.log('\n✅ Order created successfully!');
+    const data = JSON.parse(responseText);
+    console.log('Created Order:', data);
+  } else {
+    console.log('\n❌ Failed to create order');
   }
+} catch (error) {
+  console.error('❌ Error:', error.message);
+  console.error('Full error:', error);
 }
-
-testOrderCreation();

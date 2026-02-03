@@ -117,8 +117,8 @@ export default function MenuAddScreen() {
       setCatererCuisines(prev => prev.filter(c => c.id !== cuisineId));
       // If deleted cuisine was selected, select the first available
       if (formData.cuisine === cuisineName && catererCuisines.length > 1) {
-        const remaining = catererCuisines.filter(c => c.id !== cuisineId);
-        setFormData(prev => ({ ...prev, cuisine: remaining[0].name }));
+        const remaining = catererCuisines.find(c => c.id !== cuisineId);
+        setFormData(prev => ({ ...prev, cuisine: remaining?.name || '' }));
       }
       Alert.alert("Success", "Cuisine deleted successfully");
     } catch (error) {
@@ -168,8 +168,18 @@ export default function MenuAddScreen() {
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
+      // Generate label for date
+      let label;
+      if (i === 0) {
+        label = "Today";
+      } else if (i === 1) {
+        label = "Tomorrow";
+      } else {
+        label = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+
       dates.push({
-        label: i === 0 ? "Today" : i === 1 ? "Tomorrow" : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+        label,
         value: date.toISOString().split('T')[0],
       });
     }
@@ -190,7 +200,7 @@ export default function MenuAddScreen() {
       Alert.alert("Error", "Please enter item name");
       return;
     }
-    if (!formData.price || isNaN(Number(formData.price))) {
+    if (!formData.price || Number.isNaN(Number(formData.price))) {
       Alert.alert("Error", "Please enter valid price");
       return;
     }
@@ -329,27 +339,31 @@ export default function MenuAddScreen() {
           </View>
           {loadingCuisines ? (
             <ActivityIndicator color="#10B981" size="small" />
-          ) : catererCuisines.length > 0 ? (
-            <View style={styles.chipGroup}>
-              {catererCuisines.map(cuisine => (
-                <TouchableOpacity
-                  key={cuisine.id}
-                  style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
-                  onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
-                  onLongPress={() => { handleDeleteCuisine(cuisine.id, cuisine.name); }}
-                >
-                  <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
-                    {cuisine.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
           ) : (
-            <View style={styles.emptyCuisineContainer}>
-              <Ionicons name="alert-circle-outline" size={24} color="#9CA3AF" />
-              <Text style={styles.emptyCuisineText}>No cuisines added yet</Text>
-              <Text style={styles.emptyCuisineSubtext}>Tap the Add button to create one</Text>
-            </View>
+            <>
+              {catererCuisines.length > 0 ? (
+                <View style={styles.chipGroup}>
+                  {catererCuisines.map(cuisine => (
+                    <TouchableOpacity
+                      key={cuisine.id}
+                      style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
+                      onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
+                      onLongPress={() => { handleDeleteCuisine(cuisine.id, cuisine.name); }}
+                    >
+                      <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
+                        {cuisine.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyCuisineContainer}>
+                  <Ionicons name="alert-circle-outline" size={24} color="#9CA3AF" />
+                  <Text style={styles.emptyCuisineText}>No cuisines added yet</Text>
+                  <Text style={styles.emptyCuisineSubtext}>Tap the Add button to create one</Text>
+                </View>
+              )}
+            </>
           )}
         </View>
 

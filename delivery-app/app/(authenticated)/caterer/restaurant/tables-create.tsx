@@ -52,10 +52,10 @@ export default function TablesCreateScreen() {
   };
 
   const handleCreate = () => {
-    const tableCount = parseInt(count);
+    const tableCount = Number.parseInt(count);
 
     // Validation
-    if (isNaN(tableCount) || tableCount < 1) {
+    if (Number.isNaN(tableCount) || tableCount < 1) {
       Alert.alert('Invalid Input', 'Please enter a valid number of tables (minimum 1)');
       return;
     }
@@ -94,12 +94,16 @@ export default function TablesCreateScreen() {
   };
 
   const getPreviewText = () => {
-    const tableCount = parseInt(count);
-    if (isNaN(tableCount) || tableCount < 1) return 'Enter a valid number';
+    const tableCount = Number.parseInt(count);
+    if (Number.isNaN(tableCount) || tableCount < 1) return 'Enter a valid number';
 
     if (tableCount === 1) return 'Will create: Table 1';
-    if (tableCount <= 5)
-      return `Will create: ${Array.from({ length: tableCount }, (_, i) => `Table ${i + 1}`).join(', ')}`;
+
+    if (tableCount <= 5) {
+      const tableNames = Array.from({ length: tableCount }, (_, i) => `Table ${i + 1}`);
+      return `Will create: ${tableNames.join(', ')}`;
+    }
+
     return `Will create: Table 1, Table 2, ..., Table ${tableCount}`;
   };
 

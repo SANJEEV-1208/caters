@@ -22,7 +22,6 @@ export default function Cart() {
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [caterer, setCaterer] = useState<User | null>(null);
-  const [validatingCart, setValidatingCart] = useState(false);
   const [isProcessingReorder, setIsProcessingReorder] = useState(false);
 
   // --- Fetch caterer details ---
@@ -78,8 +77,6 @@ export default function Cart() {
       const dateToValidate = selectedDeliveryDate || getTodayIST();
 
       try {
-        setValidatingCart(true);
-
         // Fetch available menu items for the selected delivery date
         const availableItems = await getMenuItemsByDate(catererId, dateToValidate);
         const availableItemIds = new Set(availableItems.map(item => item.id));
@@ -103,8 +100,6 @@ export default function Cart() {
         }
       } catch (error) {
         console.error("Failed to validate cart items:", error);
-      } finally {
-        setValidatingCart(false);
       }
     };
 
@@ -127,8 +122,6 @@ export default function Cart() {
       }
 
       try {
-        setValidatingCart(true);
-
         // Fetch available menu items for the selected delivery date
         const availableItems = await getMenuItemsByDate(catererId, selectedDeliveryDate);
         const availableItemIds = new Set(availableItems.map(item => item.id));
@@ -150,8 +143,6 @@ export default function Cart() {
         }
       } catch (error) {
         console.error("Failed to validate cart items:", error);
-      } finally {
-        setValidatingCart(false);
       }
     };
 
@@ -227,7 +218,7 @@ export default function Cart() {
         const allOrders = await fetchAndMergeOrders(user?.id);
         const order = allOrders.find(o => o.orderId === orderId);
 
-        if (!order || !order.catererId) {
+        if (!order?.catererId) {
           setIsProcessingReorder(false);
           return;
         }

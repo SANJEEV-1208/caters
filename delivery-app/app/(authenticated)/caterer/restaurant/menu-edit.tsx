@@ -53,8 +53,8 @@ export default function RestaurantMenuEdit() {
       return;
     }
 
-    const priceNum = parseFloat(price);
-    if (isNaN(priceNum) || priceNum <= 0) {
+    const priceNum = Number.parseFloat(price);
+    if (Number.isNaN(priceNum) || priceNum <= 0) {
       Alert.alert("Invalid", "Please enter a valid price");
       return;
     }

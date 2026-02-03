@@ -1,7 +1,7 @@
 // eslint-disable-next-line security/detect-non-literal-fs-filename
 // This is a database initialization script with hardcoded paths - not user input
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const pool = require('../config/database');
 
 async function initializeDatabase() {
@@ -32,15 +32,15 @@ async function initializeDatabase() {
   }
 }
 
+// Using top-level await when run directly (ES2022)
 if (require.main === module) {
-  initializeDatabase()
-    .then(() => {
-      console.log('Done!');
-      process.exit(0);
-    })
-    .catch(() => {
-      process.exit(1);
-    });
+  try {
+    await initializeDatabase();
+    console.log('Done!');
+    process.exit(0);
+  } catch {
+    process.exit(1);
+  }
 }
 
 module.exports = initializeDatabase;

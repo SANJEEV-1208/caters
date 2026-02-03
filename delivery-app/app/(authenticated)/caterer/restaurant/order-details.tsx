@@ -175,8 +175,8 @@ export default function RestaurantOrderDetails() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Order Items</Text>
         <View style={styles.itemsContainer}>
-          {order.items.map((item, index) => (
-            <View key={index} style={styles.itemRow}>
+          {order.items.map((item) => (
+            <View key={item.id} style={styles.itemRow}>
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>

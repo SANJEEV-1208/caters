@@ -1,6 +1,6 @@
 const QRCode = require('qrcode');
 const cloudinary = require('../config/cloudinary');
-const { Readable } = require('stream');
+const { Readable } = require('node:stream');
 
 /**
  * Generate QR code buffer from data

@@ -6,7 +6,7 @@ const formatMenuItem = (item) => ({
   catererId: item.caterer_id,
   name: item.name,
   description: item.description,
-  price: parseFloat(item.price),
+  price: Number.parseFloat(item.price),
   category: item.category,
   cuisine: item.cuisine,
   type: item.type,

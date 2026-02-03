@@ -162,8 +162,8 @@ export default function OrderDetailsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Items</Text>
           <View style={styles.itemsCard}>
-            {order.items.map((item, index) => (
-              <View key={index} style={styles.itemRow}>
+            {order.items.map((item) => (
+              <View key={item.id} style={styles.itemRow}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemQuantity}>x{item.quantity}</Text>
                 <Text style={styles.itemPrice}>₹{item.price * item.quantity}</Text>

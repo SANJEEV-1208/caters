@@ -337,13 +337,17 @@ export default function RestaurantOrders() {
           <View style={styles.emptyState}>
             <Ionicons name="receipt-outline" size={56} color="#D1D5DB" />
             <Text style={styles.emptyText}>
-              {filterType === "status"
-                ? activeStatusFilter === "all"
-                  ? "No orders yet"
-                  : `No ${activeStatusFilter} orders`
-                : activeTableFilter === "all"
-                ? "No orders yet"
-                : `No orders for Table ${activeTableFilter}`}
+              {(() => {
+                if (filterType === "status") {
+                  return activeStatusFilter === "all"
+                    ? "No orders yet"
+                    : `No ${activeStatusFilter} orders`;
+                } else {
+                  return activeTableFilter === "all"
+                    ? "No orders yet"
+                    : `No orders for Table ${activeTableFilter}`;
+                }
+              })()}
             </Text>
             <Text style={styles.emptySubtext}>
               Orders will appear here when customers place them

@@ -67,7 +67,7 @@ export default function PaymentQrScreen() {
 
     Alert.alert(
       "Remove QR Code",
-      "Are you sure you want to remove your payment QR code? Customers won\'t be able to pay via UPI.",
+      "Are you sure you want to remove your payment QR code? Customers won't be able to pay via UPI.",
       [
         { text: "Cancel", style: "cancel" },
         {

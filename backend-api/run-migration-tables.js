@@ -1,8 +1,8 @@
 // eslint-disable-next-line security/detect-non-literal-fs-filename
 // Migration script with hardcoded paths - safe for development use
 const { Pool } = require('pg');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 require('dotenv').config();
 
 const pool = new Pool({
@@ -13,49 +13,46 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || '1234',
 });
 
-async function runMigration() {
-  const client = await pool.connect();
+// Using top-level await (ES2022)
+const client = await pool.connect();
 
-  try {
-    console.log('🔄 Running restaurant_tables migration...\n');
+try {
+  console.log('🔄 Running restaurant_tables migration...\n');
 
-    // Read the migration file
-    const migrationPath = path.join(__dirname, 'src', 'database', 'migrations', 'add_restaurant_tables.sql');
-    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+  // Read the migration file
+  const migrationPath = path.join(__dirname, 'src', 'database', 'migrations', 'add_restaurant_tables.sql');
+  const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
 
-    // Execute the migration
-    await client.query(migrationSQL);
+  // Execute the migration
+  await client.query(migrationSQL);
 
-    console.log('✅ Migration completed successfully!');
-    console.log('\n📊 Tables created:');
-    console.log('   - restaurant_tables');
-    console.log('   - qr_scans');
-    console.log('\n📑 Indexes created:');
-    console.log('   - idx_restaurant_tables_caterer');
-    console.log('   - idx_restaurant_tables_active');
-    console.log('   - idx_qr_scans_table');
-    console.log('   - idx_qr_scans_customer');
+  console.log('✅ Migration completed successfully!');
+  console.log('\n📊 Tables created:');
+  console.log('   - restaurant_tables');
+  console.log('   - qr_scans');
+  console.log('\n📑 Indexes created:');
+  console.log('   - idx_restaurant_tables_caterer');
+  console.log('   - idx_restaurant_tables_active');
+  console.log('   - idx_qr_scans_table');
+  console.log('   - idx_qr_scans_customer');
 
-    // Verify tables were created
-    const result = await client.query(`
-      SELECT table_name
-      FROM information_schema.tables
-      WHERE table_schema = 'public'
-      AND table_name IN ('restaurant_tables', 'qr_scans')
-    `);
+  // Verify tables were created
+  const result = await client.query(`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+    AND table_name IN ('restaurant_tables', 'qr_scans')
+  `);
 
-    console.log('\n✓ Verified tables:');
-    result.rows.forEach(row => {
-      console.log(`   ✓ ${row.table_name}`);
-    });
+  console.log('\n✓ Verified tables:');
+  result.rows.forEach(row => {
+    console.log(`   ✓ ${row.table_name}`);
+  });
 
-  } catch (error) {
-    console.error('❌ Migration failed:', error.message);
-    process.exit(1);
-  } finally {
-    client.release();
-    await pool.end();
-  }
+} catch (error) {
+  console.error('❌ Migration failed:', error.message);
+  process.exit(1);
+} finally {
+  client.release();
+  await pool.end();
 }
-
-runMigration();

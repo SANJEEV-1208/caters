@@ -34,8 +34,18 @@ export default function MenuScreen() {
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
+      // Generate label for date
+      let label;
+      if (i === 0) {
+        label = "Today";
+      } else if (i === 1) {
+        label = "Tomorrow";
+      } else {
+        label = date.toLocaleDateString('en-US', { weekday: 'short' });
+      }
+
       dates.push({
-        label: i === 0 ? "Today" : i === 1 ? "Tomorrow" : date.toLocaleDateString('en-US', { weekday: 'short' }),
+        label,
         value: date.toISOString().split('T')[0],
         fullDate: date,
       });

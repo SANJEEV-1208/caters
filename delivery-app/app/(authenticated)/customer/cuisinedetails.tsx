@@ -47,8 +47,7 @@
         // Filter by cuisine AND today's date AND in stock
         const filteredItems = allMenuItems.filter(item =>
           item.cuisine === cuisineName &&
-          item.availableDates &&
-          item.availableDates.includes(today) &&
+          item.availableDates?.includes(today) &&
           item.inStock
         );
 
@@ -117,9 +116,12 @@
               {/* Meal Type Badge */}
               <View style={styles.mealTypeBadge}>
                 <Text style={styles.mealTypeIcon}>
-                  {item.type === "breakfast" ? "☀️" :
-                   item.type === "lunch" ? "🌤️" :
-                   item.type === "dinner" ? "🌙" : "🍽️"}
+                  {(() => {
+                    if (item.type === "breakfast") return "☀️";
+                    if (item.type === "lunch") return "🌤️";
+                    if (item.type === "dinner") return "🌙";
+                    return "🍽️";
+                  })()}
                 </Text>
               </View>
             </View>
