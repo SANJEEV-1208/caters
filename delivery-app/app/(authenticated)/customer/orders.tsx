@@ -266,7 +266,7 @@ export default function OrderHistory() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
+            onRefresh={() => { void onRefresh(); }}
             tintColor="#10B981"
             colors={['#10B981']}
           />

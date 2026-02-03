@@ -41,11 +41,11 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
       }
     }, 400); // Debounce: wait 400ms after user stops typing
 
-    return () => clearTimeout(timer);
+    return () => { clearTimeout(timer); };
   }, [value]);
 
   const fetchSuggestions = async (query: string) => {
-    if (!API_KEY) {
+    if (API_KEY === null || API_KEY === undefined || API_KEY === '') {
       console.warn('⚠️ LocationIQ API key not configured. Please add your API key.');
       return;
     }

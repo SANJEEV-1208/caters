@@ -45,7 +45,7 @@ export default function RestaurantMenuBrowser() {
   }, [user]);
 
   useEffect(() => {
-    loadMenuItems();
+    void loadMenuItems();
   }, [catererId]);
 
   const loadMenuItems = async () => {
@@ -90,7 +90,7 @@ export default function RestaurantMenuBrowser() {
         quantity: 1,
       };
       
-      addToCart(cartItem as any);
+      addToCart(cartItem as unknown);
       Alert.alert("Added", `${item.name} added to cart`, [
         {
           text: "Continue Shopping",
@@ -162,7 +162,7 @@ export default function RestaurantMenuBrowser() {
                 styles.filterButton,
                 selectedCategory === cat && styles.filterButtonActive,
               ]}
-              onPress={() => setSelectedCategory(cat)}
+              onPress={() => { setSelectedCategory(cat); }}
             >
               {cat !== "all" && (
                 <View
@@ -245,7 +245,7 @@ export default function RestaurantMenuBrowser() {
                   {/* Add to Cart Button */}
                   <TouchableOpacity
                     style={styles.addButton}
-                    onPress={() => handleAddToCart(item)}
+                    onPress={() => { void handleAddToCart(item); }}
                     disabled={addingToCart === item.id}
                   >
                     {addingToCart === item.id ? (

@@ -72,7 +72,7 @@ export default function ApartmentsScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadApartments();
+    void loadApartments();
   }, []);
 
   const handleDelete = (id: number, name: string) => {

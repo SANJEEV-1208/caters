@@ -57,7 +57,7 @@ export default function Dashboard() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadDashboardData();
+    void loadDashboardData();
   };
 
   const handleLogout = () => {

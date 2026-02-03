@@ -72,7 +72,7 @@ export default function PaymentCard({ order, customerName, onPress, onMarkReceiv
       {isPending && onMarkReceived && order.id && (
         <TouchableOpacity
           style={styles.markReceivedButton}
-          onPress={() => onMarkReceived(order.id!)}
+          onPress={() => { if (order.id) { void onMarkReceived(order.id); } }}
         >
           <Ionicons name="checkmark-circle" size={18} color="#10B981" />
           <Text style={styles.markReceivedText}>Mark as Received</Text>

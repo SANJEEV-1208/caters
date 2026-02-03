@@ -191,7 +191,7 @@ export default function RestaurantMenuAdd() {
         <View style={styles.formGroup}>
           <CloudinaryImagePicker
             label="Food Image"
-            onImageUploaded={(url) => setImageUrl(url)}
+            onImageUploaded={(url) => { setImageUrl(url); }}
             currentImage={imageUrl}
             disabled={loading}
           />
@@ -216,7 +216,7 @@ export default function RestaurantMenuAdd() {
         {/* Create Button */}
         <TouchableOpacity
           style={[styles.createButton, loading && styles.createButtonDisabled]}
-          onPress={handleCreate}
+          onPress={() => { void handleCreate(); }}
           disabled={loading}
         >
           {loading ? (

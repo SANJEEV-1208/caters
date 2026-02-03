@@ -146,7 +146,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
         error.message || 'Failed to upload image. Please try again.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Retry', onPress: () => uploadToCloudinary(asset) },
+          { text: 'Retry', onPress: () => { void uploadToCloudinary(asset); } },
         ]
       );
     }
@@ -162,7 +162,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
           disabled && styles.uploadButtonDisabled,
           uploading && styles.uploadButtonUploading,
         ]}
-        onPress={selectImage}
+        onPress={() => { void selectImage(); }}
         disabled={disabled || uploading}
         activeOpacity={0.7}
       >

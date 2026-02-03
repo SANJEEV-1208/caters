@@ -221,7 +221,7 @@ export default function CustomerAddScreen() {
             </View>
             <TouchableOpacity
               style={[styles.searchButton, searching && styles.searchButtonDisabled]}
-              onPress={handleSearch}
+              onPress={() => { void handleSearch(); }}
               disabled={searching}
             >
               {searching ? (
@@ -363,7 +363,7 @@ export default function CustomerAddScreen() {
             {/* Create Button */}
             <TouchableOpacity
               style={[styles.submitButton, adding && styles.submitButtonDisabled]}
-              onPress={handleCreateCustomer}
+              onPress={() => { void handleCreateCustomer(); }}
               disabled={adding}
             >
               {adding ? (
@@ -467,7 +467,7 @@ export default function CustomerAddScreen() {
             {/* Add Button */}
             <TouchableOpacity
               style={[styles.submitButton, adding && styles.submitButtonDisabled]}
-              onPress={handleAddCustomer}
+              onPress={() => { void handleAddCustomer(); }}
               disabled={adding}
             >
               {adding ? (

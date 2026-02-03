@@ -165,7 +165,7 @@ export default function HomeScreen() {
       <View style={styles.headerWrapper}>
         <Header
           showFilter={true}
-          onFilterPress={() => setFilterModalVisible(true)}
+          onFilterPress={() => { setFilterModalVisible(true); }}
         />
       </View>
 
@@ -273,7 +273,7 @@ export default function HomeScreen() {
 
       <DayFilterModal
         visible={filterModalVisible}
-        onClose={() => setFilterModalVisible(false)}
+        onClose={() => { setFilterModalVisible(false); }}
         onSelectDay={(day) => {
           setSelectedDay(day);
         }}

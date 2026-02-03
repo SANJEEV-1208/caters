@@ -73,7 +73,7 @@ export default function OrderDetailsScreen() {
         {
           text: "Yes, Cancel",
           style: "destructive",
-          onPress: () => handleStatusUpdate("cancelled"),
+          onPress: () => { void handleStatusUpdate("cancelled"); },
         },
       ]
     );
@@ -203,10 +203,10 @@ export default function OrderDetailsScreen() {
         {/* Action Buttons */}
         {order.status !== "delivered" && order.status !== "cancelled" && (
           <View style={styles.actionsSection}>
-            {nextAction && nextAction.status && (
+            {nextAction?.status && (
               <TouchableOpacity
                 style={[styles.primaryButton, { backgroundColor: nextAction.color }]}
-                onPress={() => handleStatusUpdate(nextAction.status!)}
+                onPress={() => { if (nextAction.status) { void handleStatusUpdate(nextAction.status); } }}
                 disabled={updating}
               >
                 {updating ? (

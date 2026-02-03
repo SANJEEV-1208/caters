@@ -87,7 +87,7 @@ export default function RestaurantOrderDetails() {
       preparing: "#8B5CF6",
       delivered: "#10B981",
     };
-    return colors[status] || "#6B7280";
+    return (status in colors) ? colors[status as keyof typeof colors] : "#6B7280";
   };
 
   const getStatusLabel = (status: string) => {
@@ -270,7 +270,7 @@ export default function RestaurantOrderDetails() {
         {nextStatus && (
           <TouchableOpacity
             style={styles.updateButton}
-            onPress={() => handleStatusUpdate(nextStatus)}
+            onPress={() => { void handleStatusUpdate(nextStatus); }}
             disabled={updating}
           >
             {updating ? (

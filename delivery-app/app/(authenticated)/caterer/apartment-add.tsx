@@ -260,7 +260,7 @@ export default function ApartmentAddScreen() {
         {/* Submit Button */}
         <TouchableOpacity
           style={[styles.submitButton, loading && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
+          onPress={() => { void handleSubmit(); }}
           disabled={loading}
         >
           {loading ? (

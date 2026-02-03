@@ -140,7 +140,7 @@ export default function SignupScreen() {
         {/* Register Button */}
         <TouchableOpacity
           style={[styles.registerButton, loading && styles.registerButtonDisabled]}
-          onPress={handleSignup}
+          onPress={() => { void handleSignup(); }}
           disabled={loading}
           activeOpacity={0.8}
         >

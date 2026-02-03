@@ -91,7 +91,7 @@ export default function RestaurantDashboard() {
       <ScrollView
         style={styles.container}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { void onRefresh(); }} />
         }
       >
       {/* Header with Gradient */}

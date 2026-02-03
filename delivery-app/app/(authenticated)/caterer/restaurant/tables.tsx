@@ -243,7 +243,7 @@ export default function TablesScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
+            onRefresh={() => { void onRefresh(); }}
             colors={['#10B981']}
           />
         }

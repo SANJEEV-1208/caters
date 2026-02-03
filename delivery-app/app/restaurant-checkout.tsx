@@ -61,7 +61,7 @@ export default function RestaurantCheckout() {
         Alert.alert(
           "UPI Not Available",
           "This restaurant doesn't accept UPI payments. Please use Cash on Delivery.",
-          [{ text: "OK", onPress: () => setPaymentMethod("cod") }]
+          [{ text: "OK", onPress: () => { setPaymentMethod("cod"); } }]
         );
         return;
       }
@@ -133,7 +133,7 @@ export default function RestaurantCheckout() {
         transactionId: paymentMethod === "upi" ? transactionId : "WALK-IN",
         deliveryAddress: `${restaurantName} - Table ${tableNumber}`,
         tableNumber: Number(tableNumber),
-        itemCount: cartData.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0),
+        itemCount: cartData.reduce((sum: number, item: unknown) => sum + (item.quantity || 1), 0),
         orderDate: getCurrentTimestampIST(),
         deliveryDate: getTodayIST(),
         status: "pending",
@@ -332,7 +332,7 @@ export default function RestaurantCheckout() {
             </View>
 
             <View style={styles.itemsList}>
-              {cartData.map((item: any, index: number) => (
+              {cartData.map((item: unknown, index: number) => (
                 <View key={index} style={styles.orderItem}>
                   <View style={styles.itemLeft}>
                     <View style={[
@@ -388,7 +388,7 @@ export default function RestaurantCheckout() {
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           style={[styles.placeOrderButton, loading && styles.placeOrderButtonDisabled]}
-          onPress={handlePlaceOrder}
+          onPress={() => { void handlePlaceOrder(); }}
           disabled={loading}
           activeOpacity={0.9}
         >
@@ -410,7 +410,7 @@ export default function RestaurantCheckout() {
       {catererQrCode && (
         <QrCodePaymentModal
           visible={showQrModal}
-          onClose={() => setShowQrModal(false)}
+          onClose={() => { setShowQrModal(false); }}
           qrCodeUrl={catererQrCode}
           amount={totalAmount}
           catererName={restaurantName}

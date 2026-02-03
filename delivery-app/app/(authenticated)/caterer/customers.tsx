@@ -87,7 +87,7 @@ export default function CustomersScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadCustomers();
+    void loadCustomers();
   }, []);
 
   if (loading) {

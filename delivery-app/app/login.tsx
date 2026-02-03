@@ -113,7 +113,7 @@ export default function LoginScreen() {
         {/* Login Button */}
         <TouchableOpacity
           style={[styles.loginButton, loading && styles.loginButtonDisabled]}
-          onPress={handleLogin}
+          onPress={() => { void handleLogin(); }}
           disabled={loading}
           activeOpacity={0.8}
         >

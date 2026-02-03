@@ -228,7 +228,7 @@ export default function RestaurantCheckout() {
                 styles.paymentOption as unknown,
                 paymentMethod === "upi" && (styles.paymentOptionActive as unknown),
               ]}
-              onPress={() => handlePaymentMethodSelect("upi")}
+              onPress={() => { handlePaymentMethodSelect("upi"); }}
             >
               <View style={styles.paymentOptionContent as unknown}>
                 <Ionicons
@@ -260,7 +260,7 @@ export default function RestaurantCheckout() {
                 styles.paymentOption as unknown,
                 paymentMethod === "cod" && (styles.paymentOptionActive as unknown),
               ]}
-              onPress={() => handlePaymentMethodSelect("cod")}
+              onPress={() => { handlePaymentMethodSelect("cod"); }}
             >
               <View style={styles.paymentOptionContent as unknown}>
                 <Ionicons
@@ -317,7 +317,7 @@ export default function RestaurantCheckout() {
                     ₹{item.price * item.quantity}
                   </Text>
                   <TouchableOpacity
-                    onPress={() => removeFromCart(item.id!)}
+                    onPress={() => { if (item.id) { removeFromCart(item.id); } }}
                     style={styles.removeButton as unknown}
                   >
                     <Ionicons name="trash-outline" size={16} color="#EF4444" />
@@ -347,7 +347,7 @@ export default function RestaurantCheckout() {
       <View style={styles.footer as unknown}>
         <TouchableOpacity
           style={[styles.placeOrderButton as unknown, loading && (styles.placeOrderButtonDisabled as unknown)]}
-          onPress={handlePlaceOrder}
+          onPress={() => { void handlePlaceOrder(); }}
           disabled={loading}
         >
           {loading ? (
@@ -365,7 +365,7 @@ export default function RestaurantCheckout() {
       {catererQrCode && (
         <QrCodePaymentModal
           visible={showQrModal}
-          onClose={() => setShowQrModal(false)}
+          onClose={() => { setShowQrModal(false); }}
           qrCodeUrl={catererQrCode}
           amount={totalAmount}
           catererName={restaurantName}

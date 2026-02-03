@@ -116,7 +116,7 @@ export default function RestaurantOrders() {
       preparing: "Preparing",
       delivered: "Delivered",
     };
-    return labels[status] || status;
+    return (status in labels) ? labels[status as keyof typeof labels] : status;
   };
 
   if (loading) {
@@ -385,7 +385,7 @@ export default function RestaurantOrders() {
           </Pressable>
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { void onRefresh(); }} />
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>

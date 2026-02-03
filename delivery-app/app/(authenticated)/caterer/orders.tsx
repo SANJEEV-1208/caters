@@ -107,7 +107,7 @@ export default function CatererOrdersScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadOrders();
+    void loadOrders();
   }, []);
 
   const getStatusCount = (status: string) => {

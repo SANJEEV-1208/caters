@@ -224,7 +224,7 @@ export default function RestaurantMenuEdit() {
         {/* Update Button */}
         <TouchableOpacity
           style={[styles.updateButton, loading && styles.updateButtonDisabled]}
-          onPress={handleUpdate}
+          onPress={() => { void handleUpdate(); }}
           disabled={loading}
         >
           {loading ? (

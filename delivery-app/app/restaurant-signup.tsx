@@ -151,7 +151,7 @@ export default function RestaurantSignupScreen() {
         {/* Signup Button */}
         <TouchableOpacity
           style={[styles.signupButton, loading && styles.signupButtonDisabled]}
-          onPress={handleSignup}
+          onPress={() => { void handleSignup(); }}
           disabled={loading}
         >
           {loading ? (

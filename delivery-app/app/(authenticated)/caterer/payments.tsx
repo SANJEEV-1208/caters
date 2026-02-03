@@ -67,7 +67,7 @@ export default function PaymentsScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    loadPayments();
+    void loadPayments();
   };
 
   const handleMarkAsReceived = async (orderId: number) => {

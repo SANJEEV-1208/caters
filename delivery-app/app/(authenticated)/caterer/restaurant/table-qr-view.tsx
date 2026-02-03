@@ -99,7 +99,7 @@ export default function TableQRViewScreen() {
         mimeType: 'image/png',
         dialogTitle: `Share ${tableNumber} QR Code`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Share error:', error);
       Alert.alert('Share Failed', error.message || 'Failed to share QR code');
     } finally {
@@ -132,7 +132,7 @@ export default function TableQRViewScreen() {
         <View style={styles.actions}>
           <TouchableOpacity
             style={[styles.actionButton, styles.downloadButton]}
-            onPress={downloadQR}
+            onPress={() => { void downloadQR(); }}
             disabled={downloading}
           >
             {downloading ? (
@@ -147,7 +147,7 @@ export default function TableQRViewScreen() {
 
           <TouchableOpacity
             style={[styles.actionButton, styles.shareButton]}
-            onPress={shareQR}
+            onPress={() => { void shareQR(); }}
             disabled={sharing}
           >
             {sharing ? (

@@ -111,7 +111,7 @@ export default function Search() {
         : {};
 
       const lowerTerm = searchTerm.toLowerCase();
-      searchCounts[lowerTerm] = (searchCounts[lowerTerm] || 0) + 1;
+      searchCounts[lowerTerm] = (searchCounts[lowerTerm] ?? 0) + 1;
 
       await AsyncStorage.setItem(SEARCH_TRACKING_KEY, JSON.stringify(searchCounts));
     } catch (error) {
@@ -147,7 +147,7 @@ export default function Search() {
         placeholder="Search Food..."
         style={styles.inputBar}
         value={query}
-        onChangeText={handleSearch}
+        onChangeText={(text) => { void handleSearch(text); }}
       />
       <Text style={styles.heading}>Popular Cuisines</Text>
       <FlatList

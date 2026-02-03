@@ -85,7 +85,7 @@ export default function MenuScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadMenuItems();
+    void loadMenuItems();
   }, []);
 
   const handleToggleStock = async (id: number, inStock: boolean) => {

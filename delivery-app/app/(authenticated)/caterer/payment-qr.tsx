@@ -244,7 +244,7 @@ export default function PaymentQrScreen() {
           // Show Save button when no QR code exists
           <TouchableOpacity
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            onPress={handleSave}
+            onPress={() => { void handleSave(); }}
             disabled={loading}
           >
             {loading ? (
@@ -260,7 +260,7 @@ export default function PaymentQrScreen() {
           // Show Remove button when QR code exists
           <TouchableOpacity
             style={styles.removeButton}
-            onPress={handleRemove}
+            onPress={() => { void handleRemove(); }}
             disabled={loading}
           >
             <Ionicons name="trash-outline" size={20} color="#EF4444" />

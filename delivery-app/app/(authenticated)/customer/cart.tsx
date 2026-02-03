@@ -302,7 +302,7 @@ export default function Cart() {
       console.log("Got catererId from loaded caterer:", catererId);
     }
 
-    if (!catererId) {
+    if (catererId === null || catererId === undefined) {
       Alert.alert(
         "Missing Caterer Information",
         "Please go back to the home screen, select a caterer, and add items to your cart again.",
@@ -553,7 +553,7 @@ export default function Cart() {
       {/* Payment Modal */}
       <PaymentBottomSheet
         visible={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={() => { setShowPaymentModal(false); }}
         totalAmount={totalAmount}
         onConfirmOrder={handleConfirmOrder}
         catererQrCode={caterer?.paymentQrCode}

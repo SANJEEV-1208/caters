@@ -286,7 +286,7 @@ export default function MenuEditScreen() {
 
         <TouchableOpacity
           style={[styles.submitButton, saving && styles.submitButtonDisabled]}
-          onPress={handleSubmit}
+          onPress={() => { void handleSubmit(); }}
           disabled={saving}
         >
           {saving ? (
