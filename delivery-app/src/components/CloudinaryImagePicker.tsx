@@ -60,7 +60,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
         return;
       }
 
-      if (result.assets && result.assets[0]) {
+      if (result.assets?.[0]) {
         const asset = result.assets[0];
         setSelectedImageUri(asset.uri || null);
 
