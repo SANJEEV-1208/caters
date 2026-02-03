@@ -273,7 +273,6 @@
       backgroundColor: "#fff",
       paddingHorizontal: 16,
       paddingVertical: 16,
-      paddingTop: 48,
       borderBottomWidth: 1,
       borderBottomColor: "#E8ECF1",
       shadowColor: "#000",

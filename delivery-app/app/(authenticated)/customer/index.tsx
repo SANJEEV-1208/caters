@@ -162,10 +162,12 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-      <Header
-        showFilter={true}
-        onFilterPress={() => setFilterModalVisible(true)}
-      />
+      <View style={styles.headerWrapper}>
+        <Header
+          showFilter={true}
+          onFilterPress={() => setFilterModalVisible(true)}
+        />
+      </View>
 
       <View style={styles.dayCard}>
         <View style={styles.calendarIcon}>
@@ -284,12 +286,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#F8F8F8",
+  },
+  headerWrapper: {
+    paddingHorizontal: 16,
   },
   centerContent: {
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 16,
   },
   loadingText: {
     marginTop: 12,
@@ -304,6 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginTop: 16,
     marginBottom: 8,
+    marginHorizontal: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -354,6 +360,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
     marginBottom: 12,
+    marginHorizontal: 16,
     gap: 8,
   },
   filtersTitle: {
@@ -366,6 +373,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 16,
     marginBottom: 12,
+    marginHorizontal: 16,
     gap: 8,
   },
   sectionTitle: {
@@ -379,23 +387,25 @@ const styles = StyleSheet.create({
   },
   mealTypeContent: {
     gap: 10,
-    paddingRight: 16,
+    paddingHorizontal: 16,
   },
   categoryRow: {
     flexDirection: "row",
     marginVertical: 12,
     marginBottom: 20,
+    marginHorizontal: 16,
     gap: 10,
   },
   list: {
     paddingBottom: 20,
     paddingTop: 8,
+    paddingHorizontal: 16,
   },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: 56,
   },
   emptyTitle: {
     fontSize: 18,

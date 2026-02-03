@@ -20,57 +20,18 @@ export default function QRScannerScreen() {
   const [scanned, setScanned] = useState(false);
   const [flashOn, setFlashOn] = useState(false);
 
-  // Debug: Screen mounted
-  useEffect(() => {
-    Alert.alert('QR Scanner', 'Scanner screen loaded successfully!');
-  }, []);
-
   // Auto-request permission on mount
   useEffect(() => {
-    if (permission) {
-      Alert.alert(
-        'Permission Status',
-        `Granted: ${permission.granted}\nCan Ask: ${permission.canAskAgain}\nStatus: ${permission.status}`
-      );
-
-      if (!permission.granted && permission.canAskAgain) {
-        Alert.alert('Requesting Permission', 'Asking for camera access...');
-        requestPermission();
-      }
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
     }
   }, [permission]);
-
-  // Debug: Show when scanner is ready
-  useEffect(() => {
-    if (permission?.granted) {
-      // Small delay to ensure camera is ready
-      setTimeout(() => {
-        Alert.alert('Scanner Ready', 'Point your camera at a restaurant table QR code to scan.\n\nNote: You cannot scan a QR code displayed on THIS device\'s screen. Use another device or print it.');
-      }, 1500);
-    }
-  }, [permission?.granted]);
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     if (scanned) return;
 
     setScanned(true);
-
-    // First alert - confirm scan detected
-    Alert.alert(
-      'QR Code Detected!',
-      `Length: ${data.length} characters\n\nFirst 50 chars:\n${data.substring(0, 50)}...`,
-      [
-        {
-          text: 'Continue',
-          onPress: () => processQRData(data),
-        },
-        {
-          text: 'Cancel',
-          onPress: () => setScanned(false),
-          style: 'cancel',
-        },
-      ]
-    );
+    processQRData(data);
   };
 
   const processQRData = (data: string) => {
@@ -78,28 +39,24 @@ export default function QRScannerScreen() {
       // Parse QR data
       const qrData = JSON.parse(data);
 
-      Alert.alert('Parsed Successfully', `Found JSON data:\n${JSON.stringify(qrData, null, 2)}`);
-
       // Validate QR data structure
       if (!qrData.catererId || !qrData.tableNumber) {
         Alert.alert(
           'Invalid QR Code',
-          `Missing required fields!\n\nCatererId: ${qrData.catererId || 'MISSING'}\nTableNumber: ${qrData.tableNumber || 'MISSING'}`,
-          [{ text: 'OK', onPress: () => setScanned(false) }]
+          'This QR code is not valid for restaurant ordering. Please scan the QR code on your table.',
+          [{ text: 'Try Again', onPress: () => setScanned(false) }]
         );
         return;
       }
 
+      // Navigate to restaurant menu with table context
       Alert.alert(
-        'Valid Restaurant QR!',
-        `✓ Caterer ID: ${qrData.catererId}\n✓ Table: ${qrData.tableNumber}\n✓ Restaurant: ${qrData.restaurantName || 'N/A'}`,
+        'Table QR Scanned',
+        `Welcome to ${qrData.restaurantName || 'Restaurant'}!\nTable: ${qrData.tableNumber}`,
         [
           {
-            text: 'Open Menu',
+            text: 'View Menu',
             onPress: () => {
-              Alert.alert('Navigating', 'Opening restaurant menu...');
-
-              // Navigate to restaurant menu with table context (unauthenticated for walk-in customers)
               router.replace({
                 pathname: '/restaurant-menu',
                 params: {
@@ -119,8 +76,8 @@ export default function QRScannerScreen() {
       );
     } catch (error: any) {
       Alert.alert(
-        'QR Parse Error',
-        `This QR code is not valid JSON.\n\nError: ${error.message}\n\nRaw data:\n${data.substring(0, 100)}`,
+        'Invalid QR Code',
+        'This QR code cannot be read. Please try scanning again or contact restaurant staff.',
         [{ text: 'Scan Again', onPress: () => setScanned(false) }]
       );
     }
@@ -222,10 +179,7 @@ export default function QRScannerScreen() {
           ) : (
             <TouchableOpacity
               style={styles.resetButton}
-              onPress={() => {
-                setScanned(false);
-                Alert.alert('Scanner Reset', 'Ready to scan again');
-              }}
+              onPress={() => setScanned(false)}
             >
               <Ionicons name="refresh" size={20} color="#FFFFFF" />
               <Text style={styles.resetButtonText}>Scan Again</Text>

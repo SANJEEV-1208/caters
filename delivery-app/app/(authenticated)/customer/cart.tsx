@@ -28,22 +28,94 @@ export default function Cart() {
   // --- Fetch caterer details ---
   useEffect(() => {
     const fetchCaterer = async () => {
-      // Try to get caterer ID from cart items first, fallback to selectedCatererId
-      const catererId = cart.length > 0 ? cart[0].catererId : selectedCatererId;
+      console.log('🔍 Fetching caterer...');
+      console.log('   Cart length:', cart.length);
+      console.log('   Cart[0]?.catererId:', cart[0]?.catererId);
+      console.log('   selectedCatererId:', selectedCatererId);
 
-      if (catererId) {
+      // Get caterer ID - prioritize selectedCatererId, then cart item's catererId (if valid)
+      let catererId = selectedCatererId;
+
+      // If no selectedCatererId, try cart item (but skip if it's 0 or undefined)
+      if (!catererId && cart.length > 0 && cart[0].catererId && cart[0].catererId > 0) {
+        catererId = cart[0].catererId;
+      }
+
+      console.log('   ➡️ Using catererId:', catererId);
+
+      if (catererId && catererId > 0) {
         const catererData = await getUserById(catererId);
+        console.log('🍽️ Fetched caterer data:', catererData);
+        console.log('💳 Payment QR Code:', catererData?.paymentQrCode);
+        console.log('💳 QR Code type:', typeof catererData?.paymentQrCode);
+        console.log('💳 QR Code length:', catererData?.paymentQrCode?.length);
         setCaterer(catererData);
+        console.log('✅ Caterer state updated');
+      } else {
+        console.log('❌ No valid catererId found - cannot fetch caterer');
+        setCaterer(null);
       }
     };
     fetchCaterer();
   }, [selectedCatererId, cart]);
 
-  // --- Validate cart items for selected delivery date ---
+  // --- Validate cart items on mount (for stale items from previous sessions) ---
+  useEffect(() => {
+    const validateOnMount = async () => {
+      // Skip validation if no cart items or if viewing a previous order
+      if (cart.length === 0 || orderId) {
+        return;
+      }
+
+      // Get caterer ID from cart items
+      const catererId = cart[0].catererId;
+
+      if (!catererId) {
+        return;
+      }
+
+      // Use selectedDeliveryDate if available, otherwise use today's date
+      const dateToValidate = selectedDeliveryDate || getTodayIST();
+
+      try {
+        setValidatingCart(true);
+
+        // Fetch available menu items for the selected delivery date
+        const availableItems = await getMenuItemsByDate(catererId, dateToValidate);
+        const availableItemIds = new Set(availableItems.map(item => item.id));
+
+        // Find items in cart that are not available on selected date
+        const unavailableItems = cart.filter(item => !availableItemIds.has(item.id));
+
+        // Remove unavailable items from cart
+        if (unavailableItems.length > 0) {
+          const unavailableIds = unavailableItems.map(item => item.id);
+          removeMultipleItems(unavailableIds);
+
+          const dateLabel = dateToValidate === getTodayIST() ? 'today' : formatDeliveryDate();
+
+          // Show alert about removed items
+          Alert.alert(
+            "Items Removed",
+            `${unavailableItems.length} item(s) in your cart are not available for ${dateLabel} and have been removed.`,
+            [{ text: "OK" }]
+          );
+        }
+      } catch (error) {
+        console.error("Failed to validate cart items:", error);
+      } finally {
+        setValidatingCart(false);
+      }
+    };
+
+    validateOnMount();
+  }, []); // Run only once on mount
+
+  // --- Validate cart items when delivery date changes ---
   useEffect(() => {
     const validateCartItems = async () => {
-      // Skip validation if no cart items or delivery date or if viewing a previous order
-      if (cart.length === 0 || !selectedDeliveryDate || orderId) {
+      // Skip validation if no cart items or if viewing a previous order
+      if (cart.length === 0 || orderId || !selectedDeliveryDate) {
         return;
       }
 
@@ -72,7 +144,7 @@ export default function Cart() {
           // Show alert about removed items
           Alert.alert(
             "Items Removed",
-            `${unavailableItems.length} item(s) in your cart are not available for the selected date and have been removed.`,
+            `${unavailableItems.length} item(s) in your cart are not available for ${formatDeliveryDate()} and have been removed.`,
             [{ text: "OK" }]
           );
         }
@@ -84,7 +156,7 @@ export default function Cart() {
     };
 
     validateCartItems();
-  }, [selectedDeliveryDate, cart]);
+  }, [selectedDeliveryDate]); // Run when delivery date changes
 
   // --- Handle Re-Order from previous order ---
   useEffect(() => {
@@ -208,6 +280,9 @@ export default function Cart() {
       return;
     }
 
+    // Determine the actual delivery date to use
+    const finalDeliveryDate = deliveryDate || selectedDeliveryDate || getTodayIST();
+
     // Try multiple sources for caterer ID
     let catererId = null;
 
@@ -245,6 +320,36 @@ export default function Cart() {
       return;
     }
 
+    // CRITICAL: Validate that all cart items are available for the selected delivery date
+    try {
+      const availableItems = await getMenuItemsByDate(catererId, finalDeliveryDate);
+      const availableItemIds = new Set(availableItems.map(item => item.id));
+
+      const unavailableItems = cart.filter(item => !availableItemIds.has(item.id));
+
+      if (unavailableItems.length > 0) {
+        const unavailableNames = unavailableItems.map(item => item.name).join(', ');
+
+        Alert.alert(
+          "Items Not Available",
+          `The following items are not available for ${formatDeliveryDate()}: ${unavailableNames}\n\nPlease remove them from your cart or select a different date.`,
+          [{ text: "OK" }]
+        );
+
+        // Re-open the payment modal so user can modify cart
+        setShowPaymentModal(true);
+        return;
+      }
+    } catch (error) {
+      console.error("Failed to validate cart items before checkout:", error);
+      Alert.alert(
+        "Validation Error",
+        "Unable to verify item availability. Please try again.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
     const newOrderId = `ORD-${Date.now()}`;
 
     // Check if this is a restaurant order (has tableNumber from params)
@@ -261,7 +366,7 @@ export default function Cart() {
       paymentProofImage: paymentProofImage, // Payment proof screenshot URL
       itemCount: cart.length,
       orderDate: getCurrentTimestampIST(),
-      deliveryDate: deliveryDate || selectedDeliveryDate || getTodayIST(),
+      deliveryDate: finalDeliveryDate, // Use validated delivery date
       status: 'pending',
       tableNumber: tableNumberValue, // Add table number if restaurant order
     };
@@ -433,7 +538,12 @@ export default function Cart() {
             style={[styles.payButton, cart.length === 0 && styles.payButtonDisabled]}
             disabled={cart.length === 0}
             activeOpacity={0.8}
-            onPress={() => setShowPaymentModal(true)}
+            onPress={() => {
+              console.log('🛒 Opening payment modal...');
+              console.log('🍽️ Caterer state:', caterer);
+              console.log('💳 Caterer QR Code at modal open:', caterer?.paymentQrCode);
+              setShowPaymentModal(true);
+            }}
           >
             <Text style={styles.payButtonText}>Proceed to Pay</Text>
           </TouchableOpacity>
@@ -441,6 +551,14 @@ export default function Cart() {
       )}
 
       {/* Payment Modal */}
+      {showPaymentModal && (
+        <>
+          {console.log('📦 Rendering PaymentBottomSheet with props:')}
+          {console.log('   caterer:', caterer)}
+          {console.log('   catererQrCode:', caterer?.paymentQrCode)}
+          {console.log('   catererName:', caterer?.serviceName || caterer?.name)}
+        </>
+      )}
       <PaymentBottomSheet
         visible={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}

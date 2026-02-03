@@ -35,10 +35,21 @@ export default function PaymentBottomSheet({
   catererQrCode,
   catererName,
 }: PaymentBottomSheetProps) {
+  // Debug: Log props on every render
+  console.log('🎨 PaymentBottomSheet rendered with:');
+  console.log('   visible:', visible);
+  console.log('   catererQrCode:', catererQrCode);
+  console.log('   catererName:', catererName);
+
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
     null
   );
   const [showQrModal, setShowQrModal] = useState(false);
+
+  // Track QR code changes
+  useEffect(() => {
+    console.log('🔄 catererQrCode prop changed to:', catererQrCode);
+  }, [catererQrCode]);
 
   // Animation values
   const translateY = useSharedValue(500);
@@ -101,8 +112,14 @@ export default function PaymentBottomSheet({
     if (!selectedMethod) return;
 
     if (selectedMethod === 'upi') {
+      // Debug logging
+      console.log('💳 PaymentBottomSheet - catererQrCode:', catererQrCode);
+      console.log('💳 PaymentBottomSheet - QR Code type:', typeof catererQrCode);
+      console.log('💳 PaymentBottomSheet - QR Code length:', catererQrCode?.length);
+      console.log('💳 PaymentBottomSheet - QR Code truthy?:', !!catererQrCode);
+
       // Check if caterer has QR code
-      if (!catererQrCode) {
+      if (!catererQrCode || catererQrCode.trim() === '') {
         Alert.alert(
           'UPI Not Available',
           'The caterer has not set up UPI payments yet. Please use Cash on Delivery.',

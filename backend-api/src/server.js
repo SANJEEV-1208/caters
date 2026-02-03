@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const os = require('os');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -12,6 +13,20 @@ const tablesRoutes = require('./routes/tablesRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Function to get local IP address
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces();
+  for (const interfaceName in interfaces) {
+    for (const iface of interfaces[interfaceName]) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+}
 
 // Middleware
 app.use(cors());
@@ -54,10 +69,11 @@ app.use((req, res) => {
 
 // Start server - Listen on all network interfaces (0.0.0.0) for mobile device access
 app.listen(PORT, '0.0.0.0', () => {
+  const localIp = getLocalIpAddress();
   console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Network access: http://192.168.0.101:${PORT}`);
+  console.log(`Network access: http://${localIp}:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
-  console.log(`\n📱 Mobile app should connect to: http://192.168.0.101:${PORT}/api`);
+  console.log(`\n📱 Mobile app should connect to: http://${localIp}:${PORT}/api`);
 });
 
 module.exports = app;
