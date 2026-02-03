@@ -110,7 +110,26 @@ export default function MenuAddScreen() {
     }
   };
 
-  const handleDeleteCuisine = async (cuisineId: number, cuisineName: string) => {
+  const performDeleteCuisine = async (cuisineId: number, cuisineName: string) => {
+    try {
+      setLoadingCuisines(true);
+      await deleteCatererCuisine(cuisineId);
+      setCatererCuisines(prev => prev.filter(c => c.id !== cuisineId));
+      // If deleted cuisine was selected, select the first available
+      if (formData.cuisine === cuisineName && catererCuisines.length > 1) {
+        const remaining = catererCuisines.filter(c => c.id !== cuisineId);
+        setFormData(prev => ({ ...prev, cuisine: remaining[0].name }));
+      }
+      Alert.alert("Success", "Cuisine deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete cuisine:", error);
+      Alert.alert("Error", "Failed to delete cuisine");
+    } finally {
+      setLoadingCuisines(false);
+    }
+  };
+
+  const handleDeleteCuisine = (cuisineId: number, cuisineName: string) => {
     Alert.alert(
       "Delete Cuisine",
       `Are you sure you want to delete "${cuisineName}"?`,
@@ -120,24 +139,7 @@ export default function MenuAddScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            void (async () => {
-              try {
-                setLoadingCuisines(true);
-                await deleteCatererCuisine(cuisineId);
-                setCatererCuisines(prev => prev.filter(c => c.id !== cuisineId));
-                // If deleted cuisine was selected, select the first available
-                if (formData.cuisine === cuisineName && catererCuisines.length > 1) {
-                  const remaining = catererCuisines.filter(c => c.id !== cuisineId);
-                  setFormData(prev => ({ ...prev, cuisine: remaining[0].name }));
-                }
-                Alert.alert("Success", "Cuisine deleted successfully");
-              } catch (error) {
-                console.error("Failed to delete cuisine:", error);
-                Alert.alert("Error", "Failed to delete cuisine");
-              } finally {
-                setLoadingCuisines(false);
-              }
-            })();
+            performDeleteCuisine(cuisineId, cuisineName).catch(console.error);
           },
         },
       ]

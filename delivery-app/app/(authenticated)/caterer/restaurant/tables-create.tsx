@@ -22,7 +22,36 @@ export default function TablesCreateScreen() {
   const [count, setCount] = useState('5');
   const [loading, setLoading] = useState(false);
 
-  const handleCreate = async () => {
+  const performCreateTables = async (tableCount: number) => {
+    try {
+      setLoading(true);
+
+      const response = await createBulkTables({
+        catererId: user!.id,
+        count: tableCount,
+        restaurantName: user!.restaurantName || 'Restaurant',
+      });
+
+      Alert.alert(
+        'Success',
+        `Successfully created ${response.total} table${response.total > 1 ? 's' : ''} with QR codes!`,
+        [
+          {
+            text: 'View Tables',
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    } catch (error: unknown) {
+      console.error('Create tables error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create tables. Please try again.';
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = () => {
     const tableCount = parseInt(count);
 
     // Validation
@@ -57,36 +86,7 @@ export default function TablesCreateScreen() {
         {
           text: 'Create',
           onPress: () => {
-            void (async () => {
-              try {
-                setLoading(true);
-
-                const response = await createBulkTables({
-                  catererId: user.id,
-                  count: tableCount,
-                  restaurantName: user.restaurantName || 'Restaurant',
-                });
-
-                Alert.alert(
-                  'Success',
-                  `Successfully created ${response.total} table${response.total > 1 ? 's' : ''} with QR codes!`,
-                  [
-                    {
-                      text: 'View Tables',
-                      onPress: () => router.back(),
-                    },
-                  ]
-                );
-              } catch (error: unknown) {
-                console.error('Create tables error:', error);
-                Alert.alert(
-                  'Error',
-                  error.message || 'Failed to create tables. Please try again.'
-                );
-              } finally {
-                setLoading(false);
-              }
-            })();
+            performCreateTables(tableCount).catch(console.error);
           },
         },
       ]

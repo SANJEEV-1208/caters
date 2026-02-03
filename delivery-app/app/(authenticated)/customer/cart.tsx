@@ -158,107 +158,98 @@ export default function Cart() {
     void validateCartItems();
   }, [selectedDeliveryDate]); // Run when delivery date changes
 
+  // Helper: Fetch and merge orders from backend and local storage
+  const fetchAndMergeOrders = async (userId: number | undefined) => {
+    const [backendOrders, localOrders] = await Promise.all([
+      userId ? getCustomerOrders(userId).catch(() => []) : Promise.resolve([]),
+      getOrders().catch(() => [])
+    ]);
+
+    const orderMap = new Map();
+    backendOrders.forEach(o => orderMap.set(o.orderId, o));
+    localOrders.forEach(o => {
+      if (!orderMap.has(o.orderId)) orderMap.set(o.orderId, o);
+    });
+
+    return Array.from(orderMap.values());
+  };
+
+  // Helper: Filter available items from order
+  const filterAvailableItems = async (catererId: number, orderItems: unknown[]) => {
+    const today = getTodayIST();
+    const availableItems = await getMenuItemsByDate(catererId, today);
+    const availableItemIds = new Set(availableItems.map(item => item.id));
+
+    const available = orderItems.filter((item: unknown) =>
+      availableItemIds.has((item as { id: number }).id)
+    );
+
+    const unavailable = orderItems.filter((item: unknown) =>
+      !availableItemIds.has((item as { id: number }).id)
+    );
+
+    return { available, unavailable };
+  };
+
+  // Helper: Show reorder result
+  const showReorderResult = (availableCount: number, unavailableCount: number) => {
+    if (availableCount > 0) {
+      if (unavailableCount > 0) {
+        Alert.alert(
+          "Partially Reordered",
+          `${availableCount} item(s) added to cart. ${unavailableCount} item(s) from your previous order are not available today.`,
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert(
+          "Success",
+          "All items from your previous order have been added to cart!",
+          [{ text: "OK" }]
+        );
+      }
+    } else {
+      Alert.alert(
+        "Cannot Reorder",
+        "None of the items from your previous order are available today. Please browse the current menu.",
+        [{ text: "OK", onPress: () => { if (router.canGoBack()) router.back(); } }]
+      );
+    }
+  };
+
   // --- Handle Re-Order from previous order ---
   useEffect(() => {
     const loadPreviousOrder = async () => {
-      if (orderId && typeof orderId === "string" && !isProcessingReorder) {
-        setIsProcessingReorder(true);
+      if (!orderId || typeof orderId !== "string" || isProcessingReorder) return;
 
-        // Fetch from both backend and local storage
-        const [backendOrders, localOrders] = await Promise.all([
-          user?.id ? getCustomerOrders(user.id).catch(() => []) : Promise.resolve([]),
-          getOrders().catch(() => [])
-        ]);
+      setIsProcessingReorder(true);
 
-        // Merge orders
-        const orderMap = new Map();
-        backendOrders.forEach(o => orderMap.set(o.orderId, o));
-        localOrders.forEach(o => {
-          if (!orderMap.has(o.orderId)) orderMap.set(o.orderId, o);
-        });
-
-        const allOrders = Array.from(orderMap.values());
+      try {
+        const allOrders = await fetchAndMergeOrders(user?.id);
         const order = allOrders.find(o => o.orderId === orderId);
 
-        if (order && order.catererId) {
-          // Get today's date as the default delivery date (IST)
-          const today = getTodayIST();
-
-          try {
-            // Fetch available menu items for today from this caterer
-            const availableItems = await getMenuItemsByDate(order.catererId, today);
-
-            // Create a map of available item IDs for quick lookup
-            const availableItemIds = new Set(availableItems.map(item => item.id));
-
-            // Filter order items - only add items that are available today
-            const availableOrderItems = order.items.filter((item: unknown) =>
-              availableItemIds.has((item as { id: number }).id)
-            );
-
-            const unavailableItems = order.items.filter((item: unknown) =>
-              !availableItemIds.has((item as { id: number }).id)
-            );
-
-            clearCart();
-
-            if (availableOrderItems.length > 0) {
-              reorderItems(availableOrderItems);
-              
-              // Show success alert
-              if (unavailableItems.length > 0) {
-                Alert.alert(
-                  "Partially Reordered",
-                  `${availableOrderItems.length} item(s) added to cart. ${unavailableItems.length} item(s) from your previous order are not available today.`,
-                  [{ text: "OK" }]
-                );
-              } else {
-                Alert.alert(
-                  "Success",
-                  "All items from your previous order have been added to cart!",
-                  [{ text: "OK" }]
-                );
-              }
-            } else {
-              // NO items available - show alert and go back
-              Alert.alert(
-                "Cannot Reorder",
-                "None of the items from your previous order are available today. Please browse the current menu.",
-                [
-                  { 
-                    text: "OK", 
-                    onPress: () => {
-                      // Go back to order details or home
-                      if (router.canGoBack()) {
-                        router.back();
-                      } 
-                    }
-                  }
-                ]
-              );
-            }
-          } catch (error) {
-            console.error("Failed to validate menu items:", error);
-            Alert.alert(
-              "Error",
-              "Unable to verify item availability. Please browse the menu instead.",
-              [
-                { 
-                  text: "OK", 
-                  onPress: () => {
-                    if (router.canGoBack()) {
-                      router.back();
-                    } 
-                  }
-                }
-              ]
-            );
-          } finally {
-            setIsProcessingReorder(false);
-          }
-        } else {
+        if (!order || !order.catererId) {
           setIsProcessingReorder(false);
+          return;
         }
+
+        const { available, unavailable } = await filterAvailableItems(order.catererId, order.items);
+
+        clearCart();
+
+        if (available.length > 0) {
+          reorderItems(available);
+        }
+
+        showReorderResult(available.length, unavailable.length);
+      } catch (error) {
+        console.error("Failed to validate menu items:", error);
+        Alert.alert(
+          "Error",
+          "Unable to verify item availability. Please browse the menu instead.",
+          [{ text: "OK", onPress: () => { if (router.canGoBack()) router.back(); } }]
+        );
+      } finally {
+        setIsProcessingReorder(false);
       }
     };
     void loadPreviousOrder();

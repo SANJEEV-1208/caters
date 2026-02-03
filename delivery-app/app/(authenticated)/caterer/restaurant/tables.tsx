@@ -73,7 +73,18 @@ export default function TablesScreen() {
     }
   };
 
-  const handleDelete = async (table: RestaurantTable) => {
+  const performDeleteTable = async (table: RestaurantTable) => {
+    try {
+      await deleteTable(table.id);
+      setTables((prev) => prev.filter((t) => t.id !== table.id));
+      Alert.alert('Success', `${table.tableNumber} deleted successfully`);
+    } catch (error) {
+      console.error('Delete table error:', error);
+      Alert.alert('Error', 'Failed to delete table');
+    }
+  };
+
+  const handleDelete = (table: RestaurantTable) => {
     Alert.alert(
       'Delete Table',
       `Are you sure you want to delete ${table.tableNumber}? This action cannot be undone.`,
@@ -83,16 +94,7 @@ export default function TablesScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            void (async () => {
-              try {
-                await deleteTable(table.id);
-                setTables((prev) => prev.filter((t) => t.id !== table.id));
-                Alert.alert('Success', `${table.tableNumber} deleted successfully`);
-              } catch (error) {
-                console.error('Delete table error:', error);
-                Alert.alert('Error', 'Failed to delete table');
-              }
-            })();
+            performDeleteTable(table).catch(console.error);
           },
         },
       ]
@@ -245,7 +247,7 @@ export default function TablesScreen() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => { void onRefresh(); }}
+            onRefresh={onRefresh}
             colors={['#10B981']}
           />
         }

@@ -24,6 +24,52 @@ import { formatTimeIST } from "@/src/utils/dateUtils";
 type OrderStatus = "pending" | "confirmed" | "preparing" | "delivered";
 type FilterType = "status" | "table";
 
+// Helper functions extracted to reduce cognitive complexity
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "#F59E0B";
+    case "confirmed":
+      return "#3B82F6";
+    case "preparing":
+      return "#8B5CF6";
+    case "delivered":
+      return "#10B981";
+    default:
+      return "#6B7280";
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    pending: "Pending",
+    confirmed: "Confirmed",
+    preparing: "Preparing",
+    delivered: "Delivered",
+  };
+  return (status in labels) ? labels[status as keyof typeof labels] : status;
+};
+
+const getUniqueTables = (orders: Order[]) => {
+  const tables = new Set<number>();
+  orders.forEach(order => {
+    if (order.tableNumber) {
+      tables.add(order.tableNumber);
+    }
+  });
+  return Array.from(tables).sort((a, b) => a - b);
+};
+
+const filterOrdersByStatus = (orders: Order[], status: OrderStatus | "all") => {
+  if (status === "all") return orders;
+  return orders.filter((order) => order.status === status);
+};
+
+const filterOrdersByTable = (orders: Order[], tableNum: number | "all") => {
+  if (tableNum === "all") return orders;
+  return orders.filter((order) => order.tableNumber === tableNum);
+};
+
 export default function RestaurantOrders() {
   const router = useRouter();
   const { user } = useAuth();
@@ -59,64 +105,17 @@ export default function RestaurantOrders() {
 
   const getFilteredOrders = () => {
     if (filterType === "status") {
-      if (activeStatusFilter === "all") {
-        return orders;
-      }
-      return orders.filter((order) => order.status === activeStatusFilter);
-    } else {
-      // Table filter
-      if (activeTableFilter === "all") {
-        return orders;
-      }
-      return orders.filter((order) => order.tableNumber === activeTableFilter);
+      return filterOrdersByStatus(orders, activeStatusFilter);
     }
+    return filterOrdersByTable(orders, activeTableFilter);
   };
 
-  // Get unique table numbers from orders
-  const getUniqueTables = () => {
-    const tables = new Set<number>();
-    orders.forEach(order => {
-      if (order.tableNumber) {
-        tables.add(order.tableNumber);
-      }
-    });
-    return Array.from(tables).sort((a, b) => a - b);
-  };
-
-  // Count orders for each filter
   const getStatusCount = (status: OrderStatus | "all") => {
-    if (status === "all") return orders.length;
-    return orders.filter(o => o.status === status).length;
+    return filterOrdersByStatus(orders, status).length;
   };
 
   const getTableCount = (tableNum: number | "all") => {
-    if (tableNum === "all") return orders.length;
-    return orders.filter(o => o.tableNumber === tableNum).length;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "#F59E0B";
-      case "confirmed":
-        return "#3B82F6";
-      case "preparing":
-        return "#8B5CF6";
-      case "delivered":
-        return "#10B981";
-      default:
-        return "#6B7280";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      pending: "Pending",
-      confirmed: "Confirmed",
-      preparing: "Preparing",
-      delivered: "Delivered",
-    };
-    return (status in labels) ? labels[status as keyof typeof labels] : status;
+    return filterOrdersByTable(orders, tableNum).length;
   };
 
   if (loading) {

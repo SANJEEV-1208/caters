@@ -20,6 +20,62 @@ import { User } from "@/src/types/auth";
 
 type PaymentFilter = "all" | "upi" | "cod" | "received" | "pending";
 
+// Helper function to calculate payment stats
+const calculateStats = (orders: Order[]) => {
+  const deliveredOrders = orders.filter((o) => o.status === "delivered");
+  const nonDeliveredOrders = orders.filter((o) => o.status !== "delivered");
+
+  return {
+    totalRevenue: deliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+    receivedPayments: deliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+    pendingPayments: nonDeliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+  };
+};
+
+// Helper function to calculate filter counts
+const calculateFilterCounts = (orders: Order[]) => ({
+  allCount: orders.length,
+  upiCount: orders.filter((o) => o.paymentMethod === "upi").length,
+  codCount: orders.filter((o) => o.paymentMethod === "cod").length,
+  receivedCount: orders.filter((o) => o.status === "delivered").length,
+  pendingCount: orders.filter((o) => o.status !== "delivered").length,
+});
+
+// Helper function to filter orders
+const filterOrders = (orders: Order[], filter: PaymentFilter) => {
+  switch (filter) {
+    case "upi":
+      return orders.filter((o) => o.paymentMethod === "upi");
+    case "cod":
+      return orders.filter((o) => o.paymentMethod === "cod");
+    case "received":
+      return orders.filter((o) => o.status === "delivered");
+    case "pending":
+      return orders.filter((o) => o.status !== "delivered");
+    default:
+      return orders;
+  }
+};
+
+// Helper function to fetch customers
+const fetchCustomersData = async (ordersData: Order[]) => {
+  const uniqueCustomerIds = [
+    ...new Set(ordersData.map((order) => order.customerId).filter(Boolean)),
+  ] as number[];
+
+  const customerData = new Map<number, User>();
+  await Promise.all(
+    uniqueCustomerIds.map(async (customerId) => {
+      const customer = await getUserById(customerId);
+      if (customer && customerId) {
+        customerData.set(customerId, customer);
+      }
+    })
+  );
+
+  return customerData;
+};
+
 export default function PaymentsScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -37,25 +93,10 @@ export default function PaymentsScreen() {
     if (!user?.id) return;
 
     try {
-      // Get all orders for this caterer
       const ordersData = await getCatererOrders(user.id);
       setOrders(ordersData);
 
-      // Fetch customer details for each unique customer
-      const uniqueCustomerIds = [
-        ...new Set(ordersData.map((order) => order.customerId).filter(Boolean)),
-      ] as number[];
-
-      const customerData = new Map<number, User>();
-      await Promise.all(
-        uniqueCustomerIds.map(async (customerId) => {
-          const customer = await getUserById(customerId);
-          if (customer && customerId) {
-            customerData.set(customerId, customer);
-          }
-        })
-      );
-
+      const customerData = await fetchCustomersData(ordersData);
       setCustomers(customerData);
     } catch (error) {
       console.error("Failed to load payments:", error);
@@ -74,7 +115,6 @@ export default function PaymentsScreen() {
     try {
       await updateOrderStatus(orderId, "delivered");
 
-      // Update local state
       setOrders(prev =>
         prev.map(order =>
           order.id === orderId ? { ...order, status: "delivered" as const } : order
@@ -88,49 +128,12 @@ export default function PaymentsScreen() {
     }
   };
 
-  // Filter orders based on selected filter
-  const getFilteredOrders = () => {
-    let filtered = orders;
+  const filteredOrders = filterOrders(orders, filter);
+  const stats = calculateStats(orders);
+  const counts = calculateFilterCounts(orders);
 
-    switch (filter) {
-      case "upi":
-        filtered = orders.filter((o) => o.paymentMethod === "upi");
-        break;
-      case "cod":
-        filtered = orders.filter((o) => o.paymentMethod === "cod");
-        break;
-      case "received":
-        // Show all delivered orders (payment has been received - either UPI or COD)
-        filtered = orders.filter((o) => o.status === "delivered");
-        break;
-      case "pending":
-        // Show all non-delivered orders (payment not yet received)
-        filtered = orders.filter((o) => o.status !== "delivered");
-        break;
-    }
-
-    return filtered;
-  };
-
-  const filteredOrders = getFilteredOrders();
-
-  // Calculate stats
-  const totalRevenue = orders
-    .filter((o) => o.status === "delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-  const receivedPayments = orders
-    .filter((o) => o.status === "delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-  const pendingPayments = orders
-    .filter((o) => o.status !== "delivered")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
-
-  // Filter counts
-  const allCount = orders.length;
-  const upiCount = orders.filter((o) => o.paymentMethod === "upi").length;
-  const codCount = orders.filter((o) => o.paymentMethod === "cod").length;
-  const receivedCount = orders.filter((o) => o.status === "delivered").length;
-  const pendingCount = orders.filter((o) => o.status !== "delivered").length;
+  const { totalRevenue, receivedPayments, pendingPayments } = stats;
+  const { allCount, upiCount, codCount, receivedCount, pendingCount } = counts;
 
   if (loading) {
     return (

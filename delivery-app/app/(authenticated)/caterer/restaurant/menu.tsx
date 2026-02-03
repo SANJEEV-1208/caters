@@ -45,7 +45,21 @@ export default function RestaurantMenu() {
     }
   };
 
-  const handleDeleteItem = async (itemId: number) => {
+  const performDeleteItem = async (itemId: number) => {
+    setDeleting(itemId);
+    try {
+      await deleteMenuItem(itemId);
+      setMenuItems(menuItems.filter((item) => item.id !== itemId));
+      Alert.alert("Success", "Item deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+      Alert.alert("Error", "Failed to delete item");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const handleDeleteItem = (itemId: number) => {
     Alert.alert(
       "Delete Item",
       "Are you sure you want to delete this menu item?",
@@ -54,19 +68,7 @@ export default function RestaurantMenu() {
         {
           text: "Delete",
           onPress: () => {
-            void (async () => {
-              setDeleting(itemId);
-              try {
-                await deleteMenuItem(itemId);
-                setMenuItems(menuItems.filter((item) => item.id !== itemId));
-                Alert.alert("Success", "Item deleted successfully");
-              } catch (error) {
-                console.error("Failed to delete item:", error);
-                Alert.alert("Error", "Failed to delete item");
-              } finally {
-                setDeleting(null);
-              }
-            })();
+            performDeleteItem(itemId).catch(console.error);
           },
           style: "destructive",
         },

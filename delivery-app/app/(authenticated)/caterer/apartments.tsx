@@ -75,6 +75,17 @@ export default function ApartmentsScreen() {
     void loadApartments();
   }, []);
 
+  const performDelete = async (id: number) => {
+    try {
+      await deleteApartment(id);
+      setApartments(prev => prev.filter(apt => apt.id !== id));
+      Alert.alert("Success", "Apartment deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete apartment:", error);
+      Alert.alert("Error", "Failed to delete apartment");
+    }
+  };
+
   const handleDelete = (id: number, name: string) => {
     Alert.alert(
       "Delete Apartment",
@@ -85,16 +96,7 @@ export default function ApartmentsScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            void (async () => {
-              try {
-                await deleteApartment(id);
-                setApartments(prev => prev.filter(apt => apt.id !== id));
-                Alert.alert("Success", "Apartment deleted successfully");
-              } catch (error) {
-                console.error("Failed to delete apartment:", error);
-                Alert.alert("Error", "Failed to delete apartment");
-              }
-            })();
+            performDelete(id).catch(console.error);
           },
         },
       ]
