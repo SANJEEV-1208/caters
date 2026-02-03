@@ -22,6 +22,7 @@ import { MealTypeSelector } from "@/src/components/caterer/MealTypeSelector";
 import { DateSelector } from "@/src/components/caterer/DateSelector";
 import { CuisineSelector } from "@/src/components/caterer/CuisineSelector";
 import { validateMenuForm } from "@/src/utils/menuValidation";
+import { catererMenuStyles } from "@/src/styles/catererMenuStyles";
 
 
 export default function MenuAddScreen() {
@@ -126,17 +127,17 @@ export default function MenuAddScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={catererMenuStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <View style={catererMenuStyles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={catererMenuStyles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Menu Item</Text>
+        <Text style={catererMenuStyles.headerTitle}>Add Menu Item</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={catererMenuStyles.content} contentContainerStyle={catererMenuStyles.scrollContent}>
         {/* Reuse Item Button */}
         <TouchableOpacity
           style={styles.historyButton}
@@ -183,7 +184,7 @@ export default function MenuAddScreen() {
         />
 
         {/* Image Upload */}
-        <View style={styles.field}>
+        <View style={catererMenuStyles.field}>
           <CloudinaryImagePicker
             label="Food Image *"
             onImageUploaded={(url) => { setFormData({ ...formData, image: url }); }}
@@ -200,10 +201,10 @@ export default function MenuAddScreen() {
         />
 
         {/* In Stock */}
-        <View style={styles.field}>
-          <View style={styles.switchRow}>
+        <View style={catererMenuStyles.field}>
+          <View style={catererMenuStyles.switchRow}>
             <View>
-              <Text style={styles.label}>Available Now</Text>
+              <Text style={catererMenuStyles.label}>Available Now</Text>
               <Text style={styles.hint}>Item is in stock and ready to order</Text>
             </View>
             <Switch
@@ -217,14 +218,14 @@ export default function MenuAddScreen() {
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+          style={[catererMenuStyles.submitButton, loading && catererMenuStyles.submitButtonDisabled]}
           onPress={() => { void handleSubmit(); }}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.submitText}>Add Menu Item</Text>
+            <Text style={catererMenuStyles.submitText}>Add Menu Item</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -241,35 +242,6 @@ export default function MenuAddScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
   historyButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -289,36 +261,9 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  field: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-  },
-  submitButton: {
-    backgroundColor: "#10B981",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
+  hint: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
   },
 });

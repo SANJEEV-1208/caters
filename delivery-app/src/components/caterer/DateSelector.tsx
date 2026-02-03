@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { menuFormStyles } from "@/src/styles/menuFormStyles";
 
 interface DateOption {
   label: string;
@@ -47,8 +48,8 @@ export const DateSelector: React.FC<DateSelectorProps> = ({
   const dates = getDates();
 
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>Available Dates * (Select at least one)</Text>
+    <View style={menuFormStyles.field}>
+      <Text style={menuFormStyles.label}>Available Dates * (Select at least one)</Text>
       <View style={styles.datesGrid}>
         {dates.map((date) => (
           <TouchableOpacity
@@ -85,15 +86,6 @@ export const DateSelector: React.FC<DateSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  field: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
   datesGrid: {
     gap: 8,
   },

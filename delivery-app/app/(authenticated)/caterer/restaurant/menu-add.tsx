@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Pressable,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import { createMenuItem } from "@/src/api/catererMenuApi";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
 import { validateMenuForm } from "@/src/utils/menuValidation";
+import { restaurantMenuStyles as styles } from "@/src/styles/restaurantMenuStyles";
 
 export default function RestaurantMenuAdd() {
   const router = useRouter();
@@ -113,7 +114,7 @@ export default function RestaurantMenuAdd() {
 
         {/* Create Button */}
         <TouchableOpacity
-          style={[styles.createButton, loading && styles.createButtonDisabled]}
+          style={[styles.button, styles.createButton, loading && styles.buttonDisabled]}
           onPress={() => { void handleCreate(); }}
           disabled={loading}
         >
@@ -122,7 +123,7 @@ export default function RestaurantMenuAdd() {
           ) : (
             <>
               <Ionicons name="add" size={18} color="#FFFFFF" />
-              <Text style={styles.createButtonText}>Create Item</Text>
+              <Text style={styles.buttonText}>Create Item</Text>
             </>
           )}
         </TouchableOpacity>
@@ -133,53 +134,3 @@ export default function RestaurantMenuAdd() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    paddingTop: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  form: {
-    padding: 16,
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  createButton: {
-    backgroundColor: "#F59E0B",
-    borderRadius: 12,
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 12,
-  },
-  createButtonDisabled: {
-    opacity: 0.6,
-  },
-  createButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  spacer: {
-    height: 20,
-  },
-});

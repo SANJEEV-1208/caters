@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { menuFormStyles } from "@/src/styles/menuFormStyles";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
 type MealType = typeof MEAL_TYPES[number];
@@ -16,17 +17,17 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   disabled = false,
 }) => {
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>Meal Type *</Text>
-      <View style={styles.chipGroup}>
+    <View style={menuFormStyles.field}>
+      <Text style={menuFormStyles.label}>Meal Type *</Text>
+      <View style={menuFormStyles.chipGroup}>
         {MEAL_TYPES.map((type) => (
           <TouchableOpacity
             key={type}
-            style={[styles.chip, selectedType === type && styles.chipActive]}
+            style={[menuFormStyles.chip, selectedType === type && menuFormStyles.chipActive]}
             onPress={() => { onSelectType(type); }}
             disabled={disabled}
           >
-            <Text style={[styles.chipText, selectedType === type && styles.chipTextActive]}>
+            <Text style={[menuFormStyles.chipText, selectedType === type && menuFormStyles.chipTextActive]}>
               {type.replace("_", " ")}
             </Text>
           </TouchableOpacity>
@@ -35,42 +36,3 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  field: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
-  chipGroup: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  chipActive: {
-    backgroundColor: "#10B981",
-    borderColor: "#10B981",
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#6B7280",
-    textTransform: "capitalize",
-  },
-  chipTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-});

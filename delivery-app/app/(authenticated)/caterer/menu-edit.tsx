@@ -19,6 +19,8 @@ import { MealTypeSelector } from "@/src/components/caterer/MealTypeSelector";
 import { DateSelector } from "@/src/components/caterer/DateSelector";
 import { validateMenuForm } from "@/src/utils/menuValidation";
 import { getCatererCuisines } from "@/src/api/foodApi";
+import { catererMenuStyles } from "@/src/styles/catererMenuStyles";
+import { menuFormStyles } from "@/src/styles/menuFormStyles";
 
 export default function MenuEditScreen() {
   const router = useRouter();
@@ -134,16 +136,16 @@ export default function MenuEditScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+    <View style={catererMenuStyles.container}>
+      <View style={catererMenuStyles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={catererMenuStyles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Menu Item</Text>
+        <Text style={catererMenuStyles.headerTitle}>Edit Menu Item</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={catererMenuStyles.content} contentContainerStyle={catererMenuStyles.scrollContent}>
         {/* Using shared form fields component */}
         <MenuFormFields
           name={formData.name}
@@ -158,17 +160,17 @@ export default function MenuEditScreen() {
         />
 
         {/* Display cuisines as read-only chips (no add/delete in edit mode) */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Cuisine *</Text>
-          <View style={styles.chipGroup}>
+        <View style={catererMenuStyles.field}>
+          <Text style={catererMenuStyles.label}>Cuisine *</Text>
+          <View style={menuFormStyles.chipGroup}>
             {catererCuisines.map(cuisine => (
               <TouchableOpacity
                 key={cuisine.id}
-                style={[styles.chip, formData.cuisine === cuisine.name && styles.chipActive]}
+                style={[menuFormStyles.chip, formData.cuisine === cuisine.name && menuFormStyles.chipActive]}
                 onPress={() => { setFormData({ ...formData, cuisine: cuisine.name }); }}
                 disabled={saving}
               >
-                <Text style={[styles.chipText, formData.cuisine === cuisine.name && styles.chipTextActive]}>
+                <Text style={[menuFormStyles.chipText, formData.cuisine === cuisine.name && menuFormStyles.chipTextActive]}>
                   {cuisine.name}
                 </Text>
               </TouchableOpacity>
@@ -183,7 +185,7 @@ export default function MenuEditScreen() {
           disabled={saving}
         />
 
-        <View style={styles.field}>
+        <View style={catererMenuStyles.field}>
           <CloudinaryImagePicker
             label="Food Image *"
             onImageUploaded={(url) => { setFormData({ ...formData, image: url }); }}
@@ -199,10 +201,10 @@ export default function MenuEditScreen() {
           disabled={saving}
         />
 
-        <View style={styles.field}>
-          <View style={styles.switchRow}>
+        <View style={catererMenuStyles.field}>
+          <View style={catererMenuStyles.switchRow}>
             <View>
-              <Text style={styles.label}>Available Now</Text>
+              <Text style={catererMenuStyles.label}>Available Now</Text>
               <Text style={styles.hint}>Item is in stock and ready to order</Text>
             </View>
             <Switch
@@ -215,14 +217,14 @@ export default function MenuEditScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.submitButton, saving && styles.submitButtonDisabled]}
+          style={[catererMenuStyles.submitButton, saving && catererMenuStyles.submitButtonDisabled]}
           onPress={() => { void handleSubmit(); }}
           disabled={saving}
         >
           {saving ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.submitText}>Update Menu Item</Text>
+            <Text style={catererMenuStyles.submitText}>Update Menu Item</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -231,98 +233,15 @@ export default function MenuEditScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#F8F8F8",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  content: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  field: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 8,
-  },
-  chipGroup: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
-  chipActive: {
-    backgroundColor: "#10B981",
-    borderColor: "#10B981",
-  },
-  chipText: {
-    fontSize: 13,
-    fontWeight: "500",
+  hint: {
+    fontSize: 12,
     color: "#6B7280",
-    textTransform: "capitalize",
-  },
-  chipTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  switchRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
-  },
-  submitButton: {
-    backgroundColor: "#10B981",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    marginTop: 4,
   },
 });
