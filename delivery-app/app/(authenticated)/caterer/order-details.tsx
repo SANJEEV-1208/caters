@@ -206,7 +206,7 @@ export default function OrderDetailsScreen() {
             {nextAction?.status && (
               <TouchableOpacity
                 style={[styles.primaryButton, { backgroundColor: nextAction.color }]}
-                onPress={() => { if (nextAction.status) { void handleStatusUpdate(nextAction.status); } }}
+                onPress={() => { void handleStatusUpdate(nextAction.status); }}
                 disabled={updating}
               >
                 {updating ? (

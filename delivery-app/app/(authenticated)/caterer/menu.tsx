@@ -116,14 +116,16 @@ export default function MenuScreen() {
         {
           text: "Delete",
           style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteMenuItem(id);
-              setMenuItems(prev => prev.filter(item => item.id !== id));
-            } catch (error) {
-              console.error("Failed to delete item:", error);
-              Alert.alert("Error", "Failed to delete menu item");
-            }
+          onPress: () => {
+            void (async () => {
+              try {
+                await deleteMenuItem(id);
+                setMenuItems(prev => prev.filter(item => item.id !== id));
+              } catch (error) {
+                console.error("Failed to delete item:", error);
+                Alert.alert("Error", "Failed to delete menu item");
+              }
+            })();
           },
         },
       ]

@@ -82,15 +82,17 @@ export default function TablesScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteTable(table.id);
-              setTables((prev) => prev.filter((t) => t.id !== table.id));
-              Alert.alert('Success', `${table.tableNumber} deleted successfully`);
-            } catch (error) {
-              console.error('Delete table error:', error);
-              Alert.alert('Error', 'Failed to delete table');
-            }
+          onPress: () => {
+            void (async () => {
+              try {
+                await deleteTable(table.id);
+                setTables((prev) => prev.filter((t) => t.id !== table.id));
+                Alert.alert('Success', `${table.tableNumber} deleted successfully`);
+              } catch (error) {
+                console.error('Delete table error:', error);
+                Alert.alert('Error', 'Failed to delete table');
+              }
+            })();
           },
         },
       ]

@@ -43,24 +43,31 @@ export const MockRazorpayCheckout = {
         const shouldSucceed = true; // Set to false to test failure
         const shouldCancel = false; // Set to true to test cancellation
 
+        // Note: shouldCancel is always false in current implementation
         if (shouldCancel) {
           // Simulate user cancellation
-          reject({
-            code: 2,
-            description: 'Payment cancelled by user',
-            source: 'customer',
-            step: 'payment_authorization',
-            reason: 'user_cancelled',
-            metadata: {},
-          });
-        } else if (shouldSucceed) {
+          reject(new Error('Payment cancelled by user'));
+        } else {
           // Simulate successful payment
           const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           resolve({
             razorpay_payment_id: mockPaymentId,
             razorpay_order_id: `order_mock_${Date.now()}`,
           });
-        } else {
+        }
+
+        // Payment failure case (unreachable due to shouldSucceed always being true)
+        /* else {
+          // Simulate payment failure
+          reject({
+            code: 0,
+            description: 'Payment processing failed',
+            source: 'gateway',
+            step: 'payment_authorization',
+            reason: 'payment_failed',
+            metadata: {},
+          });
+        } */
           // Simulate payment failure
           reject({
             code: 0,

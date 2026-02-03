@@ -73,18 +73,20 @@ export default function PaymentQrScreen() {
         {
           text: "Remove",
           style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              const updatedUser = await updatePaymentQrCode(user.id, "");
-              setUser(updatedUser);
-              setQrCodeUrl("");
-              Alert.alert("Success", "Payment QR code removed");
-            } catch (error) {
-              Alert.alert("Error", "Failed to remove QR code");
-            } finally {
-              setLoading(false);
-            }
+          onPress: () => {
+            void (async () => {
+              setLoading(true);
+              try {
+                const updatedUser = await updatePaymentQrCode(user.id, "");
+                setUser(updatedUser);
+                setQrCodeUrl("");
+                Alert.alert("Success", "Payment QR code removed");
+              } catch (error) {
+                Alert.alert("Error", "Failed to remove QR code");
+              } finally {
+                setLoading(false);
+              }
+            })();
           },
         },
       ]

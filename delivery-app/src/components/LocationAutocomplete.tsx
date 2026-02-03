@@ -45,7 +45,7 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
   }, [value]);
 
   const fetchSuggestions = async (query: string) => {
-    if (API_KEY === null || API_KEY === undefined || API_KEY === '') {
+    if (!API_KEY) {
       console.warn('⚠️ LocationIQ API key not configured. Please add your API key.');
       return;
     }

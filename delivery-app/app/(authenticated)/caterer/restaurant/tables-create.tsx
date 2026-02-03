@@ -56,35 +56,37 @@ export default function TablesCreateScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Create',
-          onPress: async () => {
-            try {
-              setLoading(true);
+          onPress: () => {
+            void (async () => {
+              try {
+                setLoading(true);
 
-              const response = await createBulkTables({
-                catererId: user.id,
-                count: tableCount,
-                restaurantName: user.restaurantName || 'Restaurant',
-              });
+                const response = await createBulkTables({
+                  catererId: user.id,
+                  count: tableCount,
+                  restaurantName: user.restaurantName || 'Restaurant',
+                });
 
-              Alert.alert(
-                'Success',
-                `Successfully created ${response.total} table${response.total > 1 ? 's' : ''} with QR codes!`,
-                [
-                  {
-                    text: 'View Tables',
-                    onPress: () => router.back(),
-                  },
-                ]
-              );
-            } catch (error: unknown) {
-              console.error('Create tables error:', error);
-              Alert.alert(
-                'Error',
-                error.message || 'Failed to create tables. Please try again.'
-              );
-            } finally {
-              setLoading(false);
-            }
+                Alert.alert(
+                  'Success',
+                  `Successfully created ${response.total} table${response.total > 1 ? 's' : ''} with QR codes!`,
+                  [
+                    {
+                      text: 'View Tables',
+                      onPress: () => router.back(),
+                    },
+                  ]
+                );
+              } catch (error: unknown) {
+                console.error('Create tables error:', error);
+                Alert.alert(
+                  'Error',
+                  error.message || 'Failed to create tables. Please try again.'
+                );
+              } finally {
+                setLoading(false);
+              }
+            })();
           },
         },
       ]

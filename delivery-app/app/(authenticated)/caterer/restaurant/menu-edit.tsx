@@ -26,7 +26,7 @@ export default function RestaurantMenuEdit() {
   const itemId = Number(params?.id || 0);
   const initialName = (params?.name as string) || "";
   const initialPrice = (params?.price as string) || "0";
-  const initialCategory = (params?.category as "veg" | "non-veg") || "veg";
+  const initialCategory = (params?.category as "veg" | "non-veg") ?? "veg";
   const initialImage = params?.image ? JSON.parse(params.image as string) : "";
   const initialDescription = (params?.description as string) || "";
 

@@ -93,7 +93,7 @@ export default function RestaurantMenuBrowser() {
   const handleRemoveFromCart = (itemId: number) => {
     setCart((prev) => {
       const newCart = { ...prev };
-      if (itemId in newCart && newCart[itemId] > 1) {
+      if (itemId in newCart && typeof newCart[itemId] === 'number' && newCart[itemId] > 1) {
         newCart[itemId]--;
         return newCart;
       } else {

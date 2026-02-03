@@ -53,18 +53,20 @@ export default function RestaurantMenu() {
         { text: "Cancel", onPress: () => {} },
         {
           text: "Delete",
-          onPress: async () => {
-            setDeleting(itemId);
-            try {
-              await deleteMenuItem(itemId);
-              setMenuItems(menuItems.filter((item) => item.id !== itemId));
-              Alert.alert("Success", "Item deleted successfully");
-            } catch (error) {
-              console.error("Failed to delete item:", error);
-              Alert.alert("Error", "Failed to delete item");
-            } finally {
-              setDeleting(null);
-            }
+          onPress: () => {
+            void (async () => {
+              setDeleting(itemId);
+              try {
+                await deleteMenuItem(itemId);
+                setMenuItems(menuItems.filter((item) => item.id !== itemId));
+                Alert.alert("Success", "Item deleted successfully");
+              } catch (error) {
+                console.error("Failed to delete item:", error);
+                Alert.alert("Error", "Failed to delete item");
+              } finally {
+                setDeleting(null);
+              }
+            })();
           },
           style: "destructive",
         },

@@ -111,7 +111,11 @@ export default function Search() {
         : {};
 
       const lowerTerm = searchTerm.toLowerCase();
-      searchCounts[lowerTerm] = (searchCounts[lowerTerm] ?? 0) + 1;
+      if (Object.hasOwn(searchCounts, lowerTerm)) {
+        searchCounts[lowerTerm]++;
+      } else {
+        searchCounts[lowerTerm] = 1;
+      }
 
       await AsyncStorage.setItem(SEARCH_TRACKING_KEY, JSON.stringify(searchCounts));
     } catch (error) {

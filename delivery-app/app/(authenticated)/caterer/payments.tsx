@@ -50,7 +50,7 @@ export default function PaymentsScreen() {
       await Promise.all(
         uniqueCustomerIds.map(async (customerId) => {
           const customer = await getUserById(customerId);
-          if (customer) {
+          if (customer && customerId) {
             customerData[customerId] = customer;
           }
         })
