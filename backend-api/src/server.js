@@ -10,6 +10,8 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const apartmentRoutes = require('./routes/apartmentRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
+const pool = require('./config/database');
+const initializeDatabase = require('./database/init');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -69,13 +71,39 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Auto-initialize database on first startup (for Render deployment)
+async function checkAndInitializeDatabase() {
+  try {
+    // Check if users table exists
+    const result = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')"
+    );
+
+    const tableExists = result.rows[0].exists;
+
+    if (!tableExists) {
+      console.log('🔧 Database tables not found. Initializing database...');
+      await initializeDatabase();
+      console.log('✅ Database initialized successfully!');
+    } else {
+      console.log('✅ Database already initialized');
+    }
+  } catch (error) {
+    console.error('⚠️ Database check/initialization error:', error.message);
+    // Don't crash the server - it will retry on next restart
+  }
+}
+
 // Start server - Listen on all network interfaces (0.0.0.0) for mobile device access
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   const localIp = getLocalIpAddress();
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Network access: http://${localIp}:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
   console.log(`\n📱 Mobile app should connect to: http://${localIp}:${PORT}/api`);
+
+  // Auto-initialize database if needed
+  await checkAndInitializeDatabase();
 });
 
 module.exports = app;
