@@ -11,6 +11,7 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
@@ -188,100 +189,106 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
               style={styles.modalContent}
               onPress={(e) => { e.stopPropagation(); }}
             >
-              {/* Header */}
-              <View style={styles.modalHeader}>
-                <View style={styles.modalHeaderLeft}>
-                  <View style={styles.modalIconContainer}>
-                    <Ionicons name="restaurant" size={24} color="#10B981" />
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+              >
+                {/* Header */}
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalHeaderLeft}>
+                    <View style={styles.modalIconContainer}>
+                      <Ionicons name="restaurant" size={24} color="#10B981" />
+                    </View>
+                    <View>
+                      <Text style={styles.modalTitle}>Add New Cuisine</Text>
+                      <Text style={styles.modalSubtitle}>Create a new cuisine category</Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={styles.modalTitle}>Add New Cuisine</Text>
-                    <Text style={styles.modalSubtitle}>Create a new cuisine category</Text>
-                  </View>
+                  <TouchableOpacity style={styles.modalCloseButton} onPress={closeModal}>
+                    <Ionicons name="close-circle" size={28} color="#9CA3AF" />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.modalCloseButton} onPress={closeModal}>
-                  <Ionicons name="close-circle" size={28} color="#9CA3AF" />
-                </TouchableOpacity>
-              </View>
 
-              <View style={styles.modalDivider} />
+                <View style={styles.modalDivider} />
 
-              {/* Cuisine Name Input */}
-              <View style={styles.modalInputContainer}>
-                <View style={styles.inputLabelRow}>
-                  <Ionicons name="text-outline" size={18} color="#10B981" />
-                  <Text style={styles.inputLabel}>Cuisine Name</Text>
-                  <View style={styles.requiredBadge}>
-                    <Text style={styles.requiredText}>Required</Text>
+                {/* Cuisine Name Input */}
+                <View style={styles.modalInputContainer}>
+                  <View style={styles.inputLabelRow}>
+                    <Ionicons name="text-outline" size={18} color="#10B981" />
+                    <Text style={styles.inputLabel}>Cuisine Name</Text>
+                    <View style={styles.requiredBadge}>
+                      <Text style={styles.requiredText}>Required</Text>
+                    </View>
+                  </View>
+                  <View style={styles.inputWrapper}>
+                    <Ionicons
+                      name="fast-food-outline"
+                      size={20}
+                      color="#9CA3AF"
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="e.g., Shawarma, Biryani, Pasta"
+                      value={newCuisineName}
+                      onChangeText={setNewCuisineName}
+                      placeholderTextColor="#9CA3AF"
+                      autoFocus
+                      returnKeyType="done"
+                    />
                   </View>
                 </View>
-                <View style={styles.inputWrapper}>
-                  <Ionicons
-                    name="fast-food-outline"
-                    size={20}
-                    color="#9CA3AF"
-                    style={styles.inputIcon}
-                  />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="e.g., Shawarma, Biryani, Pasta"
-                    value={newCuisineName}
-                    onChangeText={setNewCuisineName}
-                    placeholderTextColor="#9CA3AF"
-                    autoFocus
-                    returnKeyType="done"
-                  />
-                </View>
-              </View>
 
-              {/* Cuisine Image Upload */}
-              <View style={styles.cuisineImageUpload}>
-                <View style={styles.inputLabelRow}>
-                  <Ionicons name="image-outline" size={18} color="#10B981" />
-                  <Text style={styles.inputLabel}>Cuisine Image</Text>
-                  <View style={styles.requiredBadge}>
-                    <Text style={styles.requiredText}>Required</Text>
+                {/* Cuisine Image Upload */}
+                <View style={styles.cuisineImageUpload}>
+                  <View style={styles.inputLabelRow}>
+                    <Ionicons name="image-outline" size={18} color="#10B981" />
+                    <Text style={styles.inputLabel}>Cuisine Image</Text>
+                    <View style={styles.requiredBadge}>
+                      <Text style={styles.requiredText}>Required</Text>
+                    </View>
+                  </View>
+                  <View style={styles.imagePickerCard}>
+                    <CloudinaryImagePicker
+                      label=""
+                      onImageUploaded={(url) => { setNewCuisineImage(url); }}
+                      currentImage={newCuisineImage}
+                      disabled={loading}
+                    />
                   </View>
                 </View>
-                <View style={styles.imagePickerCard}>
-                  <CloudinaryImagePicker
-                    label=""
-                    onImageUploaded={(url) => { setNewCuisineImage(url); }}
-                    currentImage={newCuisineImage}
+
+                {/* Info Card */}
+                <View style={styles.modalInfoCard}>
+                  <Ionicons name="information-circle" size={20} color="#3B82F6" />
+                  <Text style={styles.modalInfoText}>
+                    This cuisine will be available for all your menu items
+                  </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity style={styles.modalCancelButton} onPress={closeModal}>
+                    <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                    <Text style={styles.modalCancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalAddButton, loading && styles.modalAddButtonDisabled]}
+                    onPress={() => { void handleAddCuisine(); }}
                     disabled={loading}
-                  />
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                        <Text style={styles.modalAddButtonText}>Add Cuisine</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
                 </View>
-              </View>
-
-              {/* Info Card */}
-              <View style={styles.modalInfoCard}>
-                <Ionicons name="information-circle" size={20} color="#3B82F6" />
-                <Text style={styles.modalInfoText}>
-                  This cuisine will be available for all your menu items
-                </Text>
-              </View>
-
-              {/* Action Buttons */}
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={styles.modalCancelButton} onPress={closeModal}>
-                  <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
-                  <Text style={styles.modalCancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalAddButton, loading && styles.modalAddButtonDisabled]}
-                  onPress={() => { void handleAddCuisine(); }}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" />
-                  ) : (
-                    <>
-                      <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
-                      <Text style={styles.modalAddButtonText}>Add Cuisine</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
+              </ScrollView>
             </Pressable>
           </KeyboardAvoidingView>
         </Pressable>
@@ -551,5 +558,9 @@ const styles = StyleSheet.create({
   },
   cuisineImageUpload: {
     marginBottom: 24,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
 });
