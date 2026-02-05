@@ -1,0 +1,36 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: kaaspro-db
+    env: node
+    plan: free
+    databaseName: kaaspro_delivery_db
+    databaseUser: kaaspro_user
+
+  # Backend API Server
+  - type: web
+    name: kaaspro-backend
+    env: node
+    plan: free
+    rootDir: backend-api
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kaaspro-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+    # Automatically run database initialization after first deploy
+    postDeployCommand: npm run init-db
