@@ -290,6 +290,8 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   centerContent: {
     justifyContent: "center",

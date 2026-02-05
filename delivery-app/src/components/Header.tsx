@@ -82,13 +82,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    minHeight: 60,
   },
   leftSection: {
     flex: 1,
+    justifyContent: "center",
   },
   label: {
     fontSize: 12,
     color: "#6B7280",
+    marginBottom: 2,
   },
   name: {
     fontSize: 16,
