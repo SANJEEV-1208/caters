@@ -38,6 +38,7 @@ yarn-error.log*
 Thumbs.db
 *.class
 *.jar
+!gradle-wrapper.jar
 *.war
 
 # Mobile app (Expo/React Native)
