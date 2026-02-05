@@ -1,10 +1,9 @@
 {
   "expo": {
-    "name": "delivery-app",
+    "name": "KaasproFoods",
     "slug": "delivery-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/food.jpg",
     "scheme": "deliveryapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
@@ -13,8 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/food.jpg",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#10B981"
       },
       "softwareKeyboardLayoutMode": "pan",
       "edgeToEdgeEnabled": true,
@@ -29,10 +27,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/food.jpg",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#10B981"
         }
       ],
       [

@@ -99,7 +99,9 @@ const filterOrdersByStatus = (orders: Order[], status: OrderStatus | "all") => {
 
 const filterOrdersByTable = (orders: Order[], tableNum: number | "all") => {
   if (tableNum === "all") return orders;
-  return orders.filter((order) => order.tableNumber === tableNum);
+  return orders.filter((order) =>
+    order.tableNumber != null && Number(order.tableNumber) === Number(tableNum)
+  );
 };
 
 export default function RestaurantOrders() {

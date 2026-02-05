@@ -2,7 +2,7 @@
 // Update BASE_URL_IP with your computer's IP address for mobile device testing
 // Find your IP: Windows (ipconfig), Mac/Linux (ifconfig)
 
-const BASE_URL_IP = ' 192.168.1.35'; // Change this to your computer's IP address
+const BASE_URL_IP = '192.168.1.33'; // Change this to your computer's IP address
 const PORT = '5000';
 
 export const API_CONFIG = {

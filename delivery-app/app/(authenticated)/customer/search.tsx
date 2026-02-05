@@ -91,8 +91,8 @@ export default function Search() {
       }));
 
       // Sort by search count and get top 5
-      const topItems = itemsWithCounts
-        .toSorted((a, b) => b.searchCount - a.searchCount)
+      const topItems = [...itemsWithCounts]
+        .sort((a, b) => b.searchCount - a.searchCount)
         .slice(0, 5);
 
       setTrending(topItems);

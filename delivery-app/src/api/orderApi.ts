@@ -40,7 +40,7 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
   } catch (error: unknown) {
     console.error('❌ createOrder error:', error);
 
-    if (error.message?.includes('fetch')) {
+    if (error instanceof Error && error.message?.includes('fetch')) {
       throw new Error('Cannot connect to server. Please check your network connection and ensure the backend is running.');
     }
 
