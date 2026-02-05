@@ -25,9 +25,11 @@ expo-env.d.ts
 *.mobileprovision
 
 # Android
-/android
-*.gradle
-.gradle/
+/android/app/build
+/android/build
+/android/.gradle
+android/.gradle
+local.properties
 *.apk
 *.ap_
 
