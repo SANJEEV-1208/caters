@@ -1,14 +1,14 @@
 // Cloudinary Configuration for Image Uploads
-// Replace these values with your actual Cloudinary credentials
+// Using production credentials from backend
 
 export const CLOUDINARY_CONFIG = {
-  cloudName: process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME',
+  cloudName: process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dgejbxsy7',
   uploadPreset: process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'kaaspro_menu_images',
   folder: 'kaaspro/menu-items',
 };
 
 export const CLOUDINARY_QR_CONFIG = {
-  cloudName: process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'YOUR_CLOUD_NAME',
+  cloudName: process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dgejbxsy7',
   uploadPreset: process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'kaaspro_menu_images',
   folder: 'kaaspro/qr-codes',
 };
