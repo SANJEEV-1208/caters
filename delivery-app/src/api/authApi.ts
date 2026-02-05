@@ -6,6 +6,8 @@ const BASE_URL = API_CONFIG.BASE_URL;
 // Login - check if phone number exists in users collection
 export const loginUser = async (phone: string): Promise<User | null> => {
   try {
+    console.log('🔍 Login attempt:', { phone, endpoint: `${BASE_URL}/auth/login` });
+
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
@@ -14,17 +16,28 @@ export const loginUser = async (phone: string): Promise<User | null> => {
       body: JSON.stringify({ phone }),
     });
 
+    console.log('📡 Login response:', { status: res.status, ok: res.ok });
+
     if (!res.ok) {
       if (res.status === 404) {
+        console.log('❌ User not found (404)');
         return null; // User not found
       }
+      const errorText = await res.text();
+      console.error('❌ Login failed:', { status: res.status, error: errorText });
       throw new Error("Login failed");
     }
 
     const user = await res.json();
+    console.log('✅ Login successful:', user.phone, user.role);
     return user;
   } catch (error) {
-    console.error("Login API error:", error);
+    console.error("❌ Login API error:", error);
+    if (error instanceof TypeError && error.message.includes('Network request failed')) {
+      console.error('🔥 NETWORK ERROR: Cannot reach backend server');
+      console.error(`   Check if backend is running at ${BASE_URL}`);
+      console.error('   Ensure phone and computer are on same WiFi network');
+    }
     throw error;
   }
 };

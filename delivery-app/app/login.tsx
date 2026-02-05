@@ -43,17 +43,30 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
+      console.log('🚀 Starting login with phone:', fullPhone);
 
       const success = await login(fullPhone);
 
       if (!success) {
-        Alert.alert("Not Registered", "Phone number not found.");
+        Alert.alert(
+          "Not Registered",
+          `Phone number ${fullPhone} not found in database.\n\nTry these test numbers:\n+919876543210\n9003995965\n+919123456789`
+        );
       }
       // ✅ Do NOT check `user` here for redirect
       // Redirect happens automatically on next render
     } catch (error) {
-      Alert.alert("Error", "Something went wrong");
-      console.log("LOGIN ERROR:", error);
+      console.error("❌ LOGIN ERROR:", error);
+
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('Network request failed')) {
+        Alert.alert(
+          "Connection Error",
+          "Cannot connect to server. Please ensure:\n\n1. Backend server is running\n2. Phone and computer are on same WiFi\n3. Server IP is correct (192.168.1.33:5000)"
+        );
+      } else {
+        Alert.alert("Error", "Something went wrong. Check console for details.");
+      }
     } finally {
       setLoading(false);
     }
