@@ -11,7 +11,6 @@ const apartmentRoutes = require('./routes/apartmentRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
 const pool = require('./config/database');
-const initializeDatabase = require('./database/init');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -83,6 +82,8 @@ async function checkAndInitializeDatabase() {
 
     if (!tableExists) {
       console.log('🔧 Database tables not found. Initializing database...');
+      // Use dynamic import to load the init module (handles top-level await)
+      const { default: initializeDatabase } = await import('./database/init.js');
       await initializeDatabase();
       console.log('✅ Database initialized successfully!');
     } else {
@@ -90,6 +91,7 @@ async function checkAndInitializeDatabase() {
     }
   } catch (error) {
     console.error('⚠️ Database check/initialization error:', error.message);
+    console.error(error);
     // Don't crash the server - it will retry on next restart
   }
 }
