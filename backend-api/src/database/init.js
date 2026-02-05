@@ -32,15 +32,17 @@ async function initializeDatabase() {
   }
 }
 
-// Using top-level await when run directly (ES2022)
+// Run directly from command line
 if (require.main === module) {
-  try {
-    await initializeDatabase();
-    console.log('Done!');
-    process.exit(0);
-  } catch {
-    process.exit(1);
-  }
+  initializeDatabase()
+    .then(() => {
+      console.log('Done!');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('Failed:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = initializeDatabase;

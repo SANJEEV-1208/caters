@@ -82,8 +82,7 @@ async function checkAndInitializeDatabase() {
 
     if (!tableExists) {
       console.log('🔧 Database tables not found. Initializing database...');
-      // Use dynamic import to load the init module (handles top-level await)
-      const { default: initializeDatabase } = await import('./database/init.js');
+      const initializeDatabase = require('./database/init');
       await initializeDatabase();
       console.log('✅ Database initialized successfully!');
     } else {
