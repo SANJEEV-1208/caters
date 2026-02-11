@@ -10,6 +10,8 @@ export type User = {
   restaurantName?: string; // For restaurant caterers
   restaurantAddress?: string; // For restaurant caterers
   paymentQrCode?: string; // For caterers - GPay/UPI QR code image URL
+  profilePicture?: string; // Profile picture URL
+  token?: string;        // JWT token for authentication
   createdAt?: string;
 };
 

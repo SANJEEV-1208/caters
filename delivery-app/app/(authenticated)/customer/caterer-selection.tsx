@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
@@ -13,10 +15,13 @@ import { useAuth } from "@/src/context/AuthContext";
 import { getSubscribedCaterers } from "@/src/api/subscriptionApi";
 import { User } from "@/src/types/auth";
 import CatererCard from "@/src/components/CatererCard";
+import ProfileModal from "@/src/components/ProfileModal";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
 
 export default function CatererSelectionScreen() {
   const [caterers, setCaterers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
   const { user, setSelectedCatererId } = useAuth();
   const router = useRouter();
 
@@ -79,6 +84,18 @@ export default function CatererSelectionScreen() {
         <Text style={styles.subtitle}>
           Choose a caterer to browse their menu
         </Text>
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => setProfileModalVisible(true)}
+        >
+          {user?.profilePicture ? (
+            <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profilePlaceholder}>
+              <Ionicons name="person" size={20} color="#10B981" />
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -92,6 +109,11 @@ export default function CatererSelectionScreen() {
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+      />
+
+      <ProfileModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
       />
     </View>
     </SafeAreaView>
@@ -109,6 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
+    position: "relative",
   },
   title: {
     fontSize: 28,
@@ -156,5 +179,27 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     lineHeight: 20,
+  },
+  iconButton: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  profileImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  profilePlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E6F4F0",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -33,6 +33,8 @@ CREATE TABLE users (
   restaurant_name VARCHAR(200),
   restaurant_address TEXT,
   payment_qr_code TEXT,
+  profile_picture TEXT,
+  pin_hash VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

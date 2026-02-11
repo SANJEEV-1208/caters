@@ -5,7 +5,7 @@
 const USE_PRODUCTION = true; // Set to false for local development
 
 const PRODUCTION_URL = 'https://kaaspro-backend.onrender.com/api';
-const LOCAL_IP = '192.168.1.33';
+const LOCAL_IP = '192.168.1.48';
 const LOCAL_PORT = '5000';
 const LOCAL_URL = `http://${LOCAL_IP}:${LOCAL_PORT}/api`;
 

@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { signupRestaurant } from "@/src/api/authApi";
+import { Ionicons } from "@expo/vector-icons";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
 
 export default function RestaurantSignupScreen() {
@@ -19,6 +20,10 @@ export default function RestaurantSignupScreen() {
   const [restaurantAddress, setRestaurantAddress] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [pin, setPinState] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const [showConfirmPin, setShowConfirmPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
@@ -41,6 +46,22 @@ export default function RestaurantSignupScreen() {
       Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
       return;
     }
+    if (!pin.trim()) {
+      Alert.alert("Required", "Please create a PIN to secure your account");
+      return;
+    }
+    if (pin.length < 4 || pin.length > 6) {
+      Alert.alert("Invalid PIN", "PIN must be 4-6 digits");
+      return;
+    }
+    if (!/^\d+$/.test(pin)) {
+      Alert.alert("Invalid PIN", "PIN must contain only numbers");
+      return;
+    }
+    if (pin !== confirmPin) {
+      Alert.alert("PIN Mismatch", "PINs do not match. Please try again.");
+      return;
+    }
 
     setLoading(true);
     const fullPhone = `+91${phone}`;
@@ -51,6 +72,7 @@ export default function RestaurantSignupScreen() {
         name: ownerName.trim(),
         restaurantName: restaurantName.trim(),
         restaurantAddress: restaurantAddress.trim(),
+        pin: pin,
       });
 
       // Add restaurant type info to the user object
@@ -66,10 +88,11 @@ export default function RestaurantSignupScreen() {
       
       // Will be redirected to (authenticated) by root layout
     } catch (error: unknown) {
-      if (error?.message?.includes("already exists")) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      if (errorMessage.includes("already exists")) {
         Alert.alert("Already Registered", "This phone number is already registered. Please login to upgrade your account to restaurant.");
       } else {
-        Alert.alert("Error", error?.message || "An error occurred during registration. Please try again.");
+        Alert.alert("Error", `Registration failed: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
@@ -145,6 +168,60 @@ export default function RestaurantSignupScreen() {
               Phone number must be 10 digits
             </Text>
           )}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Create PIN (4-6 digits) *</Text>
+          <View style={styles.pinContainer}>
+            <TextInput
+              style={styles.pinInput}
+              placeholder="Enter your PIN"
+              placeholderTextColor="#A0AEC0"
+              keyboardType="numeric"
+              maxLength={6}
+              value={pin}
+              onChangeText={setPinState}
+              secureTextEntry={!showPin}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPin(!showPin)}
+            >
+              <Ionicons
+                name={showPin ? "eye-off" : "eye"}
+                size={20}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Confirm PIN *</Text>
+          <View style={styles.pinContainer}>
+            <TextInput
+              style={styles.pinInput}
+              placeholder="Re-enter your PIN"
+              placeholderTextColor="#A0AEC0"
+              keyboardType="numeric"
+              maxLength={6}
+              value={confirmPin}
+              onChangeText={setConfirmPin}
+              secureTextEntry={!showConfirmPin}
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowConfirmPin(!showConfirmPin)}
+            >
+              <Ionicons
+                name={showConfirmPin ? "eye-off" : "eye"}
+                size={20}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Signup Button */}
@@ -253,6 +330,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#EF4444",
     marginTop: 4,
+  },
+  pinContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  pinInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1A1A1A",
+    fontWeight: "600",
+    letterSpacing: 2,
+  },
+  eyeButton: {
+    padding: 4,
   },
   signupButton: {
     backgroundColor: "#F59E0B",

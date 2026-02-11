@@ -1,23 +1,75 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
+const { authenticateToken, requireRole } = require('../middleware/auth');
+const { orderLimiter } = require('../middleware/rateLimiter');
+const {
+  validateOrder,
+  validateTransactionId,
+  validateOrderId,
+  validateCustomerId,
+  validateCatererId,
+  handleValidationErrors
+} = require('../middleware/validators');
 
-// POST /api/orders - Create order
-router.post('/', orderController.createOrder);
+// POST /api/orders - Create order (protected, customer only, rate limited, with transaction validation)
+router.post(
+  '/',
+  authenticateToken,
+  requireRole('customer'),
+  orderLimiter,
+  validateOrder,
+  handleValidationErrors,
+  validateTransactionId, // Custom middleware for transaction ID validation
+  orderController.createOrder
+);
 
-// GET /api/orders/customer - Get orders by customer
-router.get('/customer', orderController.getOrdersByCustomer);
+// GET /api/orders/customer - Get orders by customer (protected, customer only)
+router.get(
+  '/customer',
+  authenticateToken,
+  requireRole('customer'),
+  validateCustomerId,
+  handleValidationErrors,
+  orderController.getOrdersByCustomer
+);
 
-// GET /api/orders/caterer - Get orders by caterer
-router.get('/caterer', orderController.getOrdersByCaterer);
+// GET /api/orders/caterer - Get orders by caterer (protected, caterer only)
+router.get(
+  '/caterer',
+  authenticateToken,
+  requireRole('caterer'),
+  validateCatererId,
+  handleValidationErrors,
+  orderController.getOrdersByCaterer
+);
 
-// GET /api/orders/:id - Get order by ID
-router.get('/:id', orderController.getOrderById);
+// GET /api/orders/:id - Get order by ID (protected)
+router.get(
+  '/:id',
+  authenticateToken,
+  validateOrderId,
+  handleValidationErrors,
+  orderController.getOrderById
+);
 
-// PATCH /api/orders/:id/status - Update order status
-router.patch('/:id/status', orderController.updateOrderStatus);
+// PATCH /api/orders/:id/status - Update order status (protected, caterer only)
+router.patch(
+  '/:id/status',
+  authenticateToken,
+  requireRole('caterer'),
+  validateOrderId,
+  handleValidationErrors,
+  orderController.updateOrderStatus
+);
 
-// DELETE /api/orders/:id - Delete order
-router.delete('/:id', orderController.deleteOrder);
+// DELETE /api/orders/:id - Delete order (protected, admin only - not implemented yet)
+router.delete(
+  '/:id',
+  authenticateToken,
+  validateOrderId,
+  handleValidationErrors,
+  orderController.deleteOrder
+);
 
 module.exports = router;

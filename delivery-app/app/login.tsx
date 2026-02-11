@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [phone, setPhone] = useState("");
+  const [pin, setPinState] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { login, user, isAuthenticated } = useAuth(); // get isAuthenticated
@@ -43,9 +45,9 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      console.log('🚀 Starting login with phone:', fullPhone);
+      console.log('🚀 Starting login with phone:', fullPhone, 'PIN provided:', !!pin);
 
-      const success = await login(fullPhone);
+      const success = await login(fullPhone, pin || undefined);
 
       if (!success) {
         Alert.alert(
@@ -55,8 +57,23 @@ export default function LoginScreen() {
       }
       // ✅ Do NOT check `user` here for redirect
       // Redirect happens automatically on next render
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("❌ LOGIN ERROR:", error);
+
+      // Check if user needs to setup PIN
+      if (error instanceof Error && error.message === 'PIN_SETUP_REQUIRED') {
+        console.log('📍 Navigating to PIN setup');
+        const setupData = (error as unknown as { setupData: { userId: number; phone: string; name: string } }).setupData;
+        router.push({
+          pathname: "/setup-pin",
+          params: {
+            userId: String(setupData.userId),
+            phone: setupData.phone,
+            name: setupData.name,
+          }
+        });
+        return;
+      }
 
       // Check if it's a network error
       if (error instanceof TypeError && error.message.includes('Network request failed')) {
@@ -65,7 +82,8 @@ export default function LoginScreen() {
           "Cannot connect to server. Please ensure:\n\n1. Backend server is running\n2. Phone and computer are on same WiFi\n3. Server IP is correct (192.168.1.33:5000)"
         );
       } else {
-        Alert.alert("Error", "Something went wrong. Check console for details.");
+        const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+        Alert.alert("Error", errorMessage);
       }
     } finally {
       setLoading(false);
@@ -121,6 +139,36 @@ export default function LoginScreen() {
               autoFocus
             />
           </View>
+        </View>
+
+        {/* PIN Input */}
+        <View style={styles.inputSection}>
+          <Text style={styles.label}>PIN (4-6 digits)</Text>
+          <View style={styles.pinContainer}>
+            <TextInput
+              style={styles.pinInput}
+              placeholder="Enter your PIN"
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+              maxLength={6}
+              value={pin}
+              onChangeText={setPinState}
+              secureTextEntry={!showPin}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPin(!showPin)}
+            >
+              <Ionicons
+                name={showPin ? "eye-off" : "eye"}
+                size={20}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.helperText}>
+            First time? Leave PIN empty - you'll set it after login
+          </Text>
         </View>
 
         {/* Login Button */}
@@ -263,6 +311,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#1A1A1A",
     paddingHorizontal: 16,
+  },
+  pinContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    overflow: "hidden",
+    height: 50,
+    paddingHorizontal: 16,
+  },
+  pinInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1A1A1A",
+    fontWeight: "600",
+    letterSpacing: 2,
+  },
+  eyeButton: {
+    padding: 4,
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 6,
+    fontStyle: "italic",
   },
   loginButton: {
     backgroundColor: "#10B981",

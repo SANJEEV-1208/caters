@@ -29,3 +29,13 @@ exports.updatePaymentQrCode = async (req, res) => {
 exports.signupRestaurant = async (req, res) => {
   return await authService.signupRestaurant(req, res);
 };
+
+// Set PIN for first-time users
+exports.setPin = async (req, res) => {
+  return await authService.setPin(req, res);
+};
+
+// Update user profile
+exports.updateUserProfile = async (req, res) => {
+  return await authService.updateUserProfile(req, res);
+};

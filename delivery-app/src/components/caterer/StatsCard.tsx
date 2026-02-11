@@ -22,7 +22,7 @@ export default function StatsCard({
   const Component = onPress ? TouchableOpacity : View;
 
   return (
-    <Component style={[styles.card, { borderLeftColor: color }]} onPress={onPress}>
+    <Component style={[styles.card, { borderLeftColor: "white" }]} onPress={onPress}>
       <View style={[styles.iconContainer, { backgroundColor: `${color}15` }]}>
         <Ionicons name={icon} size={24} color={color} />
       </View>

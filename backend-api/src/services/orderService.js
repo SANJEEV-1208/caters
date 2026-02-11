@@ -55,6 +55,28 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ error: 'Required fields missing' });
     }
 
+    // Ownership check: Ensure customer is creating order for themselves
+    if (req.user && req.user.id !== Number(customerId)) {
+      return res.status(403).json({ error: 'You can only create orders for yourself' });
+    }
+
+    // Duplicate transaction ID check (for UPI payments)
+    if (paymentMethod === 'upi' && transactionId && transactionId !== 'N/A') {
+      const duplicateCheck = await pool.query(
+        'SELECT id, order_id, customer_id FROM orders WHERE transaction_id = $1',
+        [transactionId]
+      );
+
+      if (duplicateCheck.rows.length > 0) {
+        const existingOrder = duplicateCheck.rows[0];
+        return res.status(400).json({
+          error: 'Transaction ID already used',
+          message: `This transaction ID was already used for order #${existingOrder.order_id}. Please provide a unique transaction ID.`,
+          existingOrderId: existingOrder.order_id
+        });
+      }
+    }
+
     const result = await pool.query(
       `INSERT INTO orders
       (order_id, customer_id, caterer_id, items, total_amount, payment_method, transaction_id,
@@ -77,6 +99,8 @@ exports.createOrder = async (req, res) => {
         status || 'pending'
       ]
     );
+
+    console.log(`Order created by customer ${customerId}: ${orderId}, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
 
     res.status(201).json(formatOrder(result.rows[0]));
   } catch (error) {

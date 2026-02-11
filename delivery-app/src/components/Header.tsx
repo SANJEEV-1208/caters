@@ -1,7 +1,9 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "expo-router";
+import ProfileModal from "@/src/components/ProfileModal";
 
 interface HeaderProps {
   onFilterPress?: () => void;
@@ -9,26 +11,9 @@ interface HeaderProps {
 }
 
 export default function Header({ onFilterPress, showFilter = false }: HeaderProps) {
-  const { user, logout, selectedCatererId } = useAuth();
+  const { user, selectedCatererId } = useAuth();
   const router = useRouter();
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: () => {
-            logout();
-            router.replace("/login");
-          },
-        },
-      ]
-    );
-  };
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
 
   const handleChangeCaterer = () => {
     router.push("/customer/caterer-selection");
@@ -66,13 +51,25 @@ export default function Header({ onFilterPress, showFilter = false }: HeaderProp
           </TouchableOpacity>
         )}
 
+        {/* Profile Icon */}
         <TouchableOpacity
-          style={styles.iconButton}
-          onPress={handleLogout}
+          style={styles.profileButton}
+          onPress={() => setProfileModalVisible(true)}
         >
-          <Ionicons name="log-out-outline" size={20} color="#6B7280" />
+          {user?.profilePicture ? (
+            <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profilePlaceholder}>
+              <Ionicons name="person" size={20} color="#10B981" />
+            </View>
+          )}
         </TouchableOpacity>
       </View>
+
+      <ProfileModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
+      />
     </View>
   );
 }
@@ -108,6 +105,25 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    overflow: "hidden",
+  },
+  profileImage: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  profilePlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#E6F4F0",
     justifyContent: "center",
     alignItems: "center",
   },

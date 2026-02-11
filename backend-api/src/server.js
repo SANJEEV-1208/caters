@@ -11,6 +11,7 @@ const apartmentRoutes = require('./routes/apartmentRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
 const pool = require('./config/database');
+const { apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,10 +32,36 @@ function getLocalIpAddress() {
   return 'localhost';
 }
 
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production'
+    ? (origin, callback) => {
+        // Allow requests from your domain or no origin (mobile apps)
+        const allowedOrigins = [
+          'https://kaaspro.com',
+          'https://www.kaaspro.com',
+          undefined, // Allow mobile apps (no origin header)
+        ];
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    : '*', // Allow all origins in development
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400, // Cache preflight for 24 hours
+};
+
 // Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' })); // Limit request size
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply rate limiting to all API routes
+app.use('/api', apiLimiter);
 
 // Request logging middleware
 app.use((req, res, next) => {

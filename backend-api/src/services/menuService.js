@@ -102,6 +102,11 @@ exports.createMenuItem = async (req, res) => {
       return res.status(400).json({ error: 'Required fields: catererId, name, price, category' });
     }
 
+    // Ownership check: Ensure caterer is creating for themselves
+    if (req.user && req.user.id !== Number(catererId)) {
+      return res.status(403).json({ error: 'You can only create menu items for your own catering service' });
+    }
+
     const result = await pool.query(
       `INSERT INTO caterer_menus
       (caterer_id, name, description, price, category, cuisine, type, image, available_dates, in_stock)
@@ -110,6 +115,7 @@ exports.createMenuItem = async (req, res) => {
       [catererId, name, description || '', price, category, cuisine || '', type || 'main_course', image || '', availableDates || [], inStock !== false]
     );
 
+    console.log(`Menu item created by caterer ${catererId}:`, result.rows[0].name);
     res.status(201).json(formatMenuItem(result.rows[0]));
   } catch (error) {
     console.error('Create menu item error:', error);
@@ -133,6 +139,20 @@ exports.updateMenuItem = async (req, res) => {
       inStock
     } = req.body;
 
+    // Ownership check: Verify the menu item belongs to this caterer
+    const checkOwnership = await pool.query(
+      'SELECT caterer_id FROM caterer_menus WHERE id = $1',
+      [id]
+    );
+
+    if (checkOwnership.rows.length === 0) {
+      return res.status(404).json({ error: 'Menu item not found' });
+    }
+
+    if (req.user && req.user.id !== checkOwnership.rows[0].caterer_id) {
+      return res.status(403).json({ error: 'You can only update your own menu items' });
+    }
+
     const result = await pool.query(
       `UPDATE caterer_menus
       SET name = COALESCE($1, name),
@@ -149,10 +169,7 @@ exports.updateMenuItem = async (req, res) => {
       [name, description, price, category, cuisine, type, image, availableDates, inStock, id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Menu item not found' });
-    }
-
+    console.log(`Menu item updated by caterer ${req.user.id}:`, result.rows[0].name);
     res.json(formatMenuItem(result.rows[0]));
   } catch (error) {
     console.error('Update menu item error:', error);
@@ -166,15 +183,26 @@ exports.toggleStock = async (req, res) => {
     const { id } = req.params;
     const { inStock } = req.body;
 
+    // Ownership check: Verify the menu item belongs to this caterer
+    const checkOwnership = await pool.query(
+      'SELECT caterer_id FROM caterer_menus WHERE id = $1',
+      [id]
+    );
+
+    if (checkOwnership.rows.length === 0) {
+      return res.status(404).json({ error: 'Menu item not found' });
+    }
+
+    if (req.user && req.user.id !== checkOwnership.rows[0].caterer_id) {
+      return res.status(403).json({ error: 'You can only update your own menu items' });
+    }
+
     const result = await pool.query(
       'UPDATE caterer_menus SET in_stock = $1 WHERE id = $2 RETURNING *',
       [inStock, id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Menu item not found' });
-    }
-
+    console.log(`Stock toggled by caterer ${req.user.id}:`, result.rows[0].name, inStock ? 'In Stock' : 'Out of Stock');
     res.json(formatMenuItem(result.rows[0]));
   } catch (error) {
     console.error('Toggle stock error:', error);
@@ -187,15 +215,26 @@ exports.deleteMenuItem = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Ownership check: Verify the menu item belongs to this caterer
+    const checkOwnership = await pool.query(
+      'SELECT caterer_id, name FROM caterer_menus WHERE id = $1',
+      [id]
+    );
+
+    if (checkOwnership.rows.length === 0) {
+      return res.status(404).json({ error: 'Menu item not found' });
+    }
+
+    if (req.user && req.user.id !== checkOwnership.rows[0].caterer_id) {
+      return res.status(403).json({ error: 'You can only delete your own menu items' });
+    }
+
     const result = await pool.query(
       'DELETE FROM caterer_menus WHERE id = $1 RETURNING *',
       [id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Menu item not found' });
-    }
-
+    console.log(`Menu item deleted by caterer ${req.user.id}:`, checkOwnership.rows[0].name);
     res.json({ message: 'Menu item deleted successfully', item: formatMenuItem(result.rows[0]) });
   } catch (error) {
     console.error('Delete menu item error:', error);

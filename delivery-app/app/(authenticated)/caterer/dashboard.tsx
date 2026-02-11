@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert,
+  Image,
   SafeAreaView,
   StatusBar,
 } from "react-native";
@@ -16,17 +16,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import StatsCard from "@/src/components/caterer/StatsCard";
 import OrderCard from "@/src/components/caterer/OrderCard";
+import ProfileModal from "@/src/components/ProfileModal";
 import { getCatererOrders } from "@/src/api/orderApi";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
 import { Order } from "@/src/types/order";
 
 export default function Dashboard() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItemsCount, setMenuItemsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [profileModalVisible, setProfileModalVisible] = useState(false);
 
   useEffect(() => {
     void loadDashboardData();
@@ -58,27 +60,6 @@ export default function Dashboard() {
   const onRefresh = () => {
     setRefreshing(true);
     void loadDashboardData();
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: () => {
-            logout();
-            router.replace("/login");
-          },
-        },
-      ]
-    );
   };
 
   // Calculate stats
@@ -131,10 +112,19 @@ export default function Dashboard() {
         <View style={styles.welcomeContent}>
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.businessName}>{user?.serviceName || user?.name}</Text>
+            <Text style={styles.businessName}>{user?.serviceName || user?.restaurantName || user?.name}</Text>
           </View>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => setProfileModalVisible(true)}
+          >
+            {user?.profilePicture ? (
+              <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.profilePlaceholder}>
+                <Ionicons name="person" size={24} color="#10B981" />
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -280,6 +270,11 @@ export default function Dashboard() {
         )}
       </View>
       </ScrollView>
+
+      <ProfileModal
+        visible={profileModalVisible}
+        onClose={() => setProfileModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -328,20 +323,26 @@ const styles = StyleSheet.create({
     color: "#1A1A1A",
     marginTop: 4,
   },
-  logoutButton: {
+  profileButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FEF2F2",
-    borderWidth: 1.5,
-    borderColor: "#FEE2E2",
-    alignItems: "center",
+    overflow: "hidden",
+  },
+  profileImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  profilePlaceholder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E6F4F0",
     justifyContent: "center",
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#10B981",
   },
   statsGrid: {
     marginBottom: 20,
