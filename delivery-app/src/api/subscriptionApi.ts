@@ -1,15 +1,24 @@
 import { Subscription, User } from "@/src/types/auth";
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
 // Get all subscriptions for a customer
 export const getCustomerSubscriptions = async (customerId: number): Promise<Subscription[]> => {
   try {
-    const res = await fetch(`${BASE_URL}/subscriptions?customerId=${customerId}`);
+    const res = await authenticatedFetch(`${BASE_URL}/subscriptions?customerId=${customerId}`);
 
     if (!res.ok) {
-      throw new Error("Failed to fetch subscriptions");
+      const errorText = await res.text();
+      let errorMessage = "Failed to fetch subscriptions";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
     return await res.json();
@@ -60,7 +69,7 @@ export const createSubscription = async (
   catererId: number
 ): Promise<Subscription> => {
   try {
-    const res = await fetch(`${BASE_URL}/subscriptions`, {
+    const res = await authenticatedFetch(`${BASE_URL}/subscriptions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,7 +101,7 @@ export const createSubscription = async (
 // Remove a subscription
 export const removeSubscription = async (subscriptionId: number): Promise<void> => {
   try {
-    const res = await fetch(`${BASE_URL}/subscriptions/${subscriptionId}`, {
+    const res = await authenticatedFetch(`${BASE_URL}/subscriptions/${subscriptionId}`, {
       method: "DELETE",
     });
 

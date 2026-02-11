@@ -31,6 +31,12 @@ export default function SetupPinScreen() {
   const userName = params.name as string || "there";
 
   const handleSetPin = async () => {
+    // Prevent double submission
+    if (loading) {
+      console.log('⚠️ Already setting PIN, ignoring duplicate request');
+      return;
+    }
+
     // Validation
     if (!pin || !confirmPin) {
       Alert.alert("Error", "Please enter and confirm your PIN");
@@ -54,7 +60,6 @@ export default function SetupPinScreen() {
 
     try {
       setLoading(true);
-      console.log('🔑 Setting PIN for user:', userId);
 
       const result = await setPin(userId, pin);
 

@@ -39,8 +39,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userJson = await AsyncStorage.getItem('user');
         if (userJson) {
           const savedUser = JSON.parse(userJson);
-          setUser(savedUser);
-          console.log('✓ User loaded from storage:', savedUser.phone, savedUser.role);
+
+          // Check if token exists - if not, clear user and force re-login
+          if (!savedUser.token) {
+            console.warn('⚠️ User loaded but token is missing - clearing stored user');
+            console.warn('⚠️ Please login again to get a new token');
+            await AsyncStorage.removeItem('user');
+            setUser(null);
+          } else {
+            setUser(savedUser);
+            console.log('✓ User loaded from storage:', savedUser.phone, savedUser.role);
+          }
         }
       } catch (error) {
         console.error('Error loading user from storage:', error);

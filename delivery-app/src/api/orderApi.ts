@@ -1,5 +1,6 @@
 import { Order } from "../types/order";
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
@@ -9,7 +10,7 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
     console.log('URL:', `${BASE_URL}/orders`);
     console.log('Order Data:', JSON.stringify(orderData, null, 2));
 
-    const res = await fetch(`${BASE_URL}/orders`, {
+    const res = await authenticatedFetch(`${BASE_URL}/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +50,7 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
 };
 
 export const getCustomerOrders = async (customerId: number): Promise<Order[]> => {
-  const res = await fetch(`${BASE_URL}/orders/customer?customerId=${customerId}`);
+  const res = await authenticatedFetch(`${BASE_URL}/orders/customer?customerId=${customerId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch customer orders");
@@ -59,7 +60,7 @@ export const getCustomerOrders = async (customerId: number): Promise<Order[]> =>
 };
 
 export const getCatererOrders = async (catererId: number): Promise<Order[]> => {
-  const res = await fetch(`${BASE_URL}/orders/caterer?catererId=${catererId}`);
+  const res = await authenticatedFetch(`${BASE_URL}/orders/caterer?catererId=${catererId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch caterer orders");
@@ -87,7 +88,7 @@ export const getOrdersByStatus = async (
 };
 
 export const getOrderById = async (id: number): Promise<Order> => {
-  const res = await fetch(`${BASE_URL}/orders/${id}`);
+  const res = await authenticatedFetch(`${BASE_URL}/orders/${id}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch order");
@@ -100,7 +101,7 @@ export const updateOrderStatus = async (
   id: number,
   status: Order["status"]
 ): Promise<Order> => {
-  const res = await fetch(`${BASE_URL}/orders/${id}/status`, {
+  const res = await authenticatedFetch(`${BASE_URL}/orders/${id}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

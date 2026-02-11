@@ -373,6 +373,8 @@ exports.setPin = async (req, res) => {
   try {
     const { userId, pin } = req.body;
 
+    console.log('📍 Set PIN request:', { userId, pinLength: pin?.length });
+
     if (!userId || !pin) {
       return res.status(400).json({ error: 'User ID and PIN are required' });
     }
@@ -388,25 +390,31 @@ exports.setPin = async (req, res) => {
     }
 
     // Check if user exists
+    console.log('🔍 Checking if user exists:', userId);
     const userCheck = await pool.query(
       'SELECT * FROM users WHERE id = $1',
       [userId]
     );
 
     if (userCheck.rows.length === 0) {
+      console.log('❌ User not found:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
     const user = userCheck.rows[0];
+    console.log('✓ User found:', user.phone, 'Has PIN:', !!user.pin_hash);
 
     // Check if PIN is already set
     if (user.pin_hash) {
+      console.log('⚠️ PIN already set for user:', userId);
       return res.status(400).json({ error: 'PIN is already set. Please use login instead.' });
     }
 
     // Hash PIN before storing
+    console.log('🔐 Hashing PIN...');
     const pinHash = await bcrypt.hash(pin, 10);
 
+    console.log('💾 Updating user with PIN hash...');
     const result = await pool.query(
       'UPDATE users SET pin_hash = $1 WHERE id = $2 RETURNING *',
       [pinHash, userId]
@@ -415,6 +423,7 @@ exports.setPin = async (req, res) => {
     const updatedUser = result.rows[0];
 
     // Generate JWT token after PIN is set
+    console.log('🔑 Generating JWT token...');
     const token = jwt.sign(
       {
         id: updatedUser.id,
@@ -441,14 +450,18 @@ exports.setPin = async (req, res) => {
       token
     };
 
-    console.log(`PIN set successfully for user ${updatedUser.id}`);
+    console.log(`✅ PIN set successfully for user ${updatedUser.id}`);
     res.json({
       ...formattedUser,
       message: 'PIN set successfully'
     });
   } catch (error) {
-    console.error('Set PIN error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('❌ Set PIN error:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

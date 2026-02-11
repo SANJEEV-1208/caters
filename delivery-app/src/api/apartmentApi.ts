@@ -1,10 +1,11 @@
 import { Apartment, CustomerApartment } from "../types/apartment";
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
 export const getCatererApartments = async (catererId: number): Promise<Apartment[]> => {
-  const res = await fetch(`${BASE_URL}/apartments?catererId=${catererId}`);
+  const res = await authenticatedFetch(`${BASE_URL}/apartments?catererId=${catererId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch apartments");
@@ -15,7 +16,7 @@ export const getCatererApartments = async (catererId: number): Promise<Apartment
 
 // Fetch all customer-apartment links for a caterer
 export const getCustomerApartmentLinks = async (catererId: number): Promise<CustomerApartment[]> => {
-  const res = await fetch(`${BASE_URL}/apartments/links?catererId=${catererId}`);
+  const res = await authenticatedFetch(`${BASE_URL}/apartments/links?catererId=${catererId}`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch customer apartment links");
@@ -25,7 +26,7 @@ export const getCustomerApartmentLinks = async (catererId: number): Promise<Cust
 };
 
 export const createApartment = async (data: Omit<Apartment, "id" | "createdAt">): Promise<Apartment> => {
-  const res = await fetch(`${BASE_URL}/apartments`, {
+  const res = await authenticatedFetch(`${BASE_URL}/apartments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export const updateApartment = async (id: number, data: Partial<Apartment>): Pro
 };
 
 export const deleteApartment = async (id: number): Promise<void> => {
-  const res = await fetch(`${BASE_URL}/apartments/${id}`, {
+  const res = await authenticatedFetch(`${BASE_URL}/apartments/${id}`, {
     method: "DELETE",
   });
 
@@ -72,7 +73,7 @@ export const addCustomerToApartment = async (
   data: Omit<CustomerApartment, "id" | "createdAt">
 ): Promise<CustomerApartment> => {
   // Use manual-link endpoint for manual linking (by caterer selection or direct add)
-  const res = await fetch(`${BASE_URL}/apartments/manual-link`, {
+  const res = await authenticatedFetch(`${BASE_URL}/apartments/manual-link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +98,7 @@ export const linkCustomerToApartmentByCode = async (
   customerId: number,
   accessCode: string
 ): Promise<CustomerApartment> => {
-  const res = await fetch(`${BASE_URL}/apartments/link`, {
+  const res = await authenticatedFetch(`${BASE_URL}/apartments/link`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

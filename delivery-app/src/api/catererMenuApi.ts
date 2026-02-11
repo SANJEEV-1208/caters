@@ -1,5 +1,6 @@
 import { MenuItem } from "../types/menu";
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
@@ -48,7 +49,7 @@ export const getMenuItemById = async (id: number): Promise<MenuItem> => {
 export const createMenuItem = async (
   data: Omit<MenuItem, "id" | "createdAt">
 ): Promise<MenuItem> => {
-  const res = await fetch(`${BASE_URL}/menus`, {
+  const res = await authenticatedFetch(`${BASE_URL}/menus`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -67,7 +68,7 @@ export const updateMenuItem = async (
   id: number,
   data: Partial<MenuItem>
 ): Promise<MenuItem> => {
-  const res = await fetch(`${BASE_URL}/menus/${id}`, {
+  const res = await authenticatedFetch(`${BASE_URL}/menus/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +84,7 @@ export const updateMenuItem = async (
 };
 
 export const deleteMenuItem = async (id: number): Promise<void> => {
-  const res = await fetch(`${BASE_URL}/menus/${id}`, {
+  const res = await authenticatedFetch(`${BASE_URL}/menus/${id}`, {
     method: "DELETE",
   });
 
@@ -93,7 +94,7 @@ export const deleteMenuItem = async (id: number): Promise<void> => {
 };
 
 export const toggleStock = async (id: number, inStock: boolean): Promise<MenuItem> => {
-  const res = await fetch(`${BASE_URL}/menus/${id}/stock`, {
+  const res = await authenticatedFetch(`${BASE_URL}/menus/${id}/stock`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

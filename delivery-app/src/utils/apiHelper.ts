@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 /**
  * Helper function to get JWT token from AsyncStorage
@@ -9,11 +10,15 @@ export const getAuthToken = async (): Promise<string | null> => {
     const userJson = await AsyncStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson);
-      return user.token || null;
+      const token = user.token || null;
+      if (!token) {
+        console.warn('⚠️ No token found in user data');
+      }
+      return token;
     }
     return null;
   } catch (error) {
-    console.error('Error getting auth token:', error);
+    console.error('❌ Error getting auth token:', error);
     return null;
   }
 };
@@ -37,6 +42,7 @@ export const getAuthHeaders = async (): Promise<HeadersInit> => {
 /**
  * Authenticated fetch wrapper
  * Automatically includes JWT token in Authorization header
+ * Handles token expiration (401 errors) by clearing stored user
  */
 export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const headers = await getAuthHeaders();
@@ -47,10 +53,25 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
     ...(options.headers || {}),
   };
 
-  return fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers: mergedHeaders,
   });
+
+  // Handle token expiration - clear user and redirect to login
+  if (response.status === 401) {
+    console.warn('⚠️ 401 Unauthorized: Token expired or invalid - clearing session');
+    await AsyncStorage.removeItem('user');
+
+    // Redirect to login page
+    try {
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error redirecting to login:', error);
+    }
+  }
+
+  return response;
 };
 
 /**

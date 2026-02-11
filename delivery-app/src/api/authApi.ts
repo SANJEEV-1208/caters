@@ -1,5 +1,6 @@
 import { User, SignupData } from "@/src/types/auth";
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
@@ -179,7 +180,7 @@ export const signupRestaurant = async (data: {
 // Get user by ID
 export const getUserById = async (userId: number): Promise<User | null> => {
   try {
-    const res = await fetch(`${BASE_URL}/auth/users/${userId}`);
+    const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}`);
     if (!res.ok) {
       return null;
     }
@@ -196,7 +197,7 @@ export const updatePaymentQrCode = async (
   qrCodeUrl: string
 ): Promise<User> => {
   try {
-    const res = await fetch(`${BASE_URL}/auth/users/${userId}/qr`, {
+    const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}/qr`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -218,7 +219,7 @@ export const updatePaymentQrCode = async (
 // Set PIN for first-time users (customers added by caterer)
 export const setPin = async (userId: number, pin: string): Promise<User> => {
   try {
-    console.log('🔑 Setting PIN for user:', userId);
+    console.log('🔑 Setting PIN for user:', userId, 'PIN length:', pin.length);
 
     const res = await fetch(`${BASE_URL}/auth/set-pin`, {
       method: "POST",
@@ -228,13 +229,28 @@ export const setPin = async (userId: number, pin: string): Promise<User> => {
       body: JSON.stringify({ userId, pin }),
     });
 
+    console.log('📡 Set PIN response status:', res.status);
+
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || "Failed to set PIN");
+      const errorText = await res.text();
+      console.error('❌ Set PIN error response:', errorText);
+
+      let errorMessage = "Failed to set PIN";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+        if (errorJson.details) {
+          console.error('❌ Validation details:', errorJson.details);
+        }
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+
+      throw new Error(errorMessage);
     }
 
     const data = await res.json();
-    console.log('✅ PIN set successfully');
+    console.log('✅ PIN set successfully, user role:', data.role);
     return data as User;
   } catch (error) {
     console.error("❌ Set PIN API error:", error);
@@ -250,7 +266,7 @@ export const updateUserProfile = async (
   try {
     console.log('📝 Updating profile for user:', userId);
 
-    const res = await fetch(`${BASE_URL}/auth/users/${userId}`, {
+    const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
