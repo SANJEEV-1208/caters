@@ -16,6 +16,10 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy - Required when behind reverse proxy (Render, Heroku, Nginx, etc.)
+// This is needed for rate limiting and client IP detection to work correctly
+app.set('trust proxy', 1);
+
 // Function to get local IP address
 function getLocalIpAddress() {
   const interfaces = os.networkInterfaces();
@@ -114,11 +118,59 @@ async function checkAndInitializeDatabase() {
       console.log('✅ Database initialized successfully!');
     } else {
       console.log('✅ Database already initialized');
+
+      // Run migrations for existing databases
+      await runMigrations();
     }
   } catch (error) {
     console.error('⚠️ Database check/initialization error:', error.message);
     console.error(error);
     // Don't crash the server - it will retry on next restart
+  }
+}
+
+// Run database migrations
+async function runMigrations() {
+  try {
+    console.log('🔄 Checking for database migrations...');
+
+    // Migration 1: Add pin_hash column if it doesn't exist
+    const pinHashCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'pin_hash'
+      )`
+    );
+
+    if (!pinHashCheck.rows[0].exists) {
+      console.log('🔧 Adding pin_hash column to users table...');
+      await pool.query('ALTER TABLE users ADD COLUMN pin_hash VARCHAR(255)');
+      console.log('✅ pin_hash column added successfully');
+    } else {
+      console.log('✓ pin_hash column already exists');
+    }
+
+    // Migration 2: Add profile_picture column if it doesn't exist
+    const profilePictureCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'profile_picture'
+      )`
+    );
+
+    if (!profilePictureCheck.rows[0].exists) {
+      console.log('🔧 Adding profile_picture column to users table...');
+      await pool.query('ALTER TABLE users ADD COLUMN profile_picture TEXT');
+      console.log('✅ profile_picture column added successfully');
+    } else {
+      console.log('✓ profile_picture column already exists');
+    }
+
+    console.log('✅ All migrations completed');
+  } catch (error) {
+    console.error('⚠️ Migration error:', error.message);
+    console.error(error);
+    // Don't crash the server
   }
 }
 
