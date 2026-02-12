@@ -5,6 +5,7 @@ import {
   loginUser as apiLoginUser,
   signupCaterer as apiSignupCaterer,
 } from "@/src/api/authApi";
+import { isTokenExpired } from "@/src/utils/apiHelper";
 
 type AuthContextType = {
   user: User | null;
@@ -40,13 +41,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userJson) {
           const savedUser = JSON.parse(userJson);
 
-          // Check if token exists - if not, clear user and force re-login
+          // Check if token exists
           if (!savedUser.token) {
             console.warn('⚠️ User loaded but token is missing - clearing stored user');
             console.warn('⚠️ Please login again to get a new token');
             await AsyncStorage.removeItem('user');
             setUser(null);
-          } else {
+          }
+          // Check if token is expired
+          else if (isTokenExpired(savedUser.token)) {
+            console.warn('⚠️ Token has expired - clearing stored user');
+            console.warn('⚠️ Please login again to get a new token');
+            await AsyncStorage.removeItem('user');
+            setUser(null);
+          }
+          // Token exists and is valid
+          else {
             setUser(savedUser);
             console.log('✓ User loaded from storage:', savedUser.phone, savedUser.role);
           }

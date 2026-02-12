@@ -9,15 +9,15 @@ export default function AuthenticatedLayout() {
     return <Redirect href="/login" />;
   }
 
-  // Customer redirect if not already inside customer routes
-  if (user.role === "customer" && !pathname.includes("/customer")) {
+  // Customer redirect if not already inside customer routes (allow edit-profile for all roles)
+  if (user.role === "customer" && !pathname.includes("/customer") && !pathname.includes("/edit-profile")) {
     return <Redirect href="/(authenticated)/customer/caterer-selection" />;
   }
 
-  // Caterer redirect based on caterType
-  if (user.role === "caterer" && !pathname.includes("/caterer")) {
+  // Caterer redirect based on caterType (allow edit-profile for all roles)
+  if (user.role === "caterer" && !pathname.includes("/caterer") && !pathname.includes("/edit-profile")) {
     // Route to appropriate dashboard based on caterType
-    const dashboardPath = user.caterType === "restaurant" 
+    const dashboardPath = user.caterType === "restaurant"
       ? "/(authenticated)/caterer/restaurant/dashboard"
       : "/(authenticated)/caterer/dashboard";
     return <Redirect href={dashboardPath} />;

@@ -484,6 +484,7 @@ exports.updateUserProfile = async (req, res) => {
     // Build dynamic update query
     const allowedFields = {
       name: 'name',
+      phone: 'phone',
       profilePicture: 'profile_picture',
       address: 'address',
       serviceName: 'service_name',

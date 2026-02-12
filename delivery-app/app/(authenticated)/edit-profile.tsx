@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/src/context/AuthContext";
 import { updateUserProfile } from "@/src/api/authApi";
 
@@ -21,14 +22,93 @@ export default function EditProfileScreen() {
   const { user, setUser } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // Form fields
   const [profilePicture, setProfilePicture] = useState(user?.profilePicture || "");
   const [name, setName] = useState(user?.name || "");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [address, setAddress] = useState(user?.address || "");
   const [serviceName, setServiceName] = useState(user?.serviceName || "");
   const [restaurantName, setRestaurantName] = useState(user?.restaurantName || "");
   const [restaurantAddress, setRestaurantAddress] = useState(user?.restaurantAddress || "");
+
+  const pickImage = async () => {
+    try {
+      // Request permission
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "Please allow access to your photo library");
+        return;
+      }
+
+      // Pick image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images" as ImagePicker.MediaTypeOptions,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri;
+        await uploadToCloudinary(imageUri);
+      }
+    } catch (error) {
+      console.error("❌ Image picker error:", error);
+      Alert.alert("Error", "Failed to pick image");
+    }
+  };
+
+  const uploadToCloudinary = async (imageUri: string) => {
+    try {
+      setUploading(true);
+
+      const cloudName = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+      if (!cloudName || !uploadPreset) {
+        Alert.alert("Configuration Error", "Cloudinary is not configured. Please contact support.");
+        return;
+      }
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", {
+        uri: imageUri,
+        type: "image/jpeg",
+        name: "profile.jpg",
+      } as unknown as Blob);
+      formData.append("upload_preset", uploadPreset);
+
+      // Upload to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.secure_url) {
+        setProfilePicture(data.secure_url);
+        console.log("✅ Image uploaded to Cloudinary:", data.secure_url);
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      console.error("❌ Cloudinary upload error:", error);
+      Alert.alert("Upload Failed", "Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -61,23 +141,31 @@ export default function EditProfileScreen() {
 
       const updateData: Record<string, string | undefined> = {
         profilePicture: profilePicture || undefined,
-        name: name.trim(),
+        name: name.trim() || undefined,
+        phone: phone.trim() || undefined,
       };
 
       if (user.role === "customer") {
         updateData.address = address.trim() || undefined;
       } else if (user.role === "caterer") {
         if (user.caterType === "restaurant") {
-          updateData.restaurantName = restaurantName.trim();
-          updateData.restaurantAddress = restaurantAddress.trim();
+          updateData.restaurantName = restaurantName.trim() || undefined;
+          updateData.restaurantAddress = restaurantAddress.trim() || undefined;
         } else {
-          updateData.serviceName = serviceName.trim();
-          updateData.address = address.trim();
+          updateData.serviceName = serviceName.trim() || undefined;
+          updateData.address = address.trim() || undefined;
         }
       }
 
       const updatedUser = await updateUserProfile(user.id, updateData);
-      setUser(updatedUser);
+
+      // IMPORTANT: Preserve the token from the current user
+      // Backend doesn't return token, but we need to keep it for authenticated requests
+      setUser({
+        ...updatedUser,
+        token: user.token, // Preserve existing token
+      });
+
       Alert.alert("Success", "Profile updated successfully", [
         { text: "OK", onPress: () => router.back() }
       ]);
@@ -109,28 +197,46 @@ export default function EditProfileScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Profile Picture</Text>
             <Text style={styles.sectionHint}>
-              Upload your photo to Imgur or ImgBB, then paste the direct image link here
+              Choose a photo from your gallery
             </Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Paste image URL here (e.g., https://i.imgur.com/...)"
-              placeholderTextColor="#9CA3AF"
-              value={profilePicture}
-              onChangeText={setProfilePicture}
-              autoCapitalize="none"
-            />
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={() => { void pickImage(); }}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <ActivityIndicator color="#10B981" />
+                  <Text style={styles.uploadButtonText}>Uploading...</Text>
+                </>
+              ) : (
+                <>
+                  <Ionicons name="images-outline" size={24} color="#10B981" />
+                  <Text style={styles.uploadButtonText}>
+                    {profilePicture ? "Change Photo" : "Choose from Gallery"}
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
 
             {profilePicture ? (
               <View style={styles.imagePreview}>
-                <Text style={styles.previewLabel}>Preview:</Text>
+                <Text style={styles.previewLabel}>Current Photo:</Text>
                 <Image source={{ uri: profilePicture }} style={styles.previewImage} />
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => setProfilePicture("")}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                  <Text style={styles.removeButtonText}>Remove Photo</Text>
+                </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.uploadHint}>
                 <Ionicons name="cloud-upload-outline" size={32} color="#9CA3AF" />
                 <Text style={styles.uploadHintText}>
-                  No profile picture yet. Upload to get started!
+                  No profile picture yet. Choose from gallery to get started!
                 </Text>
               </View>
             )}
@@ -145,6 +251,20 @@ export default function EditProfileScreen() {
               placeholderTextColor="#9CA3AF"
               value={name}
               onChangeText={setName}
+            />
+          </View>
+
+          {/* Phone Number */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Phone Number</Text>
+            <Text style={styles.sectionHint}>Update your phone number (include country code if needed)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="+919876543210"
+              placeholderTextColor="#9CA3AF"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
             />
           </View>
 
@@ -340,6 +460,36 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     textAlign: "center",
     marginTop: 12,
+  },
+  uploadButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 2,
+    borderColor: "#10B981",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginBottom: 16,
+  },
+  uploadButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#10B981",
+  },
+  removeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 12,
+    paddingVertical: 8,
+  },
+  removeButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#EF4444",
   },
   saveButton: {
     flexDirection: "row",
