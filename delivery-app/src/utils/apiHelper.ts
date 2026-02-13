@@ -85,6 +85,29 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
 };
 
 /**
+ * Optional auth fetch - includes token if available, but doesn't require it
+ * Use for endpoints that support both guest and authenticated access
+ * Does NOT redirect on 401 (unlike authenticatedFetch)
+ */
+export const optionalAuthFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const headers = await getAuthHeaders();
+
+  // Merge provided headers with auth headers (includes token if available)
+  const mergedHeaders = {
+    ...headers,
+    ...(options.headers || {}),
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    headers: mergedHeaders,
+  });
+
+  // No redirect on 401 - allows guest access
+  return response;
+};
+
+/**
  * Check if JWT token is expired
  * Returns true if token is expired or invalid
  */

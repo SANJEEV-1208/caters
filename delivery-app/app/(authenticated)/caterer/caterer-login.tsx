@@ -11,8 +11,8 @@ import {
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
-import { useRouter, Redirect, usePathname } from "expo-router";
+import { useState } from "react";
+import { useRouter, Redirect } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,35 +22,19 @@ export default function LoginScreen() {
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
-  const { login, logout, user, isAuthenticated } = useAuth();
+  const { login, user, isAuthenticated } = useAuth(); // get isAuthenticated
   const fullPhone = "+91" + phone;
 
-  // Check for wrong role and show alert (only when user logs in on THIS page)
-  useEffect(() => {
-    // Only show alert if we're currently on the customer login page
-    if (pathname !== "/login") return;
-
-    if (isAuthenticated && user && !loading) {
-      if (user.role === "caterer" && user.caterType === "restaurant") {
-        Alert.alert(
-          "Wrong Login Page",
-          "This login is for customers only. Please use the Restaurant Login page.",
-          [{ text: "OK", onPress: () => logout() }]
-        );
-      } else if (user.role === "caterer" && user.caterType === "home") {
-        Alert.alert(
-          "Wrong Login Page",
-          "This login is for customers only. Please use the Caterer Login page.",
-          [{ text: "OK", onPress: () => logout() }]
-        );
-      }
+  // 🔹 Redirect based on role if already logged in
+  if (isAuthenticated && user) {
+    if (user.role === "customer") {
+      return <Redirect href="/(authenticated)/customer/caterer-selection" />;
+    } else if (user.role === "caterer") {
+      const dashboardPath = user.caterType === "restaurant"
+        ? "/(authenticated)/caterer/restaurant/dashboard"
+        : "/(authenticated)/caterer/dashboard";
+      return <Redirect href={dashboardPath} />;
     }
-  }, [isAuthenticated, user?.role, user?.caterType, loading, pathname]);
-
-  // 🔹 Redirect if correct role is already logged in
-  if (isAuthenticated && user && user.role === "customer") {
-    return <Redirect href="/(authenticated)/customer/caterer-selection" />;
   }
 
   const handleLogin = async () => {
@@ -74,8 +58,11 @@ export default function LoginScreen() {
       // ✅ Do NOT check `user` here for redirect
       // Redirect happens automatically on next render
     } catch (error: unknown) {
+      console.error("❌ LOGIN ERROR:", error);
+
       // Check if user needs to setup PIN
       if (error instanceof Error && error.message === 'PIN_SETUP_REQUIRED') {
+        console.log('📍 Navigating to PIN setup');
         const setupData = (error as unknown as { setupData: { userId: number; phone: string; name: string } }).setupData;
         router.push({
           pathname: "/setup-pin",
@@ -88,7 +75,7 @@ export default function LoginScreen() {
         return;
       }
 
-      // Show user-friendly error messages
+      // Check if it's a network error
       if (error instanceof TypeError && error.message.includes('Network request failed')) {
         Alert.alert(
           "Connection Error",
@@ -96,7 +83,7 @@ export default function LoginScreen() {
         );
       } else {
         const errorMessage = error instanceof Error ? error.message : "Something went wrong";
-        Alert.alert("Login Failed", errorMessage);
+        Alert.alert("Error", errorMessage);
       }
     } finally {
       setLoading(false);
@@ -109,30 +96,8 @@ export default function LoginScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           {/* Header */}
-          <Text style={styles.title}>Customer Login</Text>
-          <Text style={styles.subtitle}>Enter your phone number to continue</Text>
-
-        {/* Scan Table QR Button - Guest Access Allowed */}
-        <Pressable
-          style={styles.scanQRCard}
-          onPress={() => router.push("/qr-scanner")}
-        >
-          <View style={styles.scanQRIcon}>
-            <Ionicons name="qr-code-outline" size={32} color="#FFFFFF" />
-          </View>
-          <View style={styles.scanQRContent}>
-            <Text style={styles.scanQRTitle}>Dining at a Restaurant?</Text>
-            <Text style={styles.scanQRText}>Scan table QR code to order</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#10B981" />
-        </Pressable>
-
-        {/* Divider */}
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>OR</Text>
-          <View style={styles.dividerLine} />
-        </View>
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Enter your phone number</Text>
 
         {/* Phone Number Input */}
         <View style={styles.inputSection}>
@@ -197,20 +162,6 @@ export default function LoginScreen() {
             <Text style={styles.loginButtonText}>Login</Text>
           )}
         </TouchableOpacity>
-
-        {/* Register Link */}
-        <View style={styles.registerSection}>
-          <TouchableOpacity onPress={() => router.push("/caterer-login")}>
-            <Text style={styles.continueLink}>Continue as Caterer</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/restaurant-login")}>
-            <Text style={styles.continueLink}>Continue as Restaurant</Text>
-          </TouchableOpacity>
-          <Text style={styles.registerText}>Not registered?</Text>
-          <TouchableOpacity onPress={() => router.push("/caterer-type-selection")}>
-            <Text style={styles.registerLink}>Register as Service Provider</Text>
-          </TouchableOpacity>
-        </View>
       </View>
       </ScrollView>
     </SafeAreaView>
@@ -387,7 +338,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6B7280",
     marginBottom: 4,
-    paddingVertical: 10,
   },
   registerLink: {
     fontSize: 14,
@@ -398,6 +348,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#F59E0B",
     fontWeight: "600",
-    paddingVertical: 5,
   }
 });

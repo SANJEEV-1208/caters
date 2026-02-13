@@ -6,6 +6,8 @@ import {
   signupCaterer as apiSignupCaterer,
 } from "@/src/api/authApi";
 import { isTokenExpired } from "@/src/utils/apiHelper";
+import { registerForPushNotifications } from "@/src/services/notificationService";
+import { unregisterPushToken } from "@/src/api/pushTokenApi";
 
 type AuthContextType = {
   user: User | null;
@@ -92,6 +94,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, isLoading]);
 
+  // Register for push notifications when customer logs in
+  useEffect(() => {
+    const setupNotifications = async () => {
+      // Only register for push notifications for customers
+      if (user && user.role === "customer" && !isLoading) {
+        console.log('📱 Setting up push notifications for customer...');
+        try {
+          await registerForPushNotifications();
+        } catch (error) {
+          console.error('⚠️ Failed to setup push notifications:', error);
+          // Don't block login if notification setup fails
+        }
+      }
+    };
+
+    void setupNotifications();
+  }, [user, isLoading]);
+
   // ✅ LOGIN
   const login = async (phone: string, pin?: string): Promise<boolean> => {
     try {
@@ -115,12 +135,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(response as User);
       return true;
     } catch (error) {
-      // Re-throw PIN setup errors
-      if (error instanceof Error && error.message === 'PIN_SETUP_REQUIRED') {
-        throw error;
-      }
-      console.error("Login error:", error);
-      throw error; // Throw other errors so login screen can handle them
+      // Re-throw all errors (login screen will handle display)
+      throw error;
     }
   };
 
@@ -140,7 +156,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // ✅ LOGOUT
-  const logout = () => {
+  const logout = async () => {
+    // Unregister push token if user is a customer
+    if (user && user.role === "customer") {
+      try {
+        await unregisterPushToken();
+        console.log('✓ Push token unregistered');
+      } catch (error) {
+        console.error('⚠️ Failed to unregister push token:', error);
+        // Don't block logout if unregister fails
+      }
+    }
+
     setUser(null);
     setSelectedCatererId(null);
     setSelectedDeliveryDate(new Date().toISOString().split('T')[0]);

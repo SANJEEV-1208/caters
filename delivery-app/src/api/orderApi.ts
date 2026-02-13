@@ -1,16 +1,14 @@
 import { Order } from "../types/order";
 import { API_CONFIG } from "../config/api";
-import { authenticatedFetch } from "../utils/apiHelper";
+import { authenticatedFetch, optionalAuthFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
+// Create order - Supports both guest and authenticated orders
+// Guests can order via QR code, authenticated users send token
 export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): Promise<Order> => {
   try {
-    console.log('=== orderApi.createOrder ===');
-    console.log('URL:', `${BASE_URL}/orders`);
-    console.log('Order Data:', JSON.stringify(orderData, null, 2));
-
-    const res = await authenticatedFetch(`${BASE_URL}/orders`, {
+    const res = await optionalAuthFetch(`${BASE_URL}/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -18,16 +16,21 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
       body: JSON.stringify(orderData),
     });
 
-    console.log('Response status:', res.status);
-
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('❌ API Error Response:', errorText);
 
       let errorMessage = "Failed to create order";
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.error || errorJson.message || errorMessage;
+
+        // If there are validation details, include them
+        if (errorJson.details && Array.isArray(errorJson.details)) {
+          const details = errorJson.details.map((d: { field: string; message: string }) =>
+            `${d.field}: ${d.message}`
+          ).join(', ');
+          errorMessage = `${errorMessage} - ${details}`;
+        }
       } catch (e) {
         errorMessage = errorText || errorMessage;
       }
@@ -36,11 +39,9 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
     }
 
     const result = await res.json();
-    console.log('✅ Order created successfully:', result);
     return result;
   } catch (error: unknown) {
-    console.error('❌ createOrder error:', error);
-
+    // Only log network errors
     if (error instanceof Error && error.message?.includes('fetch')) {
       throw new Error('Cannot connect to server. Please check your network connection and ensure the backend is running.');
     }

@@ -1,4 +1,5 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, SafeAreaView, StatusBar } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -333,7 +334,7 @@ export default function Cart() {
       return;
     }
 
-    const newOrderId = `ORD-${Date.now()}`;
+    const newOrderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
     // Check if this is a restaurant order (has tableNumber from params)
     const tableNumberValue = tableNumber ? Number(tableNumber) : undefined;

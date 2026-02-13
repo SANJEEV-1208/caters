@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { sendOrderStatusNotification } = require('./pushNotificationService');
 
 // Format order from database to frontend format
 const formatOrder = (order) => {
@@ -198,7 +199,22 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    res.json(formatOrder(result.rows[0]));
+    const updatedOrder = result.rows[0];
+
+    // Send push notification to customer about order status change
+    try {
+      await sendOrderStatusNotification(
+        updatedOrder.customer_id,
+        updatedOrder.order_id,
+        status
+      );
+      console.log(`✅ Notification sent to customer ${updatedOrder.customer_id} for order ${updatedOrder.order_id}`);
+    } catch (notificationError) {
+      // Log but don't fail the request if notification fails
+      console.error('⚠️ Failed to send push notification:', notificationError);
+    }
+
+    res.json(formatOrder(updatedOrder));
   } catch (error) {
     console.error('Update order status error:', error);
     res.status(500).json({ error: 'Internal server error' });

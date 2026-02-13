@@ -1,4 +1,5 @@
-import { View, ScrollView, StyleSheet, FlatList, Text, ActivityIndicator, Pressable, SafeAreaView, StatusBar } from "react-native";
+import { View, ScrollView, StyleSheet, FlatList, Text, ActivityIndicator, Pressable, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../../src/components/Header";
 import CategoryButton from "../../../src/components/CategoryButton";

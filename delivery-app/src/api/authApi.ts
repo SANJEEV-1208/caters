@@ -1,6 +1,6 @@
 import { User, SignupData } from "@/src/types/auth";
 import { API_CONFIG } from "../config/api";
-import { authenticatedFetch } from "../utils/apiHelper";
+import { authenticatedFetch, optionalAuthFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
@@ -41,16 +41,14 @@ export const loginUser = async (phone: string, pin?: string): Promise<User | Log
 
     if (!res.ok) {
       if (res.status === 404) {
-        console.log('❌ User not found (404)');
         return null; // User not found
       }
       if (res.status === 401) {
         const error = await res.json();
-        throw new Error(error.error || "Invalid PIN");
+        throw new Error(error.error || "Invalid PIN. Please try again.");
       }
       const errorText = await res.text();
-      console.error('❌ Login failed:', { status: res.status, error: errorText });
-      throw new Error("Login failed");
+      throw new Error(errorText || "Login failed");
     }
 
     const data = await res.json();
@@ -64,12 +62,13 @@ export const loginUser = async (phone: string, pin?: string): Promise<User | Log
     console.log('✅ Login successful:', data.phone, data.role);
     return data as User;
   } catch (error) {
-    console.error("❌ Login API error:", error);
+    // Only log network errors (unexpected), not validation errors (expected)
     if (error instanceof TypeError && error.message.includes('Network request failed')) {
       console.error('🔥 NETWORK ERROR: Cannot reach backend server');
       console.error(`   Check if backend is running at ${BASE_URL}`);
       console.error('   Ensure phone and computer are on same WiFi network');
     }
+    // Re-throw without logging (login page will handle display)
     throw error;
   }
 };
@@ -115,14 +114,14 @@ export const searchUserByPhone = async (phone: string): Promise<User | null> => 
   }
 };
 
-// Create a new customer (for caterers adding customers via phone)
+// Create a new customer (for caterers adding customers via phone - REQUIRES AUTH)
 export const createCustomer = async (data: {
   name: string;
   phone: string;
   address?: string;
 }): Promise<User> => {
   try {
-    const res = await fetch(`${BASE_URL}/auth/create-customer`, {
+    const res = await authenticatedFetch(`${BASE_URL}/auth/create-customer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -143,6 +142,38 @@ export const createCustomer = async (data: {
     return createdUser;
   } catch (error) {
     console.error("Create customer API error:", error);
+    throw error;
+  }
+};
+
+// Register guest customer (public - for QR code orders, NO AUTH REQUIRED)
+export const registerGuestCustomer = async (data: {
+  name: string;
+  phone: string;
+  address?: string;
+}): Promise<User> => {
+  try {
+    const res = await fetch(`${BASE_URL}/auth/guest-register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phone: data.phone,
+        name: data.name,
+        address: data.address,
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Failed to register guest");
+    }
+
+    const createdUser = await res.json();
+    return createdUser;
+  } catch (error) {
+    console.error("Register guest customer error:", error);
     throw error;
   }
 };
@@ -177,10 +208,11 @@ export const signupRestaurant = async (data: {
   }
 };
 
-// Get user by ID
+// Get user by ID - Supports both guest and authenticated access
+// Guests can view caterer info (for QR ordering), authenticated users send token
 export const getUserById = async (userId: number): Promise<User | null> => {
   try {
-    const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}`);
+    const res = await optionalAuthFetch(`${BASE_URL}/auth/users/${userId}`);
     if (!res.ok) {
       return null;
     }

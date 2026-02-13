@@ -20,12 +20,16 @@ export default function CustomerLayout() {
     return pathname.includes(pageName);
   };
 
+  // Check if user is on restaurant routes - restaurant has its own layout
+  const isRestaurantRoute = pathname.includes('/restaurant');
+
   return (
     <View style={styles.container}>
       {/* Render all customer screens */}
       <Stack screenOptions={{ headerShown: false }} />
 
-      {/* Bottom nav */}
+      {/* Bottom nav - Only show for home kitchen caterers, not restaurant providers */}
+      {!isRestaurantRoute && (
       <View style={styles.bottomNav}>
         {tabs.map((tab) => {
           const active = isTabActive(tab.path);
@@ -68,6 +72,7 @@ export default function CustomerLayout() {
           );
         })}
       </View>
+      )}
     </View>
   );
 }

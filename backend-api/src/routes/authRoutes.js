@@ -48,6 +48,15 @@ router.post(
   authController.createCustomer
 );
 
+// POST /api/auth/guest-register - Register guest customer (public, for QR code orders)
+router.post(
+  '/guest-register',
+  authLimiter,
+  validateSignup,
+  handleValidationErrors,
+  authController.createCustomer
+);
+
 // GET /api/auth/users/:id - Get user by ID (protected, ownership required)
 router.get(
   '/users/:id',

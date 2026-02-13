@@ -10,6 +10,7 @@ const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const apartmentRoutes = require('./routes/apartmentRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
+const pushTokenRoutes = require('./routes/pushTokenRoutes');
 const pool = require('./config/database');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
@@ -86,6 +87,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/tables', tablesRoutes);
+app.use('/api/push-tokens', pushTokenRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -164,6 +166,31 @@ async function runMigrations() {
       console.log('✅ profile_picture column added successfully');
     } else {
       console.log('✓ profile_picture column already exists');
+    }
+
+    // Migration 3: Create push_tokens table if it doesn't exist
+    const pushTokensTableCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'push_tokens'
+      )`
+    );
+
+    if (!pushTokensTableCheck.rows[0].exists) {
+      console.log('🔧 Creating push_tokens table...');
+      await pool.query(`
+        CREATE TABLE push_tokens (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          push_token TEXT NOT NULL UNIQUE,
+          device_type VARCHAR(20),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ push_tokens table created successfully');
+    } else {
+      console.log('✓ push_tokens table already exists');
     }
 
     console.log('✅ All migrations completed');

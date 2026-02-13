@@ -1,4 +1,5 @@
-import { View, Text, TextInput, StyleSheet, FlatList, SafeAreaView, StatusBar } from "react-native";
+import { View, Text, TextInput, StyleSheet, FlatList, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getCatererCuisines } from "@/src/api/foodApi";
 import SearchResult from "@/src/components/SearchResult";
 import { useEffect, useState } from "react";

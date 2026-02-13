@@ -12,7 +12,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { createOrder } from "@/src/api/orderApi";
-import { loginUser, createCustomer, getUserById } from "@/src/api/authApi";
+import { loginUser, registerGuestCustomer, getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
@@ -101,17 +101,17 @@ export default function RestaurantCheckout() {
       console.log('Payment Method:', paymentMethod);
       console.log('Transaction ID:', transactionId || 'WALK-IN');
 
-      // Step 1: Check if customer exists, if not create one
+      // Step 1: Check if customer exists, if not create one (GUEST REGISTRATION - QR CODE FLOW)
       let customer = await loginUser(fullPhone);
 
       if (!customer) {
-        console.log('Customer not found, creating new customer account...');
-        // Create new customer account
-        customer = await createCustomer({
+        console.log('Customer not found, creating new GUEST customer account...');
+        // Create new GUEST customer account (public endpoint, no auth required)
+        customer = await registerGuestCustomer({
           name: customerName,
           phone: fullPhone,
         });
-        console.log('✅ Created new customer:', customer);
+        console.log('✅ Created new guest customer:', customer);
       } else {
         console.log('✅ Found existing customer:', customer);
       }
@@ -121,7 +121,7 @@ export default function RestaurantCheckout() {
       }
 
       // Step 2: Create order with valid customer ID
-      const orderId = `ORD-${Date.now()}`;
+      const orderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
       const order: Order = {
         orderId,

@@ -1,4 +1,5 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator, SafeAreaView, StatusBar } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -101,7 +102,7 @@ export default function RestaurantCheckout() {
 
     setLoading(true);
     try {
-      const newOrderId = `ORD-${Date.now()}`;
+      const newOrderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
       const order: Order = {
         orderId: newOrderId,
