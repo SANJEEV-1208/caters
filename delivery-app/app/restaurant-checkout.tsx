@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/src/context/AuthContext";
 import { createOrder } from "@/src/api/orderApi";
 import { loginUser, registerGuestCustomer, getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
@@ -20,6 +21,7 @@ import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
 export default function RestaurantCheckout() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { user } = useAuth(); // Get authenticated user
 
   const catererId = Number(params?.catererId || 0);
   const tableNumber = params?.tableNumber || "";
@@ -34,6 +36,21 @@ export default function RestaurantCheckout() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [catererQrCode, setCatererQrCode] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
+
+  // Auto-fill name and phone if user is logged in
+  useEffect(() => {
+    if (user) {
+      // User is authenticated - auto-fill their info
+      if (user.name) {
+        setCustomerName(user.name);
+      }
+      if (user.phone) {
+        // Remove +91 prefix if present for display
+        const phoneWithoutPrefix = user.phone.replace(/^\+91/, '');
+        setCustomerPhone(phoneWithoutPrefix);
+      }
+    }
+  }, [user]);
 
   // Fetch caterer's payment QR code
   useEffect(() => {
@@ -204,29 +221,42 @@ export default function RestaurantCheckout() {
             <View style={styles.sectionHeader}>
               <Ionicons name="person-circle" size={24} color="#FF6B35" />
               <Text style={styles.sectionTitle}>Your Details</Text>
+              {user && (
+                <View style={styles.autoFillBadge}>
+                  <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                  <Text style={styles.autoFillText}>Auto-filled</Text>
+                </View>
+              )}
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Full Name</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={20} color="#94A3B8" style={styles.inputIcon} />
+              <View style={[styles.inputWrapper, user && styles.inputWrapperDisabled]}>
+                <Ionicons name="person-outline" size={20} color={user ? "#10B981" : "#94A3B8"} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your name"
                   placeholderTextColor="#94A3B8"
                   value={customerName}
                   onChangeText={setCustomerName}
+                  editable={!user}
                 />
+                {user && (
+                  <Ionicons name="lock-closed" size={16} color="#10B981" style={styles.lockIcon} />
+                )}
               </View>
+              {user && (
+                <Text style={styles.helperText}>From your account</Text>
+              )}
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Mobile Number</Text>
-              <View style={styles.phoneInputContainer}>
+              <View style={[styles.phoneInputContainer, user && styles.inputWrapperDisabled]}>
                 <View style={styles.phonePrefix}>
                   <Text style={styles.phonePrefixText}>+91</Text>
                 </View>
-                <Ionicons name="call-outline" size={20} color="#94A3B8" style={styles.phoneIcon} />
+                <Ionicons name="call-outline" size={20} color={user ? "#10B981" : "#94A3B8"} style={styles.phoneIcon} />
                 <TextInput
                   style={styles.phoneInput}
                   placeholder="9876543210"
@@ -235,8 +265,15 @@ export default function RestaurantCheckout() {
                   maxLength={10}
                   value={customerPhone}
                   onChangeText={setCustomerPhone}
+                  editable={!user}
                 />
+                {user && (
+                  <Ionicons name="lock-closed" size={16} color="#10B981" style={styles.lockIcon} />
+                )}
               </View>
+              {user && (
+                <Text style={styles.helperText}>From your account</Text>
+              )}
             </View>
           </View>
 
@@ -547,6 +584,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#1E293B",
+    flex: 1,
+  },
+  autoFillBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ECFDF5",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  autoFillText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#10B981",
   },
   inputGroup: {
     marginBottom: 20,
@@ -566,8 +618,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 14,
   },
+  inputWrapperDisabled: {
+    backgroundColor: "#ECFDF5",
+    borderColor: "#10B981",
+  },
   inputIcon: {
     marginRight: 10,
+  },
+  lockIcon: {
+    marginLeft: 8,
   },
   input: {
     flex: 1,
@@ -575,6 +634,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "500",
     color: "#1E293B",
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#10B981",
+    marginTop: 6,
+    fontStyle: "italic",
   },
   phoneInputContainer: {
     flexDirection: "row",

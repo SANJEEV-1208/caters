@@ -70,6 +70,22 @@ exports.validateSignup = [
     .isNumeric().withMessage('PIN must contain only numbers'),
 ];
 
+// Validation for guest customer registration (NO PIN REQUIRED, NO ADDRESS)
+// Used for QR code orders - guests can order without creating a PIN
+exports.validateGuestRegistration = [
+  body('phone')
+    .trim()
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^\+?91?\d{10}$/).withMessage('Invalid phone number format'),
+  body('name')
+    .trim()
+    .notEmpty().withMessage('Name is required')
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters')
+    .escape(), // Sanitize HTML
+  // NO ADDRESS REQUIRED - guests only need phone and name to order
+  // NO PIN REQUIRED - guests can access app directly without authentication
+];
+
 exports.validateSetPin = [
   body('userId')
     .isInt({ min: 1 }).withMessage('Valid user ID is required'),

@@ -6,6 +6,7 @@ const { authLimiter, qrCodeLimiter } = require('../middleware/rateLimiter');
 const {
   validateLogin,
   validateSignup,
+  validateGuestRegistration,
   validateSetPin,
   validateUserId,
   handleValidationErrors
@@ -48,11 +49,11 @@ router.post(
   authController.createCustomer
 );
 
-// POST /api/auth/guest-register - Register guest customer (public, for QR code orders)
+// POST /api/auth/guest-register - Register guest customer (public, for QR code orders - NO PIN REQUIRED)
 router.post(
   '/guest-register',
   authLimiter,
-  validateSignup,
+  validateGuestRegistration,
   handleValidationErrors,
   authController.createCustomer
 );

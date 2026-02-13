@@ -146,11 +146,10 @@ export const createCustomer = async (data: {
   }
 };
 
-// Register guest customer (public - for QR code orders, NO AUTH REQUIRED)
+// Register guest customer (public - for QR code orders, NO AUTH REQUIRED, NO ADDRESS)
 export const registerGuestCustomer = async (data: {
   name: string;
   phone: string;
-  address?: string;
 }): Promise<User> => {
   try {
     const res = await fetch(`${BASE_URL}/auth/guest-register`, {
@@ -161,7 +160,6 @@ export const registerGuestCustomer = async (data: {
       body: JSON.stringify({
         phone: data.phone,
         name: data.name,
-        address: data.address,
       }),
     });
 
