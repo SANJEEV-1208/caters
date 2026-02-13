@@ -145,7 +145,8 @@ exports.validateOrder = [
     .notEmpty().withMessage('Order ID is required')
     .matches(/^ORD\d+$/).withMessage('Invalid order ID format'),
   body('customerId')
-    .isInt({ min: 1 }).withMessage('Valid customer ID is required'),
+    .optional()
+    .isInt({ min: 1 }).withMessage('Valid customer ID must be a positive integer'),
   body('catererId')
     .isInt({ min: 1 }).withMessage('Valid caterer ID is required'),
   body('items')
@@ -169,7 +170,39 @@ exports.validateOrder = [
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Delivery date must be in YYYY-MM-DD format'),
   body('itemCount')
     .isInt({ min: 1, max: 1000 }).withMessage('Item count must be between 1 and 1000'),
+  // Guest order fields (required when customerId is not provided)
+  body('guestName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 }).withMessage('Guest name must be 2-100 characters')
+    .escape(),
+  body('guestPhone')
+    .optional()
+    .trim()
+    .matches(/^\+?91?\d{10}$/).withMessage('Invalid guest phone number format'),
 ];
+
+/**
+ * Validation for guest order requirements
+ * Ensures that if customerId is not provided, guestName and guestPhone are required
+ */
+exports.validateGuestOrderInfo = (req, res, next) => {
+  const { customerId, guestName, guestPhone } = req.body;
+
+  // If customerId is provided, guest info is not needed
+  if (customerId) {
+    return next();
+  }
+
+  // If no customerId, guest info is required
+  if (!guestName || !guestPhone) {
+    return res.status(400).json({
+      error: 'Guest orders require guestName and guestPhone when customerId is not provided'
+    });
+  }
+
+  next();
+};
 
 /**
  * Validation for transaction ID (stricter for UPI payments)

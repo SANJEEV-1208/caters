@@ -17,7 +17,7 @@ const formatOrder = (order) => {
   return {
     id: order.id,
     orderId: order.order_id,
-    customerId: order.customer_id,
+    customerId: order.customer_id || null, // Null for guest orders
     catererId: order.caterer_id,
     items: order.items,
     totalAmount: Number.parseFloat(order.total_amount),
@@ -29,7 +29,10 @@ const formatOrder = (order) => {
     orderDate: order.order_date,
     deliveryDate: deliveryDateStr,
     status: order.status,
-    createdAt: order.created_at
+    createdAt: order.created_at,
+    // Guest order fields
+    guestName: order.guest_name || null,
+    guestPhone: order.guest_phone || null,
   };
 };
 
@@ -49,15 +52,21 @@ exports.createOrder = async (req, res) => {
       itemCount,
       orderDate,
       deliveryDate,
-      status
+      status,
+      guestName,
+      guestPhone
     } = req.body;
 
-    if (!orderId || !customerId || !catererId || !items || !totalAmount || !paymentMethod || !itemCount) {
+    // Basic validation - either customerId OR guest info must be provided
+    if (!orderId || !catererId || !items || !totalAmount || !paymentMethod || !itemCount) {
       return res.status(400).json({ error: 'Required fields missing' });
     }
 
-    // Ownership check: Ensure customer is creating order for themselves
-    if (req.user && req.user.id !== Number(customerId)) {
+    // Guest vs authenticated order validation (handled by validateGuestOrderInfo middleware)
+    const isGuestOrder = !customerId;
+
+    // Ownership check: If authenticated user, ensure they're creating order for themselves
+    if (req.user && customerId && req.user.id !== Number(customerId)) {
       return res.status(403).json({ error: 'You can only create orders for yourself' });
     }
 
@@ -81,12 +90,12 @@ exports.createOrder = async (req, res) => {
     const result = await pool.query(
       `INSERT INTO orders
       (order_id, customer_id, caterer_id, items, total_amount, payment_method, transaction_id,
-       delivery_address, table_number, item_count, order_date, delivery_date, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       delivery_address, table_number, item_count, order_date, delivery_date, status, guest_name, guest_phone)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *`,
       [
         orderId,
-        customerId,
+        customerId || null,  // Null for guest orders
         catererId,
         JSON.stringify(items),
         totalAmount,
@@ -97,11 +106,17 @@ exports.createOrder = async (req, res) => {
         itemCount,
         orderDate || new Date(),
         deliveryDate || null,
-        status || 'pending'
+        status || 'pending',
+        guestName || null,  // Guest name for anonymous orders
+        guestPhone || null  // Guest phone for anonymous orders
       ]
     );
 
-    console.log(`Order created by customer ${customerId}: ${orderId}, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+    if (isGuestOrder) {
+      console.log(`Guest order created: ${orderId}, Guest: ${guestName} (${guestPhone}), Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+    } else {
+      console.log(`Order created by customer ${customerId}: ${orderId}, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+    }
 
     res.status(201).json(formatOrder(result.rows[0]));
   } catch (error) {
@@ -201,17 +216,21 @@ exports.updateOrderStatus = async (req, res) => {
 
     const updatedOrder = result.rows[0];
 
-    // Send push notification to customer about order status change
-    try {
-      await sendOrderStatusNotification(
-        updatedOrder.customer_id,
-        updatedOrder.order_id,
-        status
-      );
-      console.log(`✅ Notification sent to customer ${updatedOrder.customer_id} for order ${updatedOrder.order_id}`);
-    } catch (notificationError) {
-      // Log but don't fail the request if notification fails
-      console.error('⚠️ Failed to send push notification:', notificationError);
+    // Send push notification to customer about order status change (skip for guest orders)
+    if (updatedOrder.customer_id) {
+      try {
+        await sendOrderStatusNotification(
+          updatedOrder.customer_id,
+          updatedOrder.order_id,
+          status
+        );
+        console.log(`✅ Notification sent to customer ${updatedOrder.customer_id} for order ${updatedOrder.order_id}`);
+      } catch (notificationError) {
+        // Log but don't fail the request if notification fails
+        console.error('⚠️ Failed to send push notification:', notificationError);
+      }
+    } else {
+      console.log(`ℹ️ Skipping notification for guest order ${updatedOrder.order_id} (${updatedOrder.guest_name})`);
     }
 
     res.json(formatOrder(updatedOrder));

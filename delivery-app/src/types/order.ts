@@ -3,7 +3,7 @@ import { CartItem } from "@/src/context/CartContext";
 export interface Order {
   id?: number; // Backend database ID (auto-generated)
   orderId: string; // Client-generated order ID
-  customerId?: number; // Customer user ID
+  customerId?: number; // Customer user ID (optional for guest orders)
   catererId?: number; // Caterer user ID
   items: CartItem[];
   totalAmount: number;
@@ -17,4 +17,7 @@ export interface Order {
   deliveryDate?: string; // YYYY-MM-DD format
   status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
   createdAt?: string; // Backend timestamp
+  // Guest order fields (required when customerId is not provided)
+  guestName?: string; // Guest customer name for anonymous orders (QR scanner)
+  guestPhone?: string; // Guest customer phone for anonymous orders (QR scanner)
 }

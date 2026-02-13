@@ -6,20 +6,22 @@ const { orderLimiter } = require('../middleware/rateLimiter');
 const {
   validateOrder,
   validateTransactionId,
+  validateGuestOrderInfo,
   validateOrderId,
   validateCustomerId,
   validateCatererId,
   handleValidationErrors
 } = require('../middleware/validators');
 
-// POST /api/orders - Create order (protected, customer only, rate limited, with transaction validation)
+// POST /api/orders - Create order (public for guest orders, rate limited, with validation)
+// Guests (QR scanner): No authentication required, must provide guestName and guestPhone
+// Authenticated users: Include JWT token, must provide customerId
 router.post(
   '/',
-  authenticateToken,
-  requireRole('customer'),
   orderLimiter,
   validateOrder,
   handleValidationErrors,
+  validateGuestOrderInfo, // Ensures guest orders have name/phone when no customerId
   validateTransactionId, // Custom middleware for transaction ID validation
   orderController.createOrder
 );

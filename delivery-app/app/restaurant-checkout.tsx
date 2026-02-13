@@ -13,7 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { createOrder } from "@/src/api/orderApi";
-import { loginUser, registerGuestCustomer, getUserById } from "@/src/api/authApi";
+import { getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
@@ -112,37 +112,22 @@ export default function RestaurantCheckout() {
       setLoading(true);
 
       const fullPhone = `+91${customerPhone}`;
-      console.log('=== Restaurant Checkout ===');
-      console.log('Customer Name:', customerName);
-      console.log('Customer Phone:', fullPhone);
+      console.log('=== Restaurant Checkout - Guest Order ===');
+      console.log('Guest Name:', customerName);
+      console.log('Guest Phone:', fullPhone);
       console.log('Payment Method:', paymentMethod);
       console.log('Transaction ID:', transactionId || 'WALK-IN');
+      console.log('Authenticated User:', user ? `${user.name} (${user.id})` : 'None (Guest)');
 
-      // Step 1: Check if customer exists, if not create one (GUEST REGISTRATION - QR CODE FLOW)
-      let customer = await loginUser(fullPhone);
-
-      if (!customer) {
-        console.log('Customer not found, creating new GUEST customer account...');
-        // Create new GUEST customer account (public endpoint, no auth required)
-        customer = await registerGuestCustomer({
-          name: customerName,
-          phone: fullPhone,
-        });
-        console.log('✅ Created new guest customer:', customer);
-      } else {
-        console.log('✅ Found existing customer:', customer);
-      }
-
-      if (!customer?.id || customer.id === 0) {
-        throw new Error('Failed to create or find customer account');
-      }
-
-      // Step 2: Create order with valid customer ID
+      // Create order ID
       const orderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
+      // Create order object
+      // For authenticated users: include customerId
+      // For guests: include guestName and guestPhone (no customerId)
       const order: Order = {
         orderId,
-        customerId: customer.id,
+        customerId: user?.id, // Include customerId only if user is authenticated
         catererId,
         items: cartData,
         totalAmount,
@@ -154,6 +139,9 @@ export default function RestaurantCheckout() {
         orderDate: getCurrentTimestampIST(),
         deliveryDate: getTodayIST(),
         status: "pending",
+        // Guest order fields (only used when customerId is not provided)
+        guestName: !user ? customerName : undefined,
+        guestPhone: !user ? fullPhone : undefined,
       };
 
       console.log('Creating order:', JSON.stringify(order, null, 2));
