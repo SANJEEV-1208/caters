@@ -4,10 +4,13 @@ import { User, SignupData } from "@/src/types/auth";
 import {
   loginUser as apiLoginUser,
   signupCaterer as apiSignupCaterer,
+  refreshAccessToken as apiRefreshToken,
+  logoutUser as apiLogoutUser,
 } from "@/src/api/authApi";
 import { isTokenExpired } from "@/src/utils/apiHelper";
 import { registerForPushNotifications } from "@/src/services/notificationService";
 import { unregisterPushToken } from "@/src/api/pushTokenApi";
+import { saveRefreshToken, getRefreshToken, saveAccessToken, clearAllTokens } from "@/src/utils/secureStorage";
 
 type AuthContextType = {
   user: User | null;
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ✅ DERIVED state (no separate useState)
   const isAuthenticated = user !== null;
 
-  // Load user from AsyncStorage on app start
+  // Load user from AsyncStorage on app start and auto-refresh if token expired
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -43,24 +46,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userJson) {
           const savedUser = JSON.parse(userJson);
 
-          // Check if token exists
+          // Check if access token exists
           if (!savedUser.token) {
-            console.warn('⚠️ User loaded but token is missing - clearing stored user');
-            console.warn('⚠️ Please login again to get a new token');
+            console.warn('⚠️ User loaded but access token is missing');
+
+            // Try to refresh using refresh token
+            const refreshToken = await getRefreshToken();
+            if (refreshToken) {
+              console.log('🔄 Attempting to restore session with refresh token...');
+              const refreshed = await attemptTokenRefresh(refreshToken, savedUser);
+              if (refreshed) {
+                return; // Session restored successfully
+              }
+            }
+
+            // No refresh token or refresh failed - clear user
+            console.warn('⚠️ Cannot restore session - please login again');
+            await clearAllTokens();
             await AsyncStorage.removeItem('user');
             setUser(null);
           }
-          // Check if token is expired
+          // Check if access token is expired
           else if (isTokenExpired(savedUser.token)) {
-            console.warn('⚠️ Token has expired - clearing stored user');
-            console.warn('⚠️ Please login again to get a new token');
+            console.warn('⚠️ Access token has expired');
+
+            // Try to refresh using refresh token
+            const refreshToken = await getRefreshToken();
+            if (refreshToken) {
+              console.log('🔄 Auto-refreshing expired token...');
+              const refreshed = await attemptTokenRefresh(refreshToken, savedUser);
+              if (refreshed) {
+                return; // Token refreshed successfully
+              }
+            }
+
+            // Refresh failed - clear user
+            console.warn('⚠️ Session expired - please login again');
+            await clearAllTokens();
             await AsyncStorage.removeItem('user');
             setUser(null);
           }
-          // Token exists and is valid
+          // Access token exists and is valid
           else {
             setUser(savedUser);
-            console.log('✓ User loaded from storage:', savedUser.phone, savedUser.role);
+            console.log('✅ Session restored:', savedUser.phone, savedUser.role);
           }
         }
       } catch (error) {
@@ -69,6 +98,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     };
+
+    // Helper function to attempt token refresh
+    const attemptTokenRefresh = async (refreshToken: string, savedUser: User): Promise<boolean> => {
+      try {
+        const refreshedData = await apiRefreshToken(refreshToken);
+
+        if (refreshedData) {
+          // Update user with new tokens
+          const updatedUser = {
+            ...savedUser,
+            token: refreshedData.token,
+            refreshToken: refreshedData.refreshToken,
+          };
+
+          setUser(updatedUser);
+          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+          await saveAccessToken(refreshedData.token!);
+          await saveRefreshToken(refreshedData.refreshToken!);
+
+          console.log('✅ Session restored with new tokens');
+          return true;
+        }
+
+        return false;
+      } catch (error) {
+        console.error('❌ Token refresh failed:', error);
+        return false;
+      }
+    };
+
     void loadUser();
   }, []);
 
@@ -131,8 +190,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw error;
       }
 
-      // Normal login - save user
-      setUser(response as User);
+      // Normal login - save user and tokens
+      const userData = response as User;
+
+      // Save tokens securely
+      if (userData.token) {
+        await saveAccessToken(userData.token!);
+      }
+      if (userData.refreshToken) {
+        await saveRefreshToken(userData.refreshToken!);
+        console.log('✅ Refresh token saved - persistent login enabled');
+      }
+
+      setUser(userData);
       return true;
     } catch (error) {
       // Re-throw all errors (login screen will handle display)
@@ -143,9 +213,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ✅ SIGNUP (Caterer)
   const signup = async (data: SignupData): Promise<boolean> => {
     try {
-      const userData = await apiSignupCaterer(data);
+      const userData = await apiSignupCaterer(data as SignupData & { pin: string });
 
       if (!userData) return false;
+
+      // Save tokens securely
+      if (userData.token) {
+        await saveAccessToken(userData.token!);
+      }
+      if (userData.refreshToken) {
+        await saveRefreshToken(userData.refreshToken!);
+        console.log('✅ Refresh token saved - persistent login enabled');
+      }
 
       setUser(userData);
       return true;
@@ -168,9 +247,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
+    // Revoke refresh token on backend
+    try {
+      const refreshToken = await getRefreshToken();
+      if (refreshToken) {
+        await apiLogoutUser(refreshToken);
+        console.log('✅ Refresh token revoked on backend');
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to revoke refresh token:', error);
+      // Don't block logout if revoke fails
+    }
+
+    // Clear all tokens from secure storage
+    await clearAllTokens();
+
     setUser(null);
     setSelectedCatererId(null);
     setSelectedDeliveryDate(new Date().toISOString().split('T')[0]);
+
+    console.log('✅ Logged out successfully');
   };
 
   const value = useMemo(

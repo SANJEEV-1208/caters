@@ -157,7 +157,7 @@ export default function RestaurantMenuBrowser() {
             {tableNumber && (
               <View style={styles.tableChip}>
                 <Ionicons name="location" size={14} color="#FFF" />
-                <Text style={styles.tableInfo}>Table {tableNumber}</Text>
+                <Text style={styles.tableInfo}>{tableNumber}</Text>
               </View>
             )}
           </View>

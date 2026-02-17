@@ -18,7 +18,7 @@ import { MenuItem } from "@/src/types/menu";
 import ItemHistoryModal from "@/src/components/caterer/ItemHistoryModal";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 import { MenuFormFields } from "@/src/components/caterer/MenuFormFields";
-import { MealTypeSelector } from "@/src/components/caterer/MealTypeSelector";
+import { MealTypeSelector, MealType} from "@/src/components/caterer/MealTypeSelector";
 import { DateSelector } from "@/src/components/caterer/DateSelector";
 import { CuisineSelector } from "@/src/components/caterer/CuisineSelector";
 import { validateMenuForm } from "@/src/utils/menuValidation";
@@ -179,7 +179,7 @@ export default function MenuAddScreen() {
         {/* Using shared Meal Type Selector component */}
         <MealTypeSelector
           selectedType={formData.type}
-          onSelectType={(type) => { setFormData({ ...formData, type: type as unknown }); }}
+          onSelectType={(type) => { setFormData({ ...formData, type: type as MealType }); }}
           disabled={loading}
         />
 

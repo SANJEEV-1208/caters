@@ -6,6 +6,7 @@ const BASE_URL = API_CONFIG.BASE_URL;
 
 // Login response type for first-time users
 interface LoginResponse {
+  user : User;
   requiresPinSetup?: boolean;
   userId?: number;
   phone?: string;
@@ -107,7 +108,14 @@ export const signupCaterer = async (data: SignupData & { pin: string }): Promise
 export const searchUserByPhone = async (phone: string): Promise<User | null> => {
   try {
     // Reuse loginUser which now uses the new endpoint
-    return await loginUser(phone);
+    const result = await loginUser(phone);
+
+    // If user needs PIN setup, return null (not a complete user yet)
+    if (result && 'requiresPinSetup' in result && result.requiresPinSetup) {
+      return null;
+    }
+
+    return result as User | null;
   } catch (error) {
     console.error("Search user API error:", error);
     throw error;
@@ -315,5 +323,58 @@ export const updateUserProfile = async (
   } catch (error) {
     console.error("❌ Update profile API error:", error);
     throw error;
+  }
+};
+
+// Refresh access token using refresh token
+export const refreshAccessToken = async (refreshToken: string): Promise<User | null> => {
+  try {
+    console.log('🔄 Refreshing access token...');
+
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) {
+      console.warn('⚠️ Refresh token invalid or expired');
+      return null;
+    }
+
+    const data = await res.json();
+    console.log('✅ Access token refreshed successfully');
+    return data as User;
+  } catch (error) {
+    console.error("❌ Refresh token API error:", error);
+    return null;
+  }
+};
+
+// Logout user and revoke refresh token
+export const logoutUser = async (refreshToken: string): Promise<boolean> => {
+  try {
+    console.log('🚪 Logging out and revoking refresh token...');
+
+    const res = await fetch(`${BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) {
+      console.warn('⚠️ Failed to revoke refresh token on backend');
+      return false;
+    }
+
+    console.log('✅ Refresh token revoked on backend');
+    return true;
+  } catch (error) {
+    console.error("❌ Logout API error:", error);
+    return false;
   }
 };

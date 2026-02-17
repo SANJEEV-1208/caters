@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system';
+import { documentDirectory, cacheDirectory, downloadAsync } from 'expo-file-system/build/legacy/FileSystem';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 
@@ -40,11 +40,18 @@ export default function TableQRViewScreen() {
         return;
       }
 
+      // Ensure document directory is available
+      if (!documentDirectory) {
+        Alert.alert('Error', 'Document directory not available');
+        setDownloading(false);
+        return;
+      }
+
       // Download file
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${(FileSystem as unknown).documentDirectory}${filename}`;
+      const fileUri = `${documentDirectory}${filename}`;
 
-      const downloadResult = await FileSystem.downloadAsync(
+      const downloadResult = await downloadAsync(
         qrCodeUrl as string,
         fileUri
       );
@@ -63,7 +70,7 @@ export default function TableQRViewScreen() {
       );
     } catch (error: unknown) {
       console.error('Download error:', error);
-      Alert.alert('Download Failed', error.message || 'Failed to save QR code');
+      Alert.alert('Download Failed', error instanceof Error ? error.message : 'Failed to save QR code');
     } finally {
       setDownloading(false);
     }
@@ -81,11 +88,18 @@ export default function TableQRViewScreen() {
         return;
       }
 
+      // Ensure cache directory is available
+      if (!cacheDirectory) {
+        Alert.alert('Error', 'Cache directory not available');
+        setSharing(false);
+        return;
+      }
+
       // Download file to temp directory
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${(FileSystem as unknown).cacheDirectory}${filename}`;
+      const fileUri = `${cacheDirectory}${filename}`;
 
-      const downloadResult = await FileSystem.downloadAsync(
+      const downloadResult = await downloadAsync(
         qrCodeUrl as string,
         fileUri
       );
@@ -101,7 +115,7 @@ export default function TableQRViewScreen() {
       });
     } catch (error: unknown) {
       console.error('Share error:', error);
-      Alert.alert('Share Failed', error.message || 'Failed to share QR code');
+      Alert.alert('Share Failed', error instanceof Error ? error.message : 'Failed to share QR code');
     } finally {
       setSharing(false);
     }

@@ -52,7 +52,7 @@ export default function CustomersScreen() {
 
     try {
       const data = await getCustomersByCaterer(user.id);
-      setCustomers(data);
+      setCustomers(data as Customer[]);
     } catch (error) {
       console.error("Failed to load customers:", error);
     } finally {

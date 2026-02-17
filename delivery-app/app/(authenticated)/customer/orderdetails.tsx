@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Order } from "@/src/types/order";
 import { getOrders } from "@/src/utils/orderStorage";
 import { formatTimeIST } from "@/src/utils/dateUtils";
+import { Icon } from "react-native-screens";
 
 export default function OrderDetails() {
   const router = useRouter();
@@ -165,7 +166,7 @@ export default function OrderDetails() {
         <View style={[styles.statusCard, { borderLeftColor: statusColor }]}>
           <View style={styles.statusHeader}>
             <View style={[styles.statusIconContainer, { backgroundColor: `${statusColor}20` }]}>
-              <Ionicons name={statusIcon as unknown} size={32} color={statusColor} />
+              <Ionicons name={statusIcon} size={32} color={statusColor} />
             </View>
             <View style={styles.statusInfo}>
               <Text style={[styles.statusText, { color: statusColor }]}>

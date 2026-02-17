@@ -97,4 +97,23 @@ router.post(
   authController.setPin
 );
 
+// POST /api/auth/refresh - Refresh access token using refresh token (public)
+router.post(
+  '/refresh',
+  authController.refreshAccessToken
+);
+
+// POST /api/auth/logout - Logout user and revoke refresh token (public)
+router.post(
+  '/logout',
+  authController.logoutUser
+);
+
+// POST /api/auth/logout-all - Logout from all devices (protected)
+router.post(
+  '/logout-all',
+  authenticateToken,
+  authController.logoutAllDevices
+);
+
 module.exports = router;

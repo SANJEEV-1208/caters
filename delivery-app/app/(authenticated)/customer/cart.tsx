@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useCart } from "@/src/context/CartContext";
+import { CartItem, useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
 import PaymentBottomSheet from "@/src/components/PaymentBottomSheet";
 import { saveOrder, getOrders } from "@/src/utils/orderStorage";
@@ -167,16 +167,16 @@ export default function Cart() {
   };
 
   // Helper: Filter available items from order
-  const filterAvailableItems = async (catererId: number, orderItems: unknown[]) => {
+  const filterAvailableItems = async (catererId: number, orderItems: CartItem[]) => {
     const today = getTodayIST();
     const availableItems = await getMenuItemsByDate(catererId, today);
     const availableItemIds = new Set(availableItems.map(item => item.id));
 
-    const available = orderItems.filter((item: unknown) =>
+    const available = orderItems.filter((item: CartItem) =>
       availableItemIds.has((item as { id: number }).id)
     );
 
-    const unavailable = orderItems.filter((item: unknown) =>
+    const unavailable = orderItems.filter((item: CartItem) =>
       !availableItemIds.has((item as { id: number }).id)
     );
 

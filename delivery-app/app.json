@@ -43,7 +43,8 @@
           "savePhotosPermission": "Allow KaasproFoods to save QR codes to your gallery",
           "isAccessMediaLocationEnabled": false
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

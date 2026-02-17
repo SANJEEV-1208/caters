@@ -32,8 +32,9 @@ export type FoodItem = {
   name: string;
   rating?: string;
   price: number;
-  image: unknown;
+  image: string;
   description: string;
   category: "veg" | "non-veg";
   cuisine: string;
+  type?: "breakfast" | "lunch" | "dinner" | "snack" | "main_course";
 };

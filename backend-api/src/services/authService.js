@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const refreshTokenService = require('./refreshTokenService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'kaaspro-secret-key-change-in-production-2026';
 
@@ -54,16 +55,21 @@ exports.loginUser = async (req, res) => {
       return res.status(401).json({ error: 'Invalid PIN. Please try again.' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
+    // Generate JWT access token (short-lived: 15 minutes)
+    const accessToken = jwt.sign(
       {
         id: user.id,
         phone: user.phone,
         role: user.role
       },
       JWT_SECRET,
-      { expiresIn: '30m' } // Token expires in 30 minutes
+      { expiresIn: refreshTokenService.ACCESS_TOKEN_EXPIRY }
     );
+
+    // Generate refresh token (long-lived: 90 days)
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const refreshTokenData = await refreshTokenService.createRefreshToken(user.id, deviceInfo, ipAddress);
 
     // Convert snake_case to camelCase for frontend compatibility
     const formattedUser = {
@@ -79,10 +85,12 @@ exports.loginUser = async (req, res) => {
       paymentQrCode: user.payment_qr_code,
       profilePicture: user.profile_picture,
       createdAt: user.created_at,
-      token // Include JWT token in response
+      token: accessToken, // Short-lived access token
+      refreshToken: refreshTokenData.token, // Long-lived refresh token
+      refreshTokenExpiresAt: refreshTokenData.expiresAt
     };
 
-    console.log(`Login successful for user ${user.id} (${user.role})`);
+    console.log(`Login successful for user ${user.id} (${user.role}), refresh token expires in ${refreshTokenData.expiryDays} days`);
     res.json(formattedUser);
   } catch (error) {
     console.error('Login error:', error);
@@ -131,16 +139,21 @@ exports.signupCaterer = async (req, res) => {
 
     const user = result.rows[0];
 
-    // Generate JWT token for immediate login
-    const token = jwt.sign(
+    // Generate JWT access token for immediate login (short-lived: 15 minutes)
+    const accessToken = jwt.sign(
       {
         id: user.id,
         phone: user.phone,
         role: user.role
       },
       JWT_SECRET,
-      { expiresIn: '30m' }
+      { expiresIn: refreshTokenService.ACCESS_TOKEN_EXPIRY }
     );
+
+    // Generate refresh token (long-lived: 90 days)
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const refreshTokenData = await refreshTokenService.createRefreshToken(user.id, deviceInfo, ipAddress);
 
     const formattedUser = {
       id: user.id,
@@ -154,10 +167,12 @@ exports.signupCaterer = async (req, res) => {
       restaurantAddress: user.restaurant_address,
       profilePicture: user.profile_picture,
       createdAt: user.created_at,
-      token
+      token: accessToken, // Short-lived access token
+      refreshToken: refreshTokenData.token, // Long-lived refresh token
+      refreshTokenExpiresAt: refreshTokenData.expiresAt
     };
 
-    console.log(`Caterer signup successful for user ${user.id}`);
+    console.log(`Caterer signup successful for user ${user.id}, refresh token expires in ${refreshTokenData.expiryDays} days`);
     res.status(201).json(formattedUser);
   } catch (error) {
     console.error('Signup error:', error);
@@ -540,6 +555,111 @@ exports.updateUserProfile = async (req, res) => {
     res.json(formattedUser);
   } catch (error) {
     console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Refresh access token using refresh token
+exports.refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    // Verify the refresh token and get user data
+    const tokenData = await refreshTokenService.verifyRefreshToken(refreshToken);
+
+    if (!tokenData) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token. Please login again.' });
+    }
+
+    // Generate new access token
+    const newAccessToken = jwt.sign(
+      {
+        id: tokenData.user_id,
+        phone: tokenData.phone,
+        role: tokenData.role
+      },
+      JWT_SECRET,
+      { expiresIn: refreshTokenService.ACCESS_TOKEN_EXPIRY }
+    );
+
+    // Token rotation: Generate new refresh token and revoke old one
+    const deviceInfo = req.headers['user-agent'] || 'Unknown device';
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const newRefreshTokenData = await refreshTokenService.createRefreshToken(tokenData.user_id, deviceInfo, ipAddress);
+
+    // Revoke the old refresh token (token rotation for security)
+    await refreshTokenService.revokeRefreshToken(refreshToken);
+
+    // Return user data with new tokens
+    const formattedUser = {
+      id: tokenData.user_id,
+      phone: tokenData.phone,
+      role: tokenData.role,
+      name: tokenData.name,
+      email: tokenData.email,
+      serviceName: tokenData.service_name,
+      address: tokenData.address,
+      caterType: tokenData.cater_type,
+      restaurantName: tokenData.restaurant_name,
+      restaurantAddress: tokenData.restaurant_address,
+      paymentQrCode: tokenData.payment_qr_code,
+      profilePicture: tokenData.profile_picture,
+      token: newAccessToken,
+      refreshToken: newRefreshTokenData.token,
+      refreshTokenExpiresAt: newRefreshTokenData.expiresAt
+    };
+
+    console.log(`Token refreshed for user ${tokenData.user_id}, new refresh token expires in ${newRefreshTokenData.expiryDays} days`);
+    res.json(formattedUser);
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Logout user and revoke refresh token
+exports.logoutUser = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    // Revoke the refresh token
+    const revoked = await refreshTokenService.revokeRefreshToken(refreshToken);
+
+    if (revoked) {
+      console.log('User logged out successfully');
+      res.json({ message: 'Logged out successfully' });
+    } else {
+      res.status(404).json({ error: 'Refresh token not found' });
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Logout from all devices (revoke all refresh tokens for user)
+exports.logoutAllDevices = async (req, res) => {
+  try {
+    const userId = req.user.id; // From authenticateToken middleware
+
+    // Revoke all refresh tokens for this user
+    const revokedCount = await refreshTokenService.revokeAllUserTokens(userId);
+
+    console.log(`User ${userId} logged out from ${revokedCount} devices`);
+    res.json({
+      message: 'Logged out from all devices successfully',
+      devicesLoggedOut: revokedCount
+    });
+  } catch (error) {
+    console.error('Logout all devices error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

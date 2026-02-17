@@ -39,3 +39,18 @@ exports.setPin = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   return await authService.updateUserProfile(req, res);
 };
+
+// Refresh access token using refresh token
+exports.refreshAccessToken = async (req, res) => {
+  return await authService.refreshAccessToken(req, res);
+};
+
+// Logout user and revoke refresh token
+exports.logoutUser = async (req, res) => {
+  return await authService.logoutUser(req, res);
+};
+
+// Logout from all devices
+exports.logoutAllDevices = async (req, res) => {
+  return await authService.logoutAllDevices(req, res);
+};

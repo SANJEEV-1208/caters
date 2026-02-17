@@ -17,6 +17,8 @@ import { getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
+import { MenuItem } from "@/src/types/menu";
+import { CartItem } from "@/src/context/CartContext";
 
 export default function RestaurantCheckout() {
   const router = useRouter();
@@ -135,7 +137,7 @@ export default function RestaurantCheckout() {
         transactionId: paymentMethod === "upi" ? transactionId : "WALK-IN",
         deliveryAddress: `${restaurantName} - Table ${tableNumber}`,
         tableNumber: Number(tableNumber),
-        itemCount: cartData.reduce((sum: number, item: unknown) => sum + (item.quantity || 1), 0),
+        itemCount: cartData.reduce((sum: number, item: CartItem) => sum + (item.quantity || 1), 0),
         orderDate: getCurrentTimestampIST(),
         deliveryDate: getTodayIST(),
         status: "pending",
@@ -150,22 +152,17 @@ export default function RestaurantCheckout() {
       const createdOrder = await createOrder(order);
       console.log('✅ Order created successfully:', createdOrder);
 
-      const paymentMessage = paymentMethod === "upi"
-        ? `Payment Method: UPI\nTransaction ID: ${transactionId}`
-        : "Payment Method: Cash on Delivery\nPlease pay at the counter.";
-
-      Alert.alert(
-        "Order Placed!",
-        `Your order has been placed successfully.\n\nOrder ID: ${orderId}\nTable: ${tableNumber}\n\n${paymentMessage}`,
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              router.replace("/login");
-            },
-          },
-        ]
-      );
+      // Navigate to order confirmation screen
+      router.replace({
+        pathname: "/restaurant-order-confirmed",
+        params: {
+          orderId: orderId,
+          tableNumber: tableNumber.toString(),
+          restaurantName: restaurantName,
+          totalAmount: totalAmount.toString(),
+          paymentMethod: paymentMethod,
+        },
+      });
     } catch (error) {
       console.error("Order placement error:", error);
       Alert.alert("Error", "Failed to place order. Please try again or call the waiter.");
@@ -357,7 +354,7 @@ export default function RestaurantCheckout() {
             </View>
 
             <View style={styles.itemsList}>
-              {cartData.map((item: unknown) => (
+              {cartData.map((item: CartItem) => (
                 <View key={item.id} style={styles.orderItem}>
                   <View style={styles.itemLeft}>
                     <View style={[

@@ -11,7 +11,9 @@ export type User = {
   restaurantAddress?: string; // For restaurant caterers
   paymentQrCode?: string; // For caterers - GPay/UPI QR code image URL
   profilePicture?: string; // Profile picture URL
-  token?: string;        // JWT token for authentication
+  token?: string;        // JWT access token for authentication (short-lived: 15 min)
+  refreshToken?: string; // Refresh token for persistent login (long-lived: 90 days)
+  refreshTokenExpiresAt?: string; // Expiry date of refresh token
   createdAt?: string;
 };
 

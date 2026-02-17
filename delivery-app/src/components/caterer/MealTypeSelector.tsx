@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { menuFormStyles } from "@/src/styles/menuFormStyles";
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack", "main_course"] as const;
-type MealType = typeof MEAL_TYPES[number];
+export type MealType = typeof MEAL_TYPES[number];
 
 interface MealTypeSelectorProps {
   selectedType: MealType;

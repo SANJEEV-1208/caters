@@ -1,8 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { getRefreshToken, saveRefreshToken, saveAccessToken, clearAllTokens } from './secureStorage';
+import { API_CONFIG } from '../config/api';
 
 // Track if we're already redirecting to prevent multiple redirects
 let isRedirecting = false;
+
+// Track if we're currently refreshing to prevent multiple refresh attempts
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
 
 /**
  * Helper function to get JWT token from AsyncStorage
@@ -43,9 +49,59 @@ export const getAuthHeaders = async (): Promise<HeadersInit> => {
 };
 
 /**
- * Authenticated fetch wrapper
+ * Refresh the access token using the refresh token
+ * Returns true if refresh was successful, false otherwise
+ */
+const refreshAccessToken = async (): Promise<boolean> => {
+  try {
+    console.log('🔄 Attempting to refresh access token...');
+
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) {
+      console.warn('⚠️ No refresh token found');
+      return false;
+    }
+
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      console.warn('⚠️ Refresh token request failed:', response.status);
+      return false;
+    }
+
+    const userData = await response.json();
+
+    // Save new tokens
+    await saveAccessToken(userData.token);
+    await saveRefreshToken(userData.refreshToken);
+
+    // Update user in AsyncStorage with new tokens
+    const userJson = await AsyncStorage.getItem('user');
+    if (userJson) {
+      const user = JSON.parse(userJson);
+      user.token = userData.token;
+      user.refreshToken = userData.refreshToken;
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+    }
+
+    console.log('✅ Access token refreshed successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Error refreshing access token:', error);
+    return false;
+  }
+};
+
+/**
+ * Authenticated fetch wrapper with auto-refresh
  * Automatically includes JWT token in Authorization header
- * Handles token expiration (401 errors) by clearing stored user
+ * Handles token expiration (401 errors) by attempting to refresh, then redirects if refresh fails
  */
 export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const headers = await getAuthHeaders();
@@ -56,32 +112,78 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
     ...(options.headers || {}),
   };
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     ...options,
     headers: mergedHeaders,
   });
 
-  // Handle token expiration - clear user and redirect to login
+  // Handle 401: Try to refresh token and retry request
   if (response.status === 401 && !isRedirecting) {
-    isRedirecting = true;
-    console.warn('⚠️ 401 Unauthorized: Token expired or invalid - clearing session');
+    console.warn('⚠️ 401 Unauthorized: Access token expired, attempting refresh...');
 
-    await AsyncStorage.removeItem('user');
-
-    // Redirect to login page (only once)
-    try {
-      router.replace('/login');
-    } catch (error) {
-      console.error('Error redirecting to login:', error);
+    // Prevent multiple simultaneous refresh attempts
+    if (!isRefreshing) {
+      isRefreshing = true;
+      refreshPromise = refreshAccessToken();
     }
 
-    // Reset flag after a delay
-    setTimeout(() => {
-      isRedirecting = false;
-    }, 2000);
+    // Wait for refresh to complete
+    const refreshSuccess = await refreshPromise!;
+    isRefreshing = false;
+    refreshPromise = null;
+
+    if (refreshSuccess) {
+      // Retry the original request with new token
+      console.log('🔄 Retrying original request with new token...');
+      const newHeaders = await getAuthHeaders();
+      const retryMergedHeaders = {
+        ...newHeaders,
+        ...(options.headers || {}),
+      };
+
+      response = await fetch(url, {
+        ...options,
+        headers: retryMergedHeaders,
+      });
+
+      // If still 401 after refresh, logout
+      if (response.status === 401) {
+        console.error('❌ Still unauthorized after refresh - logging out');
+        await handleLogout();
+      }
+    } else {
+      // Refresh failed - logout
+      console.error('❌ Refresh failed - logging out');
+      await handleLogout();
+    }
   }
 
   return response;
+};
+
+/**
+ * Handle logout: clear tokens and redirect to login
+ */
+const handleLogout = async (): Promise<void> => {
+  if (isRedirecting) return;
+
+  isRedirecting = true;
+  console.warn('⚠️ Logging out and clearing session');
+
+  await clearAllTokens();
+  await AsyncStorage.removeItem('user');
+
+  // Redirect to login page (only once)
+  try {
+    router.replace('/login');
+  } catch (error) {
+    console.error('Error redirecting to login:', error);
+  }
+
+  // Reset flag after a delay
+  setTimeout(() => {
+    isRedirecting = false;
+  }, 2000);
 };
 
 /**
