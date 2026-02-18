@@ -1,5 +1,6 @@
 const pool = require('../config/database');
 const { sendOrderStatusNotification } = require('./pushNotificationService');
+const auditService = require('./auditService');
 
 // Format order from database to frontend format
 const formatOrder = (order) => {
@@ -112,13 +113,23 @@ exports.createOrder = async (req, res) => {
       ]
     );
 
+    const createdOrder = result.rows[0];
+
     if (isGuestOrder) {
       console.log(`Guest order created: ${orderId}, Guest: ${guestName} (${guestPhone}), Payment: ${paymentMethod}, Amount: ${totalAmount}`);
     } else {
       console.log(`Order created by customer ${customerId}: ${orderId}, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
     }
 
-    res.status(201).json(formatOrder(result.rows[0]));
+    // Log order creation
+    await auditService.logOrderEvent(
+      isGuestOrder ? auditService.ACTION_TYPES.ORDER_CREATED_GUEST : auditService.ACTION_TYPES.ORDER_CREATED,
+      createdOrder,
+      req.user || { role: 'guest', phone: guestPhone, name: guestName },
+      req
+    );
+
+    res.status(201).json(formatOrder(createdOrder));
   } catch (error) {
     console.error('Create order error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -205,14 +216,18 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    // Get old order before update
+    const oldOrderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (oldOrderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    const oldOrder = oldOrderResult.rows[0];
+    const oldStatus = oldOrder.status;
+
     const result = await pool.query(
       'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
       [status, id]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
 
     const updatedOrder = result.rows[0];
 
@@ -232,6 +247,16 @@ exports.updateOrderStatus = async (req, res) => {
     } else {
       console.log(`ℹ️ Skipping notification for guest order ${updatedOrder.order_id} (${updatedOrder.guest_name})`);
     }
+
+    // Log order status change
+    await auditService.logOrderEvent(
+      auditService.ACTION_TYPES.ORDER_STATUS_CHANGED,
+      updatedOrder,
+      req.user,
+      req,
+      oldStatus,
+      status
+    );
 
     res.json(formatOrder(updatedOrder));
   } catch (error) {
@@ -254,7 +279,17 @@ exports.deleteOrder = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    res.json({ message: 'Order deleted successfully', order: formatOrder(result.rows[0]) });
+    const deletedOrder = result.rows[0];
+
+    // Log order deletion
+    await auditService.logOrderEvent(
+      auditService.ACTION_TYPES.ORDER_DELETED,
+      deletedOrder,
+      req.user,
+      req
+    );
+
+    res.json({ message: 'Order deleted successfully', order: formatOrder(deletedOrder) });
   } catch (error) {
     console.error('Delete order error:', error);
     res.status(500).json({ error: 'Internal server error' });

@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const auditService = require('./auditService');
 
 // Format menu item from database to frontend format
 const formatMenuItem = (item) => ({
@@ -115,8 +116,19 @@ exports.createMenuItem = async (req, res) => {
       [catererId, name, description || '', price, category, cuisine || '', type || 'main_course', image || '', availableDates || [], inStock !== false]
     );
 
-    console.log(`Menu item created by caterer ${catererId}:`, result.rows[0].name);
-    res.status(201).json(formatMenuItem(result.rows[0]));
+    const createdItem = result.rows[0];
+
+    console.log(`Menu item created by caterer ${catererId}:`, createdItem.name);
+
+    // Log menu item creation
+    await auditService.logMenuEvent(
+      auditService.ACTION_TYPES.MENU_CREATED,
+      createdItem,
+      req.user,
+      req
+    );
+
+    res.status(201).json(formatMenuItem(createdItem));
   } catch (error) {
     console.error('Create menu item error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -141,7 +153,7 @@ exports.updateMenuItem = async (req, res) => {
 
     // Ownership check: Verify the menu item belongs to this caterer
     const checkOwnership = await pool.query(
-      'SELECT caterer_id FROM caterer_menus WHERE id = $1',
+      'SELECT * FROM caterer_menus WHERE id = $1',
       [id]
     );
 
@@ -149,7 +161,9 @@ exports.updateMenuItem = async (req, res) => {
       return res.status(404).json({ error: 'Menu item not found' });
     }
 
-    if (req.user && req.user.id !== checkOwnership.rows[0].caterer_id) {
+    const oldItem = checkOwnership.rows[0];
+
+    if (req.user && req.user.id !== oldItem.caterer_id) {
       return res.status(403).json({ error: 'You can only update your own menu items' });
     }
 
@@ -169,8 +183,20 @@ exports.updateMenuItem = async (req, res) => {
       [name, description, price, category, cuisine, type, image, availableDates, inStock, id]
     );
 
-    console.log(`Menu item updated by caterer ${req.user.id}:`, result.rows[0].name);
-    res.json(formatMenuItem(result.rows[0]));
+    const updatedItem = result.rows[0];
+
+    console.log(`Menu item updated by caterer ${req.user.id}:`, updatedItem.name);
+
+    // Log menu item update
+    await auditService.logMenuEvent(
+      auditService.ACTION_TYPES.MENU_UPDATED,
+      updatedItem,
+      req.user,
+      req,
+      oldItem
+    );
+
+    res.json(formatMenuItem(updatedItem));
   } catch (error) {
     console.error('Update menu item error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -202,8 +228,19 @@ exports.toggleStock = async (req, res) => {
       [inStock, id]
     );
 
-    console.log(`Stock toggled by caterer ${req.user.id}:`, result.rows[0].name, inStock ? 'In Stock' : 'Out of Stock');
-    res.json(formatMenuItem(result.rows[0]));
+    const updatedItem = result.rows[0];
+
+    console.log(`Stock toggled by caterer ${req.user.id}:`, updatedItem.name, inStock ? 'In Stock' : 'Out of Stock');
+
+    // Log stock toggle
+    await auditService.logMenuEvent(
+      auditService.ACTION_TYPES.MENU_STOCK_TOGGLED,
+      updatedItem,
+      req.user,
+      req
+    );
+
+    res.json(formatMenuItem(updatedItem));
   } catch (error) {
     console.error('Toggle stock error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -234,8 +271,19 @@ exports.deleteMenuItem = async (req, res) => {
       [id]
     );
 
-    console.log(`Menu item deleted by caterer ${req.user.id}:`, checkOwnership.rows[0].name);
-    res.json({ message: 'Menu item deleted successfully', item: formatMenuItem(result.rows[0]) });
+    const deletedItem = result.rows[0];
+
+    console.log(`Menu item deleted by caterer ${req.user.id}:`, deletedItem.name);
+
+    // Log menu item deletion
+    await auditService.logMenuEvent(
+      auditService.ACTION_TYPES.MENU_DELETED,
+      deletedItem,
+      req.user,
+      req
+    );
+
+    res.json({ message: 'Menu item deleted successfully', item: formatMenuItem(deletedItem) });
   } catch (error) {
     console.error('Delete menu item error:', error);
     res.status(500).json({ error: 'Internal server error' });

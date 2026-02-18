@@ -11,6 +11,7 @@ const apartmentRoutes = require('./routes/apartmentRoutes');
 const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
 const pushTokenRoutes = require('./routes/pushTokenRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 const pool = require('./config/database');
 const { apiLimiter } = require('./middleware/rateLimiter');
 
@@ -88,6 +89,7 @@ app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/apartments', apartmentRoutes);
 app.use('/api/tables', tablesRoutes);
 app.use('/api/push-tokens', pushTokenRoutes);
+app.use('/api/audit', auditRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

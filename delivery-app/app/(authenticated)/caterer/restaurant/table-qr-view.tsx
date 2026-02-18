@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { documentDirectory, cacheDirectory, downloadAsync } from 'expo-file-system/build/legacy/FileSystem';
+import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import * as Sharing from 'expo-sharing';
 
@@ -41,7 +41,7 @@ export default function TableQRViewScreen() {
       }
 
       // Ensure document directory is available
-      if (!documentDirectory) {
+      if (!(FileSystem as any).documentDirectory) {
         Alert.alert('Error', 'Document directory not available');
         setDownloading(false);
         return;
@@ -49,9 +49,9 @@ export default function TableQRViewScreen() {
 
       // Download file
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${documentDirectory}${filename}`;
+      const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
 
-      const downloadResult = await downloadAsync(
+      const downloadResult = await (FileSystem as any).downloadAsync(
         qrCodeUrl as string,
         fileUri
       );
@@ -89,7 +89,7 @@ export default function TableQRViewScreen() {
       }
 
       // Ensure cache directory is available
-      if (!cacheDirectory) {
+      if (!(FileSystem as any).cacheDirectory) {
         Alert.alert('Error', 'Cache directory not available');
         setSharing(false);
         return;
@@ -97,9 +97,9 @@ export default function TableQRViewScreen() {
 
       // Download file to temp directory
       const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
-      const fileUri = `${cacheDirectory}${filename}`;
+      const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
 
-      const downloadResult = await downloadAsync(
+      const downloadResult = await (FileSystem as any).downloadAsync(
         qrCodeUrl as string,
         fileUri
       );

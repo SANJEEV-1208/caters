@@ -10,8 +10,8 @@ export default function CustomerLayout() {
 
   const tabs = [
     { path: "/(authenticated)/caterer/dashboard", label: "Home", icon: "home" as const },
-    { path: "/(authenticated)/caterer/orders", label: "Orders", icon: "today" as const },
     { path: "/(authenticated)/caterer/menu", label: "Menu", icon: "restaurant" as const },
+    { path: "/(authenticated)/caterer/orders", label: "Orders", icon: "today" as const },
     { path: "/(authenticated)/caterer/payments", label: "Revenue", icon: "cash" as const },
   ];
 

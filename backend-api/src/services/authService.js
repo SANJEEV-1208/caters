@@ -2,6 +2,7 @@ const pool = require('../config/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const refreshTokenService = require('./refreshTokenService');
+const auditService = require('./auditService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'kaaspro-secret-key-change-in-production-2026';
 
@@ -24,6 +25,14 @@ exports.loginUser = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      // Log failed login attempt
+      await auditService.logAuthEvent(
+        auditService.ACTION_TYPES.AUTH_LOGIN_FAILURE,
+        { phone },
+        req,
+        false,
+        'User not found'
+      );
       return res.status(404).json({ error: 'User not found. Please check your phone number.' });
     }
 
@@ -52,6 +61,14 @@ exports.loginUser = async (req, res) => {
     const pinValid = await bcrypt.compare(pin, user.pin_hash);
 
     if (!pinValid) {
+      // Log failed login attempt
+      await auditService.logAuthEvent(
+        auditService.ACTION_TYPES.AUTH_LOGIN_FAILURE,
+        user,
+        req,
+        false,
+        'Invalid PIN'
+      );
       return res.status(401).json({ error: 'Invalid PIN. Please try again.' });
     }
 
@@ -91,6 +108,15 @@ exports.loginUser = async (req, res) => {
     };
 
     console.log(`Login successful for user ${user.id} (${user.role}), refresh token expires in ${refreshTokenData.expiryDays} days`);
+
+    // Log successful login
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_LOGIN_SUCCESS,
+      user,
+      req,
+      true
+    );
+
     res.json(formattedUser);
   } catch (error) {
     console.error('Login error:', error);
@@ -173,6 +199,15 @@ exports.signupCaterer = async (req, res) => {
     };
 
     console.log(`Caterer signup successful for user ${user.id}, refresh token expires in ${refreshTokenData.expiryDays} days`);
+
+    // Log caterer signup
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_SIGNUP_CATERER,
+      user,
+      req,
+      true
+    );
+
     res.status(201).json(formattedUser);
   } catch (error) {
     console.error('Signup error:', error);
@@ -267,6 +302,10 @@ exports.updatePaymentQrCode = async (req, res) => {
     const { id } = req.params;
     const { paymentQrCode } = req.body;
 
+    // Get old QR code before update
+    const oldUserResult = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    const oldUser = oldUserResult.rows[0];
+
     const result = await pool.query(
       'UPDATE users SET payment_qr_code = $1 WHERE id = $2 RETURNING *',
       [paymentQrCode, id]
@@ -291,6 +330,32 @@ exports.updatePaymentQrCode = async (req, res) => {
       profilePicture: user.profile_picture,
       createdAt: user.created_at
     };
+
+    // Log QR code update
+    const actionType = paymentQrCode
+      ? auditService.ACTION_TYPES.PAYMENT_QR_UPDATED
+      : auditService.ACTION_TYPES.PAYMENT_QR_REMOVED;
+
+    await auditService.createAuditLog({
+      userId: user.id,
+      userRole: user.role,
+      userPhone: user.phone,
+      userName: user.name,
+      actionType,
+      actionCategory: auditService.ACTION_CATEGORIES.PAYMENT_MANAGEMENT,
+      description: paymentQrCode
+        ? `Payment QR code updated for ${user.name}`
+        : `Payment QR code removed for ${user.name}`,
+      entityType: auditService.ENTITY_TYPES.USER,
+      entityId: user.id,
+      oldValue: { paymentQrCode: oldUser?.payment_qr_code },
+      newValue: { paymentQrCode },
+      ipAddress: req.ip || null,
+      userAgent: req.get('user-agent') || null,
+      requestMethod: req.method,
+      requestPath: req.path,
+      success: true,
+    });
 
     res.json(formattedUser);
   } catch (error) {
@@ -376,6 +441,15 @@ exports.signupRestaurant = async (req, res) => {
     };
 
     console.log(`Restaurant signup successful for user ${user.id}`);
+
+    // Log restaurant signup
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_SIGNUP_RESTAURANT,
+      user,
+      req,
+      true
+    );
+
     res.status(201).json(formattedUser);
   } catch (error) {
     console.error('Restaurant signup error:', error);
@@ -466,6 +540,15 @@ exports.setPin = async (req, res) => {
     };
 
     console.log(`✅ PIN set successfully for user ${updatedUser.id}`);
+
+    // Log PIN set
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_PIN_SET,
+      updatedUser,
+      req,
+      true
+    );
+
     res.json({
       ...formattedUser,
       message: 'PIN set successfully'
@@ -552,6 +635,10 @@ exports.updateUserProfile = async (req, res) => {
     };
 
     console.log(`Profile updated successfully for user ${user.id}`);
+
+    // Log profile update
+    await auditService.logProfileUpdate(user, userCheck.rows[0], updates, req);
+
     res.json(formattedUser);
   } catch (error) {
     console.error('Update profile error:', error);
@@ -614,6 +701,15 @@ exports.refreshAccessToken = async (req, res) => {
     };
 
     console.log(`Token refreshed for user ${tokenData.user_id}, new refresh token expires in ${newRefreshTokenData.expiryDays} days`);
+
+    // Log token refresh
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_TOKEN_REFRESH,
+      { id: tokenData.user_id, phone: tokenData.phone, role: tokenData.role, name: tokenData.name },
+      req,
+      true
+    );
+
     res.json(formattedUser);
   } catch (error) {
     console.error('Refresh token error:', error);
@@ -635,6 +731,23 @@ exports.logoutUser = async (req, res) => {
 
     if (revoked) {
       console.log('User logged out successfully');
+
+      // Get user data from token for audit log (if possible)
+      try {
+        const tokenData = await refreshTokenService.verifyRefreshToken(refreshToken);
+        if (tokenData) {
+          await auditService.logAuthEvent(
+            auditService.ACTION_TYPES.AUTH_LOGOUT,
+            { id: tokenData.user_id, phone: tokenData.phone, role: tokenData.role, name: tokenData.name },
+            req,
+            true
+          );
+        }
+      } catch (error) {
+        // Token already revoked, can't get user data
+        console.log('Could not log audit event for logout - token already revoked');
+      }
+
       res.json({ message: 'Logged out successfully' });
     } else {
       res.status(404).json({ error: 'Refresh token not found' });
@@ -654,6 +767,15 @@ exports.logoutAllDevices = async (req, res) => {
     const revokedCount = await refreshTokenService.revokeAllUserTokens(userId);
 
     console.log(`User ${userId} logged out from ${revokedCount} devices`);
+
+    // Log logout all devices
+    await auditService.logAuthEvent(
+      auditService.ACTION_TYPES.AUTH_LOGOUT_ALL,
+      { id: userId, phone: req.user.phone, role: req.user.role },
+      req,
+      true
+    );
+
     res.json({
       message: 'Logged out from all devices successfully',
       devicesLoggedOut: revokedCount
