@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "scheme": "deliveryapp",
     "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
