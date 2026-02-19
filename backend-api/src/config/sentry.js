@@ -9,7 +9,6 @@
  */
 
 const Sentry = require('@sentry/node');
-const { nodeProfilingIntegration } = require('@sentry/profiling-node');
 
 /**
  * Initialize Sentry
@@ -22,58 +21,66 @@ function initSentry(app) {
     return;
   }
 
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+  try {
+    // Import profiling integration only if Sentry is being initialized
+    const { nodeProfilingIntegration } = require('@sentry/profiling-node');
 
-    // Environment tracking
-    environment: process.env.NODE_ENV || 'development',
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
 
-    // Enable performance monitoring (APM)
-    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0, // 10% in prod, 100% in dev
+      // Environment tracking
+      environment: process.env.NODE_ENV || 'development',
 
-    // Enable profiling
-    profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
-    integrations: [
-      nodeProfilingIntegration(),
-    ],
+      // Enable performance monitoring (APM)
+      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0, // 10% in prod, 100% in dev
 
-    // Release tracking
-    release: process.env.RENDER_GIT_COMMIT || 'development',
+      // Enable profiling
+      profilesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+      integrations: [
+        nodeProfilingIntegration(),
+      ],
 
-    // Filter out sensitive data
-    beforeSend(event, hint) {
-      // Remove sensitive headers
-      if (event.request && event.request.headers) {
-        delete event.request.headers['authorization'];
-        delete event.request.headers['cookie'];
-      }
+      // Release tracking
+      release: process.env.RENDER_GIT_COMMIT || 'development',
 
-      // Remove sensitive data from context
-      if (event.contexts && event.contexts.user) {
-        delete event.contexts.user.ip_address;
-      }
+      // Filter out sensitive data
+      beforeSend(event, hint) {
+        // Remove sensitive headers
+        if (event.request && event.request.headers) {
+          delete event.request.headers['authorization'];
+          delete event.request.headers['cookie'];
+        }
 
-      return event;
-    },
+        // Remove sensitive data from context
+        if (event.contexts && event.contexts.user) {
+          delete event.contexts.user.ip_address;
+        }
 
-    // Ignore certain errors
-    ignoreErrors: [
-      'Non-Error promise rejection captured',
-      'ResizeObserver loop limit exceeded',
-      'Network request failed',
-    ],
-  });
+        return event;
+      },
 
-  // Add Express error handlers
-  if (app) {
-    // Request handler must be the first middleware
-    app.use(Sentry.Handlers.requestHandler());
+      // Ignore certain errors
+      ignoreErrors: [
+        'Non-Error promise rejection captured',
+        'ResizeObserver loop limit exceeded',
+        'Network request failed',
+      ],
+    });
 
-    // TracingHandler creates a trace for every incoming request
-    app.use(Sentry.Handlers.tracingHandler());
+    // Add Express error handlers
+    if (app) {
+      // Request handler must be the first middleware
+      app.use(Sentry.Handlers.requestHandler());
+
+      // TracingHandler creates a trace for every incoming request
+      app.use(Sentry.Handlers.tracingHandler());
+    }
+
+    console.log('✅ Sentry initialized - Environment:', process.env.NODE_ENV);
+  } catch (error) {
+    console.error('❌ Sentry initialization failed:', error.message);
+    console.log('Continuing without Sentry...');
   }
-
-  console.log('✅ Sentry initialized - Environment:', process.env.NODE_ENV);
 }
 
 /**
