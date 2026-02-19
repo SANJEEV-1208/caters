@@ -78,6 +78,13 @@ export default function SignupScreen() {
 
       if (success) {
         // Will be redirected to (authenticated) by root layout
+        Alert.alert(
+          "Registration Successful", 
+          "Account created successfully!", 
+          [
+            {text: "OK", onPress: () => router.replace("/(authenticated)/caterer/dashboard")}
+          ]
+        );
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

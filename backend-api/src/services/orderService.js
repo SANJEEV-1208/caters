@@ -1,6 +1,7 @@
 const pool = require('../config/database');
 const { sendOrderStatusNotification } = require('./pushNotificationService');
 const auditService = require('./auditService');
+const alertService = require('./alertService');
 
 // Format order from database to frontend format
 const formatOrder = (order) => {
@@ -128,6 +129,15 @@ exports.createOrder = async (req, res) => {
       req.user || { role: 'guest', phone: guestPhone, name: guestName },
       req
     );
+
+    // Security alerts for suspicious order patterns
+    if (customerId) {
+      // Check for high-value orders
+      await alertService.checkHighValueOrder(createdOrder.id, totalAmount, customerId);
+
+      // Check for rapid order placement
+      await alertService.checkRapidOrders(customerId);
+    }
 
     res.status(201).json(formatOrder(createdOrder));
   } catch (error) {

@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const refreshTokenService = require('./refreshTokenService');
 const auditService = require('./auditService');
+const alertService = require('./alertService');
+const { encryptPhone, encryptAddress, decrypt, hash } = require('../utils/encryption');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'kaaspro-secret-key-change-in-production-2026';
 
@@ -18,10 +20,17 @@ exports.loginUser = async (req, res) => {
     // Normalize phone number - remove +91 prefix if present
     const normalizedPhone = phone.replace(/^\+91/, '');
 
-    // Try to find user with either format (with or without +91 prefix)
+    // Create hash for lookup (supports both original phone formats)
+    const phoneHash1 = hash(phone);
+    const phoneHash2 = hash(normalizedPhone);
+
+    // Try to find user by phone hash (encrypted lookup)
+    // Fallback to plaintext for backward compatibility during migration
     const result = await pool.query(
-      'SELECT * FROM users WHERE phone = $1 OR phone = $2',
-      [phone, normalizedPhone]
+      `SELECT * FROM users
+       WHERE phone_hash IN ($1, $2)
+       OR phone IN ($3, $4)`,
+      [phoneHash1, phoneHash2, phone, normalizedPhone]
     );
 
     if (result.rows.length === 0) {
@@ -33,6 +42,11 @@ exports.loginUser = async (req, res) => {
         false,
         'User not found'
       );
+
+      // Check for brute force attempts
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      await alertService.checkBruteForceAttempts(phone, ipAddress);
+
       return res.status(404).json({ error: 'User not found. Please check your phone number.' });
     }
 
@@ -69,6 +83,11 @@ exports.loginUser = async (req, res) => {
         false,
         'Invalid PIN'
       );
+
+      // Check for brute force attempts
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      await alertService.checkBruteForceAttempts(phone, ipAddress);
+
       return res.status(401).json({ error: 'Invalid PIN. Please try again.' });
     }
 
@@ -89,16 +108,23 @@ exports.loginUser = async (req, res) => {
     const refreshTokenData = await refreshTokenService.createRefreshToken(user.id, deviceInfo, ipAddress);
 
     // Convert snake_case to camelCase for frontend compatibility
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+    const decryptedRestaurantAddress = user.restaurant_address_encrypted
+      ? decrypt(user.restaurant_address_encrypted)
+      : user.restaurant_address;
+
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
       serviceName: user.service_name,
-      address: user.address,
+      address: decryptedAddress,
       caterType: user.cater_type,
       restaurantName: user.restaurant_name,
-      restaurantAddress: user.restaurant_address,
+      restaurantAddress: decryptedRestaurantAddress,
       paymentQrCode: user.payment_qr_code,
       profilePicture: user.profile_picture,
       createdAt: user.created_at,
@@ -145,10 +171,18 @@ exports.signupCaterer = async (req, res) => {
     // Normalize phone number - remove +91 prefix if present
     const normalizedPhone = phone.replace(/^\+91/, '');
 
-    // Check if user already exists (check both formats)
+    // Encrypt phone number and address
+    const { encrypted: phoneEncrypted, hash: phoneHash } = encryptPhone(phone);
+    const addressEncrypted = address ? encryptAddress(address) : null;
+
+    // Create hash for duplicate check
+    const phoneHash1 = hash(phone);
+    const phoneHash2 = hash(normalizedPhone);
+
+    // Check if user already exists (check both hashed and plaintext for backward compat)
     const existingUser = await pool.query(
-      'SELECT * FROM users WHERE phone = $1 OR phone = $2',
-      [phone, normalizedPhone]
+      'SELECT * FROM users WHERE phone_hash IN ($1, $2) OR phone IN ($3, $4)',
+      [phoneHash1, phoneHash2, phone, normalizedPhone]
     );
 
     if (existingUser.rows.length > 0) {
@@ -159,8 +193,9 @@ exports.signupCaterer = async (req, res) => {
     const pinHash = await bcrypt.hash(pin, 10);
 
     const result = await pool.query(
-      'INSERT INTO users (phone, role, name, cater_type, service_name, address, pin_hash) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [phone, 'caterer', name, 'home', serviceName, address || null, pinHash]
+      `INSERT INTO users (phone, phone_encrypted, phone_hash, role, name, cater_type, service_name, address, address_encrypted, pin_hash)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [phone, phoneEncrypted, phoneHash, 'caterer', name, 'home', serviceName, address || null, addressEncrypted, pinHash]
     );
 
     const user = result.rows[0];
@@ -181,13 +216,17 @@ exports.signupCaterer = async (req, res) => {
     const ipAddress = req.ip || req.connection.remoteAddress;
     const refreshTokenData = await refreshTokenService.createRefreshToken(user.id, deviceInfo, ipAddress);
 
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
       serviceName: user.service_name,
-      address: user.address,
+      address: decryptedAddress,
       caterType: user.cater_type,
       restaurantName: user.restaurant_name,
       restaurantAddress: user.restaurant_address,

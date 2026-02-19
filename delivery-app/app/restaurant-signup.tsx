@@ -85,6 +85,16 @@ export default function RestaurantSignupScreen() {
 
       // Set user in auth context
       setUser(userWithType);
+
+      if(userWithType){
+        Alert.alert(
+          "Registration Successful", 
+          "Account created successfully!", 
+          [
+            {text: "OK", onPress: () => router.replace("/(authenticated)/caterer/restaurant/dashboard")}
+          ]
+        );
+      }
       
       // Will be redirected to (authenticated) by root layout
     } catch (error: unknown) {

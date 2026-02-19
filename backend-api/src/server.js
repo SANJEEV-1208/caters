@@ -3,6 +3,9 @@ const cors = require('cors');
 const os = require('node:os');
 require('dotenv').config();
 
+// Initialize Sentry FIRST (before any other imports/middleware)
+const { initSentry, sentryErrorHandler } = require('./config/sentry');
+
 const authRoutes = require('./routes/authRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -12,11 +15,16 @@ const cuisineRoutes = require('./routes/cuisineRoutes');
 const tablesRoutes = require('./routes/tablesRoutes');
 const pushTokenRoutes = require('./routes/pushTokenRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const securityRoutes = require('./routes/securityRoutes');
 const pool = require('./config/database');
 const { apiLimiter } = require('./middleware/rateLimiter');
+const { performanceMiddleware, startMemoryMonitoring } = require('./services/apmService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Sentry error tracking (must be before any other middleware)
+initSentry(app);
 
 // Trust proxy - Required when behind reverse proxy (Render, Heroku, Nginx, etc.)
 // This is needed for rate limiting and client IP detection to work correctly
@@ -69,6 +77,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
 
+// Performance monitoring middleware
+app.use(performanceMiddleware());
+
 // Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -90,6 +101,10 @@ app.use('/api/apartments', apartmentRoutes);
 app.use('/api/tables', tablesRoutes);
 app.use('/api/push-tokens', pushTokenRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/security', securityRoutes);
+
+// Sentry error handler (MUST be after all routes, before other error handlers)
+app.use(sentryErrorHandler());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -213,6 +228,9 @@ app.listen(PORT, '0.0.0.0', async () => {
 
   // Auto-initialize database if needed
   await checkAndInitializeDatabase();
+
+  // Start APM memory monitoring
+  startMemoryMonitoring(5); // Monitor every 5 minutes
 });
 
 module.exports = app;
