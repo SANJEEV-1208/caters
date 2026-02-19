@@ -7,14 +7,13 @@
 const express = require('express');
 const router = express.Router();
 const securityController = require('../controllers/securityController');
-const { authenticateToken } = require('../middleware/auth');
-const { authorizeRole } = require('../middleware/auth');
+const { authenticateToken, requireRole } = require('../middleware/auth');
 
 // All security endpoints require authentication
 router.use(authenticateToken);
 
 // Most endpoints require admin role
-const requireAdmin = authorizeRole(['superadmin', 'admin']);
+const requireAdmin = requireRole('superadmin', 'admin');
 
 // Security Overview
 router.get('/overview', requireAdmin, securityController.getSecurityOverview);
