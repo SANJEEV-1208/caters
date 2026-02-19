@@ -81,6 +81,11 @@ function initSentry(app) {
  * Call this AFTER all routes but BEFORE any other error handler
  */
 function sentryErrorHandler() {
+  // Return no-op middleware if Sentry not initialized
+  if (!process.env.SENTRY_DSN) {
+    return (err, req, res, next) => next(err);
+  }
+
   return Sentry.Handlers.errorHandler({
     shouldHandleError(error) {
       // Capture all errors with status code >= 500
@@ -96,6 +101,8 @@ function sentryErrorHandler() {
  * Capture exception manually
  */
 function captureException(error, context = {}) {
+  if (!process.env.SENTRY_DSN) return;
+
   Sentry.captureException(error, {
     tags: context.tags || {},
     extra: context.extra || {},
@@ -107,6 +114,8 @@ function captureException(error, context = {}) {
  * Capture message (for warnings, info)
  */
 function captureMessage(message, level = 'info', context = {}) {
+  if (!process.env.SENTRY_DSN) return;
+
   Sentry.captureMessage(message, {
     level, // 'info', 'warning', 'error'
     tags: context.tags || {},
@@ -118,6 +127,8 @@ function captureMessage(message, level = 'info', context = {}) {
  * Set user context for better error tracking
  */
 function setUser(user) {
+  if (!process.env.SENTRY_DSN) return;
+
   Sentry.setUser({
     id: user.id,
     username: user.name,
@@ -129,6 +140,8 @@ function setUser(user) {
  * Clear user context (on logout)
  */
 function clearUser() {
+  if (!process.env.SENTRY_DSN) return;
+
   Sentry.setUser(null);
 }
 
@@ -136,6 +149,8 @@ function clearUser() {
  * Add breadcrumb (for debugging)
  */
 function addBreadcrumb(message, data = {}) {
+  if (!process.env.SENTRY_DSN) return;
+
   Sentry.addBreadcrumb({
     message,
     level: 'info',
