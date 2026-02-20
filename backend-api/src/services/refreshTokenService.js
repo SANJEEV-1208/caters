@@ -58,7 +58,7 @@ exports.verifyRefreshToken = async (token) => {
     const hashedToken = hashToken(token);
 
     const result = await pool.query(
-      `SELECT rt.*, u.id as user_id, u.phone, u.role, u.name, u.email,
+      `SELECT rt.*, u.id as user_id, u.phone, u.role, u.name,
               u.service_name, u.address, u.cater_type, u.restaurant_name,
               u.restaurant_address, u.payment_qr_code, u.profile_picture
        FROM refresh_tokens rt

@@ -342,6 +342,12 @@ exports.updatePaymentQrCode = async (req, res) => {
     const { paymentQrCode } = req.body;
 
     console.log(`[QR Update] User ${id} updating QR code, data length: ${paymentQrCode?.length || 0}`);
+    if (paymentQrCode) {
+      const preview = paymentQrCode.substring(0, 100);
+      console.log(`[QR Update] QR code preview: ${preview}${paymentQrCode.length > 100 ? '...' : ''}`);
+      console.log(`[QR Update] Is base64 image: ${/^data:image\/(png|jpeg|jpg|gif);base64,/.test(paymentQrCode)}`);
+      console.log(`[QR Update] Is URL: ${/^https?:\/\//.test(paymentQrCode)}`);
+    }
 
     // Get old QR code before update
     const oldUserResult = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
