@@ -7,6 +7,7 @@ const {
   validateLogin,
   validateSignup,
   validateGuestRegistration,
+  validateCreateCustomer,
   validateSetPin,
   validateUserId,
   handleValidationErrors
@@ -44,7 +45,7 @@ router.post(
   '/create-customer',
   authenticateToken,
   requireRole('caterer'),
-  validateSignup,
+  validateCreateCustomer,
   handleValidationErrors,
   authController.createCustomer
 );

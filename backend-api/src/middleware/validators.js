@@ -86,6 +86,26 @@ exports.validateGuestRegistration = [
   // NO PIN REQUIRED - guests can access app directly without authentication
 ];
 
+// Validation for creating customer (by caterer) - NO PIN REQUIRED
+// Used when caterers add new customers to their subscription
+exports.validateCreateCustomer = [
+  body('phone')
+    .trim()
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^\+?91?\d{10}$/).withMessage('Invalid phone number format'),
+  body('name')
+    .trim()
+    .notEmpty().withMessage('Name is required')
+    .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters')
+    .escape(),
+  body('address')
+    .optional()
+    .trim()
+    .isLength({ max: 500 }).withMessage('Address must be less than 500 characters')
+    .escape(),
+  // NO PIN REQUIRED - caterer creates customer, customer sets PIN later
+];
+
 exports.validateSetPin = [
   body('userId')
     .isInt({ min: 1 }).withMessage('Valid user ID is required'),
