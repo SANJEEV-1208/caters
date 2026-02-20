@@ -3,9 +3,6 @@ const cors = require('cors');
 const os = require('node:os');
 require('dotenv').config();
 
-// Initialize Sentry FIRST (before any other imports/middleware)
-const { initSentry, sentryErrorHandler } = require('./config/sentry');
-
 const authRoutes = require('./routes/authRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -22,9 +19,6 @@ const { performanceMiddleware, startMemoryMonitoring } = require('./services/apm
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Initialize Sentry error tracking (must be before any other middleware)
-initSentry(app);
 
 // Trust proxy - Required when behind reverse proxy (Render, Heroku, Nginx, etc.)
 // This is needed for rate limiting and client IP detection to work correctly
@@ -102,9 +96,6 @@ app.use('/api/tables', tablesRoutes);
 app.use('/api/push-tokens', pushTokenRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/security', securityRoutes);
-
-// Sentry error handler (MUST be after all routes, before other error handlers)
-app.use(sentryErrorHandler());
 
 // Error handling middleware
 app.use((err, req, res, next) => {

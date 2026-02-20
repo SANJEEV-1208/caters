@@ -1,16 +1,14 @@
 /**
- * Real-time Security Alert Service
+ * Security Alert Service - Simplified
  *
  * Monitors for suspicious activities and security threats:
  * - Multiple failed login attempts
  * - Unusual order patterns
  * - Unauthorized access attempts
  * - Database errors
- * - High error rates
  */
 
 const pool = require('../config/database');
-const { captureMessage } = require('../config/sentry');
 
 // Alert thresholds (configurable)
 const ALERT_THRESHOLDS = {
@@ -19,7 +17,6 @@ const ALERT_THRESHOLDS = {
   HIGH_VALUE_ORDER: 10000,         // Rs. 10,000+
   RAPID_ORDERS: 10,                // Orders within timeframe
   RAPID_ORDER_WINDOW: 30,          // Minutes
-  ERROR_RATE_THRESHOLD: 0.1,       // 10% error rate
 };
 
 /**
@@ -42,45 +39,43 @@ const ALERT_TYPES = {
   HIGH_VALUE_ORDER: 'HIGH_VALUE_ORDER',
   RAPID_ORDERS: 'RAPID_ORDERS',
   DATABASE_ERROR: 'DATABASE_ERROR',
-  HIGH_ERROR_RATE: 'HIGH_ERROR_RATE',
   SUSPICIOUS_ACTIVITY: 'SUSPICIOUS_ACTIVITY',
 };
 
 /**
- * Send alert (console + Sentry for now, can add email/SMS later)
+ * Send alert - Logs to console AND stores in database
  */
-function sendAlert(level, type, message, metadata = {}) {
-  const alert = {
-    timestamp: new Date().toISOString(),
-    level,
-    type,
-    message,
-    metadata,
-  };
+async function sendAlert(level, type, message, metadata = {}) {
+  const timestamp = new Date().toISOString();
 
-  // Log to console
-  const emoji = level === ALERT_LEVELS.CRITICAL ? '🚨' :
-                level === ALERT_LEVELS.ERROR ? '❌' :
-                level === ALERT_LEVELS.WARNING ? '⚠️' : 'ℹ️';
+  // Console logging
+  console.log(`[${timestamp}] SECURITY ALERT [${level.toUpperCase()}] - ${type}: ${message}`);
 
-  console.log(`${emoji} SECURITY ALERT [${level.toUpperCase()}] - ${type}: ${message}`);
-  console.log('   Metadata:', JSON.stringify(metadata, null, 2));
-
-  // Send to Sentry for critical/error alerts
-  if (level === ALERT_LEVELS.CRITICAL || level === ALERT_LEVELS.ERROR) {
-    captureMessage(`Security Alert: ${type} - ${message}`, level, {
-      tags: { alert_type: type },
-      extra: metadata,
-    });
+  if (Object.keys(metadata).length > 0) {
+    console.log('  Details:', JSON.stringify(metadata, null, 2));
   }
 
-  // TODO: Add email/webhook notifications for critical alerts
-  // if (level === ALERT_LEVELS.CRITICAL) {
-  //   sendEmailAlert(alert);
-  //   sendWebhookAlert(alert);
-  // }
+  // Store in database
+  try {
+    const result = await pool.query(
+      `INSERT INTO security_alerts (alert_level, alert_type, message, metadata)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [level, type, message, JSON.stringify(metadata)]
+    );
 
-  return alert;
+    return result.rows[0];
+  } catch (error) {
+    console.error('Failed to store alert in database:', error);
+    // Return basic alert object even if database insert fails
+    return {
+      timestamp,
+      alert_level: level,
+      alert_type: type,
+      message,
+      metadata,
+    };
+  }
 }
 
 /**
@@ -102,7 +97,7 @@ async function checkBruteForceAttempts(phone, ipAddress) {
     const failedCount = parseInt(result.rows[0].failed_count);
 
     if (failedCount >= ALERT_THRESHOLDS.FAILED_LOGIN_ATTEMPTS) {
-      sendAlert(
+      await sendAlert(
         ALERT_LEVELS.CRITICAL,
         ALERT_TYPES.BRUTE_FORCE,
         `Possible brute force attack detected: ${failedCount} failed login attempts`,
@@ -141,7 +136,7 @@ async function checkRapidOrders(userId) {
     const orderCount = parseInt(result.rows[0].order_count);
 
     if (orderCount >= ALERT_THRESHOLDS.RAPID_ORDERS) {
-      sendAlert(
+      await sendAlert(
         ALERT_LEVELS.WARNING,
         ALERT_TYPES.RAPID_ORDERS,
         `User ${userId} placed ${orderCount} orders in ${ALERT_THRESHOLDS.RAPID_ORDER_WINDOW} minutes`,
@@ -166,7 +161,7 @@ async function checkRapidOrders(userId) {
  */
 async function checkHighValueOrder(orderId, totalAmount, userId) {
   if (totalAmount >= ALERT_THRESHOLDS.HIGH_VALUE_ORDER) {
-    sendAlert(
+    await sendAlert(
       ALERT_LEVELS.WARNING,
       ALERT_TYPES.HIGH_VALUE_ORDER,
       `High-value order detected: Rs. ${totalAmount}`,
@@ -185,9 +180,9 @@ async function checkHighValueOrder(orderId, totalAmount, userId) {
 /**
  * Check for unauthorized access attempts
  */
-function checkUnauthorizedAccess(userId, requestedRole, actualRole) {
+async function checkUnauthorizedAccess(userId, requestedRole, actualRole) {
   if (requestedRole !== actualRole) {
-    sendAlert(
+    await sendAlert(
       ALERT_LEVELS.ERROR,
       ALERT_TYPES.UNAUTHORIZED_ACCESS,
       `User ${userId} attempted to access ${requestedRole} resources`,
@@ -205,8 +200,8 @@ function checkUnauthorizedAccess(userId, requestedRole, actualRole) {
 /**
  * Report database error
  */
-function reportDatabaseError(error, query = null) {
-  sendAlert(
+async function reportDatabaseError(error, query = null) {
+  await sendAlert(
     ALERT_LEVELS.CRITICAL,
     ALERT_TYPES.DATABASE_ERROR,
     `Database error: ${error.message}`,
@@ -219,37 +214,27 @@ function reportDatabaseError(error, query = null) {
 }
 
 /**
- * Get recent alerts (for dashboard)
+ * Get recent alerts from security_alerts table (for dashboard)
  */
 async function getRecentAlerts(limit = 50) {
   try {
-    // For now, we'll get recent critical audit logs
-    // In production, you'd store alerts in a separate table
     const result = await pool.query(
       `SELECT
         id,
-        action_type as type,
-        description as message,
-        timestamp,
+        alert_level,
+        alert_type,
+        message,
         metadata,
-        ip_address
-       FROM audit_logs
-       WHERE success = false
-          OR action_type IN ('AUTH_LOGIN_FAILURE', 'AUTH_UNAUTHORIZED_ACCESS')
-       ORDER BY timestamp DESC
+        is_acknowledged,
+        is_resolved,
+        created_at
+       FROM security_alerts
+       ORDER BY created_at DESC
        LIMIT $1`,
       [limit]
     );
 
-    return result.rows.map(row => ({
-      id: row.id,
-      type: row.type,
-      message: row.message,
-      timestamp: row.timestamp,
-      level: row.type.includes('FAILURE') ? ALERT_LEVELS.ERROR : ALERT_LEVELS.WARNING,
-      metadata: row.metadata,
-      ip_address: row.ip_address,
-    }));
+    return result.rows;
   } catch (error) {
     console.error('Error fetching recent alerts:', error);
     return [];
@@ -257,7 +242,7 @@ async function getRecentAlerts(limit = 50) {
 }
 
 /**
- * Get alert statistics (for dashboard)
+ * Get alert statistics from security_alerts table (for dashboard)
  */
 async function getAlertStats(hours = 24) {
   try {
@@ -265,23 +250,103 @@ async function getAlertStats(hours = 24) {
 
     const result = await pool.query(
       `SELECT
-        COUNT(CASE WHEN action_type = 'AUTH_LOGIN_FAILURE' THEN 1 END) as failed_logins,
-        COUNT(CASE WHEN action_type LIKE '%UNAUTHORIZED%' THEN 1 END) as unauthorized_attempts,
-        COUNT(CASE WHEN success = false THEN 1 END) as total_failures
-       FROM audit_logs
-       WHERE timestamp > $1`,
+        COUNT(*) as total_alerts,
+        COUNT(CASE WHEN alert_level = 'critical' THEN 1 END) as critical_alerts,
+        COUNT(CASE WHEN alert_level = 'error' THEN 1 END) as error_alerts,
+        COUNT(CASE WHEN alert_level = 'warning' THEN 1 END) as warning_alerts,
+        COUNT(CASE WHEN alert_type = 'BRUTE_FORCE' THEN 1 END) as brute_force_attempts,
+        COUNT(CASE WHEN alert_type = 'HIGH_VALUE_ORDER' THEN 1 END) as high_value_orders,
+        COUNT(CASE WHEN alert_type = 'RAPID_ORDERS' THEN 1 END) as rapid_orders,
+        COUNT(CASE WHEN is_acknowledged = false THEN 1 END) as unacknowledged,
+        COUNT(CASE WHEN is_resolved = false THEN 1 END) as unresolved
+       FROM security_alerts
+       WHERE created_at > $1`,
       [since]
     );
 
     return {
       time_period_hours: hours,
-      failed_logins: parseInt(result.rows[0].failed_logins),
-      unauthorized_attempts: parseInt(result.rows[0].unauthorized_attempts),
-      total_failures: parseInt(result.rows[0].total_failures),
+      total_alerts: parseInt(result.rows[0].total_alerts),
+      critical_alerts: parseInt(result.rows[0].critical_alerts),
+      error_alerts: parseInt(result.rows[0].error_alerts),
+      warning_alerts: parseInt(result.rows[0].warning_alerts),
+      brute_force_attempts: parseInt(result.rows[0].brute_force_attempts),
+      high_value_orders: parseInt(result.rows[0].high_value_orders),
+      rapid_orders: parseInt(result.rows[0].rapid_orders),
+      unacknowledged: parseInt(result.rows[0].unacknowledged),
+      unresolved: parseInt(result.rows[0].unresolved),
     };
   } catch (error) {
     console.error('Error fetching alert stats:', error);
     return null;
+  }
+}
+
+/**
+ * Acknowledge an alert
+ */
+async function acknowledgeAlert(alertId, userId) {
+  try {
+    const result = await pool.query(
+      `UPDATE security_alerts
+       SET is_acknowledged = true,
+           acknowledged_by = $1,
+           acknowledged_at = CURRENT_TIMESTAMP,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2
+       RETURNING *`,
+      [userId, alertId]
+    );
+
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error acknowledging alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Resolve an alert
+ */
+async function resolveAlert(alertId, userId, resolutionNotes = null) {
+  try {
+    const result = await pool.query(
+      `UPDATE security_alerts
+       SET is_resolved = true,
+           resolved_by = $1,
+           resolved_at = CURRENT_TIMESTAMP,
+           resolution_notes = $2,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3
+       RETURNING *`,
+      [userId, resolutionNotes, alertId]
+    );
+
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error resolving alert:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get unresolved alerts
+ */
+async function getUnresolvedAlerts(limit = 50) {
+  try {
+    const result = await pool.query(
+      `SELECT *
+       FROM security_alerts
+       WHERE is_resolved = false
+       ORDER BY created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching unresolved alerts:', error);
+    return [];
   }
 }
 
@@ -296,4 +361,7 @@ module.exports = {
   reportDatabaseError,
   getRecentAlerts,
   getAlertStats,
+  acknowledgeAlert,
+  resolveAlert,
+  getUnresolvedAlerts,
 };
