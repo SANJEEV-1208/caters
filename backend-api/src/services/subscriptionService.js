@@ -34,17 +34,36 @@ exports.getCustomerSubscriptions = async (req, res) => {
 exports.getCatererDetails = async (req, res) => {
   try {
     const { catererId } = req.params;
+    console.log(`[Get Caterer] Request for caterer ID: ${catererId}`);
+
+    // First, check if user exists at all
+    const userCheck = await pool.query(
+      'SELECT id, role FROM users WHERE id = $1',
+      [catererId]
+    );
+
+    if (userCheck.rows.length === 0) {
+      console.log(`[Get Caterer] User ${catererId} does not exist at all`);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log(`[Get Caterer] User ${catererId} exists with role: ${userCheck.rows[0].role}`);
 
     const result = await pool.query(
       'SELECT * FROM users WHERE id = $1 AND role = $2',
       [catererId, 'caterer']
     );
 
+    console.log(`[Get Caterer] Query result rows: ${result.rows.length}`);
+
     if (result.rows.length === 0) {
+      console.log(`[Get Caterer] User ${catererId} exists but is not a caterer (role: ${userCheck.rows[0].role})`);
       return res.status(404).json({ error: 'Caterer not found' });
     }
 
     const caterer = result.rows[0];
+    console.log(`[Get Caterer] Found caterer: ${caterer.name}, QR code length: ${caterer.payment_qr_code?.length || 0}`);
+
     const formattedCaterer = {
       id: caterer.id,
       phone: caterer.phone,
@@ -56,9 +75,10 @@ exports.getCatererDetails = async (req, res) => {
       createdAt: caterer.created_at
     };
 
+    console.log(`[Get Caterer] Returning caterer with QR: ${formattedCaterer.paymentQrCode ? 'YES' : 'NO'}`);
     res.json(formattedCaterer);
   } catch (error) {
-    console.error('Get caterer details error:', error);
+    console.error('[Get Caterer] Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -66,10 +86,13 @@ exports.getCatererDetails = async (req, res) => {
 // Get all caterers
 exports.getAllCaterers = async (req, res) => {
   try {
+    console.log('[Get All Caterers] Fetching all caterers...');
     const result = await pool.query(
       'SELECT * FROM users WHERE role = $1 ORDER BY created_at DESC',
       ['caterer']
     );
+
+    console.log(`[Get All Caterers] Found ${result.rows.length} caterers`);
 
     const formattedCaterers = result.rows.map(caterer => ({
       id: caterer.id,
@@ -82,9 +105,10 @@ exports.getAllCaterers = async (req, res) => {
       createdAt: caterer.created_at
     }));
 
+    console.log(`[Get All Caterers] Returning ${formattedCaterers.length} caterers`);
     res.json(formattedCaterers);
   } catch (error) {
-    console.error('Get all caterers error:', error);
+    console.error('[Get All Caterers] Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
