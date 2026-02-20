@@ -201,6 +201,50 @@ async function runMigrations() {
       console.log('✓ push_tokens table already exists');
     }
 
+    // Migration 4: Create audit_logs table if it doesn't exist
+    const auditLogsTableCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'audit_logs'
+      )`
+    );
+
+    if (!auditLogsTableCheck.rows[0].exists) {
+      console.log('🔧 Creating audit_logs table...');
+      const fs = require('fs');
+      const path = require('path');
+      const auditLogsSql = fs.readFileSync(
+        path.join(__dirname, 'database', 'migrations', '002_create_audit_logs.sql'),
+        'utf8'
+      );
+      await pool.query(auditLogsSql);
+      console.log('✅ audit_logs table created successfully');
+    } else {
+      console.log('✓ audit_logs table already exists');
+    }
+
+    // Migration 5: Create security_alerts table if it doesn't exist
+    const securityAlertsTableCheck = await pool.query(
+      `SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'security_alerts'
+      )`
+    );
+
+    if (!securityAlertsTableCheck.rows[0].exists) {
+      console.log('🔧 Creating security_alerts table...');
+      const fs = require('fs');
+      const path = require('path');
+      const securityAlertsSql = fs.readFileSync(
+        path.join(__dirname, 'database', 'migrations', '004_create_alerts_table.sql'),
+        'utf8'
+      );
+      await pool.query(securityAlertsSql);
+      console.log('✅ security_alerts table created successfully');
+    } else {
+      console.log('✓ security_alerts table already exists');
+    }
+
     console.log('✅ All migrations completed');
   } catch (error) {
     console.error('⚠️ Migration error:', error.message);
