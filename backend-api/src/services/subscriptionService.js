@@ -83,6 +83,7 @@ exports.getCatererDetails = async (req, res) => {
     };
 
     console.log(`[Get Caterer] Returning caterer with QR: ${formattedCaterer.paymentQrCode ? 'YES' : 'NO'}`);
+    console.log(`[Get Caterer] Response JSON:`, JSON.stringify(formattedCaterer));
     res.json(formattedCaterer);
   } catch (error) {
     console.error('[Get Caterer] Error:', error);

@@ -9,7 +9,7 @@ import PaymentBottomSheet from "@/src/components/PaymentBottomSheet";
 import { saveOrder, getOrders } from "@/src/utils/orderStorage";
 import { createOrder, getCustomerOrders } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
-import { getUserById } from "@/src/api/authApi";
+import { getCatererDetails } from "@/src/api/subscriptionApi";
 import { User } from "@/src/types/auth";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
 import { getTodayIST, getTomorrowIST, getCurrentTimestampIST, getISTDate, formatDateIST } from "@/src/utils/dateUtils";
@@ -44,7 +44,7 @@ export default function Cart() {
       console.log('   ➡️ Using catererId:', catererId);
 
       if (catererId && catererId > 0) {
-        const catererData = await getUserById(catererId);
+        const catererData = await getCatererDetails(catererId);
         console.log('🍽️ Fetched caterer data:', catererData);
         console.log('💳 Payment QR Code:', catererData?.paymentQrCode);
         console.log('💳 QR Code type:', typeof catererData?.paymentQrCode);
