@@ -64,6 +64,13 @@ exports.getCatererDetails = async (req, res) => {
     const caterer = result.rows[0];
     console.log(`[Get Caterer] Found caterer: ${caterer.name}, QR code length: ${caterer.payment_qr_code?.length || 0}`);
 
+    // Debug: Show what the QR code actually contains
+    if (caterer.payment_qr_code) {
+      console.log(`[Get Caterer] QR code content: ${caterer.payment_qr_code}`);
+      console.log(`[Get Caterer] Is base64 image: ${/^data:image\/(png|jpeg|jpg|gif);base64,/.test(caterer.payment_qr_code)}`);
+      console.log(`[Get Caterer] Is URL: ${/^https?:\/\//.test(caterer.payment_qr_code)}`);
+    }
+
     const formattedCaterer = {
       id: caterer.id,
       phone: caterer.phone,
