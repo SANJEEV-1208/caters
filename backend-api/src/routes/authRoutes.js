@@ -10,6 +10,7 @@ const {
   validateCreateCustomer,
   validateSetPin,
   validateUserId,
+  validatePaymentQrCode,
   handleValidationErrors
 } = require('../middleware/validators');
 
@@ -85,6 +86,7 @@ router.patch(
   authenticateToken,
   qrCodeLimiter,
   validateUserId,
+  validatePaymentQrCode,
   handleValidationErrors,
   requireOwnership('id'),
   authController.updatePaymentQrCode

@@ -308,6 +308,23 @@ exports.validateApartment = [
 /**
  * Validation for user ID parameters
  */
+exports.validatePaymentQrCode = [
+  body('paymentQrCode')
+    .optional({ nullable: true })
+    .isString().withMessage('Payment QR code must be a string')
+    .custom((value) => {
+      // Allow null/undefined for removal, or validate base64/URL format
+      if (!value) return true;
+      // Check if it's a valid base64 string or URL
+      const isBase64 = /^data:image\/(png|jpeg|jpg|gif);base64,/.test(value);
+      const isURL = /^https?:\/\/.+/.test(value);
+      if (!isBase64 && !isURL) {
+        throw new Error('Payment QR code must be a valid base64 image or URL');
+      }
+      return true;
+    }),
+];
+
 exports.validateUserId = [
   param('id')
     .isInt({ min: 1 }).withMessage('Invalid user ID'),

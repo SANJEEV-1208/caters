@@ -341,9 +341,16 @@ exports.updatePaymentQrCode = async (req, res) => {
     const { id } = req.params;
     const { paymentQrCode } = req.body;
 
+    console.log(`[QR Update] User ${id} updating QR code, data length: ${paymentQrCode?.length || 0}`);
+
     // Get old QR code before update
     const oldUserResult = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
     const oldUser = oldUserResult.rows[0];
+
+    if (!oldUser) {
+      console.log(`[QR Update] User ${id} not found`);
+      return res.status(404).json({ error: 'User not found' });
+    }
 
     const result = await pool.query(
       'UPDATE users SET payment_qr_code = $1 WHERE id = $2 RETURNING *',
@@ -353,6 +360,8 @@ exports.updatePaymentQrCode = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
+
+    console.log(`[QR Update] Successfully updated QR code for user ${id}`);
 
     const user = result.rows[0];
     const formattedUser = {
@@ -398,8 +407,12 @@ exports.updatePaymentQrCode = async (req, res) => {
 
     res.json(formattedUser);
   } catch (error) {
-    console.error('Update QR code error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[QR Update] Error:', error.message);
+    console.error('[QR Update] Stack:', error.stack);
+    res.status(500).json({
+      error: 'Failed to update QR code',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
