@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   StatusBar,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, useCallback } from "react";
@@ -21,7 +22,7 @@ import { getISTDate, formatTimeIST, formatDateIST } from "@/src/utils/dateUtils"
 
 export default function OrderHistory() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, selectedCatererId } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,44 @@ export default function OrderHistory() {
     await loadOrders();
     setRefreshing(false);
   }, []);
+
+  const handleReorder = (order: Order) => {
+    // Check if a caterer is currently selected
+    if (!selectedCatererId) {
+      Alert.alert(
+        "Select Caterer First",
+        "Please select a caterer before placing an order.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.push("/(authenticated)/customer/caterer-selection"),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Check if the selected caterer matches the order's original caterer
+    if (selectedCatererId !== order.catererId) {
+      Alert.alert(
+        "Wrong Caterer Selected",
+        "This order was from a different caterer. Please select the correct caterer first to re-order.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.push("/(authenticated)/customer/caterer-selection"),
+          },
+        ]
+      );
+      return;
+    }
+
+    // Proceed with re-order - navigate to cart with orderId
+    router.push({
+      pathname: "/(authenticated)/customer/cart",
+      params: { orderId: order.orderId },
+    });
+  };
 
   const formatDate = (dateString: string) => {
     // Convert UTC timestamp to IST timezone for display
@@ -207,10 +246,7 @@ export default function OrderHistory() {
           </View>
           <TouchableOpacity
             style={styles.viewDetailsButton}
-            onPress={() => router.push({
-              pathname: '/(authenticated)/customer/cart',
-              params: { orderId: item.orderId,}
-            })}
+            onPress={() => handleReorder(item)}
           >
             <Text style={styles.viewDetailsText}>Re-Order</Text>
             <Ionicons name="chevron-forward" size={16} color="#10B981" />
