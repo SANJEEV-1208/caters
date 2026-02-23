@@ -49,7 +49,6 @@ export function getDateAfterDaysIST(days: number): string {
 export function formatDateTimeIST(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  // Note: Input dates are already in IST, no offset conversion needed
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
@@ -57,6 +56,7 @@ export function formatDateTimeIST(date: string | Date): string {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    timeZone: 'Asia/Kolkata', // Explicitly use IST timezone
   };
 
   return dateObj.toLocaleString('en-IN', options) + ' IST';
@@ -68,11 +68,11 @@ export function formatDateTimeIST(date: string | Date): string {
 export function formatDateIST(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  // Note: Input dates are already in IST, no offset conversion needed
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: 'Asia/Kolkata', // Explicitly use IST timezone
   };
 
   return dateObj.toLocaleString('en-IN', options);
@@ -84,11 +84,11 @@ export function formatDateIST(date: string | Date): string {
 export function formatTimeIST(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  // Note: Input dates are already in IST, no offset conversion needed
   const options: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    timeZone: 'Asia/Kolkata', // Explicitly use IST timezone
   };
 
   return dateObj.toLocaleString('en-IN', options);
@@ -96,9 +96,10 @@ export function formatTimeIST(date: string | Date): string {
 
 /**
  * Get current timestamp in IST
+ * Returns standard UTC timestamp that will be displayed in IST timezone
  */
 export function getCurrentTimestampIST(): string {
-  return getISTDate().toISOString();
+  return new Date().toISOString();
 }
 
 /**

@@ -11,8 +11,8 @@ type PaymentCardProps = {
 };
 
 export default function PaymentCard({ order, customerName, onPress, onMarkReceived }: PaymentCardProps) {
-  const isReceived = order.status === "delivered" && order.paymentMethod === "upi";
-  const isPending = order.status !== "delivered" || order.paymentMethod === "cod";
+  const isReceived = order.status === "delivered";
+  const isPending = order.status !== "delivered";
 
   return (
     <View style={styles.cardContainer}>

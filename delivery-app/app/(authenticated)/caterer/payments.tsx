@@ -78,37 +78,37 @@ const FilterButtonComponent: React.FC<FilterButtonProps> = ({
 // Helper function to calculate payment stats
 const calculateStats = (orders: Order[]) => {
   const deliveredOrders = orders.filter((o) => o.status === "delivered");
-  const nonDeliveredOrders = orders.filter((o) => o.status !== "delivered");
+  const pendingOrders = orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
 
   return {
     totalRevenue: deliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
     receivedPayments: deliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
-    pendingPayments: nonDeliveredOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+    pendingPayments: pendingOrders.reduce((sum, o) => sum + o.totalAmount, 0),
   };
 };
 
 // Helper function to calculate filter counts
 const calculateFilterCounts = (orders: Order[]) => ({
-  allCount: orders.length,
-  upiCount: orders.filter((o) => o.paymentMethod === "upi").length,
-  codCount: orders.filter((o) => o.paymentMethod === "cod").length,
+  allCount: orders.filter((o) => o.status !== "cancelled").length,
+  upiCount: orders.filter((o) => o.paymentMethod === "upi" && o.status !== "cancelled").length,
+  codCount: orders.filter((o) => o.paymentMethod === "cod" && o.status !== "cancelled").length,
   receivedCount: orders.filter((o) => o.status === "delivered").length,
-  pendingCount: orders.filter((o) => o.status !== "delivered").length,
+  pendingCount: orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled").length,
 });
 
 // Helper function to filter orders
 const filterOrders = (orders: Order[], filter: PaymentFilter) => {
   switch (filter) {
     case "upi":
-      return orders.filter((o) => o.paymentMethod === "upi");
+      return orders.filter((o) => o.paymentMethod === "upi" && o.status !== "cancelled");
     case "cod":
-      return orders.filter((o) => o.paymentMethod === "cod");
+      return orders.filter((o) => o.paymentMethod === "cod" && o.status !== "cancelled");
     case "received":
       return orders.filter((o) => o.status === "delivered");
     case "pending":
-      return orders.filter((o) => o.status !== "delivered");
+      return orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
     default:
-      return orders;
+      return orders.filter((o) => o.status !== "cancelled");
   }
 };
 
@@ -226,7 +226,7 @@ export default function PaymentsScreen() {
           <View style={styles.statBox}>
             <Text style={styles.statLabel}>Total Revenue</Text>
             <Text style={styles.statValue}>₹{totalRevenue.toLocaleString()}</Text>
-            <Text style={styles.statSubtext}>{orders.length} orders</Text>
+            <Text style={styles.statSubtext}>{orders.filter(o => o.status !== "cancelled").length} orders</Text>
           </View>
           <View style={styles.statRow}>
             <View style={[styles.statBoxSmall, { backgroundColor: "#DCFCE7" }]}>

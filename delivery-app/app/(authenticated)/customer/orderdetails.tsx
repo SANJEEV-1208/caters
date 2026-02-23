@@ -42,18 +42,23 @@ export default function OrderDetails() {
   };
 
   const formatDate = (dateString: string) => {
-    // Convert to IST date
+    // Convert UTC timestamp to IST timezone for display
     const date = new Date(dateString);
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const istDate = new Date(date.getTime() + istOffset);
 
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    // Use IST timezone for all date/time parts
+    const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
 
-    const dayName = days[istDate.getUTCDay()];
-    const day = istDate.getUTCDate();
-    const month = months[istDate.getUTCMonth()];
-    const year = istDate.getUTCFullYear();
+    const parts = dateFormatter.formatToParts(date);
+    const dayName = parts.find(p => p.type === 'weekday')?.value || '';
+    const day = parts.find(p => p.type === 'day')?.value || '';
+    const month = parts.find(p => p.type === 'month')?.value || '';
+    const year = parts.find(p => p.type === 'year')?.value || '';
     const time = formatTimeIST(dateString);
 
     return {
