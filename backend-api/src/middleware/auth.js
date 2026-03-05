@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'kaaspro-secret-key-change-in-produ
 exports.authenticateToken = (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader?.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
       return res.status(401).json({ error: 'Access token required. Please login.' });
@@ -86,7 +86,7 @@ exports.requireOwnership = (userIdParam = 'id') => {
  */
 exports.optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader?.split(' ')[1];
 
   if (!token) {
     // No token provided, continue as guest

@@ -136,8 +136,8 @@ export default function SecurityDashboard() {
           <Text style={styles.cardSubtitle}>Uptime: {formatUptime(health.uptime)}</Text>
           {health.issues.length > 0 && (
             <View style={styles.issuesList}>
-              {health.issues.map((issue, index) => (
-                <Text key={index} style={styles.issueText}>• {issue}</Text>
+              {health.issues.map((issue) => (
+                <Text key={issue} style={styles.issueText}>• {issue}</Text>
               ))}
             </View>
           )}
@@ -310,8 +310,8 @@ export default function SecurityDashboard() {
         {/* Slowest Endpoints */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Slowest Endpoints</Text>
-          {performance.responseTimes.slowestEndpoints.slice(0, 5).map((endpoint, index) => (
-            <View key={index} style={styles.endpointItem}>
+          {performance.responseTimes.slowestEndpoints.slice(0, 5).map((endpoint) => (
+            <View key={endpoint.endpoint} style={styles.endpointItem}>
               <Text style={styles.endpointPath}>{endpoint.endpoint}</Text>
               <Text style={styles.endpointTime}>Avg: {endpoint.avgResponseTime}ms</Text>
             </View>
@@ -331,8 +331,8 @@ export default function SecurityDashboard() {
             <Text style={styles.emptyText}>No failed login attempts</Text>
           </View>
         ) : (
-          failedLogins.map((login, index) => (
-            <View key={index} style={styles.card}>
+          failedLogins.map((login) => (
+            <View key={`${login.phone}-${login.timestamp}`} style={styles.card}>
               <Text style={styles.loginPhone}>Phone: {login.phone}</Text>
               <Text style={styles.loginDetail}>IP: {login.ip_address}</Text>
               <Text style={styles.loginDetail}>Time: {formatRelativeTime(login.timestamp)}</Text>
@@ -348,8 +348,8 @@ export default function SecurityDashboard() {
             <Text style={styles.emptyText}>No suspicious activities detected</Text>
           </View>
         ) : (
-          suspiciousActivities.slice(0, 10).map((activity, index) => (
-            <View key={index} style={styles.card}>
+          suspiciousActivities.slice(0, 10).map((activity) => (
+            <View key={`${activity.ip_address}-${activity.timestamp}`} style={styles.card}>
               <Text style={styles.activityType}>{activity.action_type}</Text>
               <Text style={styles.activityDesc}>{activity.description}</Text>
               <Text style={styles.loginDetail}>User ID: {activity.user_id || 'N/A'}</Text>

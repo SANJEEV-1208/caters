@@ -38,93 +38,100 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ✅ DERIVED state (no separate useState)
   const isAuthenticated = user !== null;
 
+  // Helper function to attempt token refresh
+  const attemptTokenRefresh = async (refreshToken: string, savedUser: User): Promise<boolean> => {
+    try {
+      const refreshedData = await apiRefreshToken(refreshToken);
+
+      if (refreshedData) {
+        // Update user with new tokens
+        const updatedUser = {
+          ...savedUser,
+          token: refreshedData.token,
+          refreshToken: refreshedData.refreshToken,
+        };
+
+        setUser(updatedUser);
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        await saveAccessToken(refreshedData.token!);
+        await saveRefreshToken(refreshedData.refreshToken!);
+
+        console.log('✅ Session restored with new tokens');
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('❌ Token refresh failed:', error);
+      return false;
+    }
+  };
+
+  const clearUserSession = async () => {
+    await clearAllTokens();
+    await AsyncStorage.removeItem('user');
+    setUser(null);
+  };
+
+  const handleMissingToken = async (savedUser: User): Promise<boolean> => {
+    console.warn('⚠️ User loaded but access token is missing');
+
+    const refreshToken = await getRefreshToken();
+    if (refreshToken) {
+      console.log('🔄 Attempting to restore session with refresh token...');
+      if (await attemptTokenRefresh(refreshToken, savedUser)) {
+        return true; // Session restored successfully
+      }
+    }
+
+    // No refresh token or refresh failed - clear user
+    console.warn('⚠️ Cannot restore session - please login again');
+    await clearUserSession();
+    return false;
+  };
+
+  const handleExpiredToken = async (savedUser: User): Promise<boolean> => {
+    console.warn('⚠️ Access token has expired');
+
+    const refreshToken = await getRefreshToken();
+    if (refreshToken) {
+      console.log('🔄 Auto-refreshing expired token...');
+      if (await attemptTokenRefresh(refreshToken, savedUser)) {
+        return true; // Token refreshed successfully
+      }
+    }
+
+    // Refresh failed - clear user
+    console.warn('⚠️ Session expired - please login again');
+    await clearUserSession();
+    return false;
+  };
+
+  const handleValidToken = (savedUser: User) => {
+    setUser(savedUser);
+    console.log('✅ Session restored:', savedUser.phone, savedUser.role);
+  };
+
   // Load user from AsyncStorage on app start and auto-refresh if token expired
   useEffect(() => {
     const loadUser = async () => {
       try {
         const userJson = await AsyncStorage.getItem('user');
-        if (userJson) {
-          const savedUser = JSON.parse(userJson);
+        if (!userJson) return;
 
-          // Check if access token exists
-          if (!savedUser.token) {
-            console.warn('⚠️ User loaded but access token is missing');
+        const savedUser = JSON.parse(userJson);
 
-            // Try to refresh using refresh token
-            const refreshToken = await getRefreshToken();
-            if (refreshToken) {
-              console.log('🔄 Attempting to restore session with refresh token...');
-              const refreshed = await attemptTokenRefresh(refreshToken, savedUser);
-              if (refreshed) {
-                return; // Session restored successfully
-              }
-            }
-
-            // No refresh token or refresh failed - clear user
-            console.warn('⚠️ Cannot restore session - please login again');
-            await clearAllTokens();
-            await AsyncStorage.removeItem('user');
-            setUser(null);
-          }
-          // Check if access token is expired
-          else if (isTokenExpired(savedUser.token)) {
-            console.warn('⚠️ Access token has expired');
-
-            // Try to refresh using refresh token
-            const refreshToken = await getRefreshToken();
-            if (refreshToken) {
-              console.log('🔄 Auto-refreshing expired token...');
-              const refreshed = await attemptTokenRefresh(refreshToken, savedUser);
-              if (refreshed) {
-                return; // Token refreshed successfully
-              }
-            }
-
-            // Refresh failed - clear user
-            console.warn('⚠️ Session expired - please login again');
-            await clearAllTokens();
-            await AsyncStorage.removeItem('user');
-            setUser(null);
-          }
-          // Access token exists and is valid
-          else {
-            setUser(savedUser);
-            console.log('✅ Session restored:', savedUser.phone, savedUser.role);
-          }
+        if (!savedUser.token) {
+          await handleMissingToken(savedUser);
+        } else if (isTokenExpired(savedUser.token)) {
+          await handleExpiredToken(savedUser);
+        } else {
+          handleValidToken(savedUser);
         }
       } catch (error) {
         console.error('Error loading user from storage:', error);
       } finally {
         setIsLoading(false);
-      }
-    };
-
-    // Helper function to attempt token refresh
-    const attemptTokenRefresh = async (refreshToken: string, savedUser: User): Promise<boolean> => {
-      try {
-        const refreshedData = await apiRefreshToken(refreshToken);
-
-        if (refreshedData) {
-          // Update user with new tokens
-          const updatedUser = {
-            ...savedUser,
-            token: refreshedData.token,
-            refreshToken: refreshedData.refreshToken,
-          };
-
-          setUser(updatedUser);
-          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-          await saveAccessToken(refreshedData.token!);
-          await saveRefreshToken(refreshedData.refreshToken!);
-
-          console.log('✅ Session restored with new tokens');
-          return true;
-        }
-
-        return false;
-      } catch (error) {
-        console.error('❌ Token refresh failed:', error);
-        return false;
       }
     };
 

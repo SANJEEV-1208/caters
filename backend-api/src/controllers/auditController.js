@@ -25,12 +25,12 @@ exports.getAuditLogs = async (req, res) => {
     };
 
     // Authorization: Users can only view their own logs unless they're caterers viewing their business logs
-    if (req.user && req.user.role === 'customer' && filters.userId !== req.user.id) {
+    if (req.user?.role === 'customer' && filters.userId !== req.user.id) {
       return res.status(403).json({ error: 'You can only view your own audit logs' });
     }
 
     // Caterers can view logs for their catering business (all actions related to their catererId)
-    if (req.user && req.user.role === 'caterer') {
+    if (req.user?.role === 'caterer') {
       // Allow caterers to view their own logs and logs related to their business
       if (filters.userId && filters.userId !== req.user.id) {
         return res.status(403).json({ error: 'You can only view your own audit logs' });
@@ -58,11 +58,11 @@ exports.getAuditStats = async (req, res) => {
     };
 
     // Authorization: Users can only view their own stats
-    if (req.user && req.user.role === 'customer' && filters.userId && filters.userId !== req.user.id) {
+    if (req.user?.role === 'customer' && filters.userId && filters.userId !== req.user.id) {
       return res.status(403).json({ error: 'You can only view your own statistics' });
     }
 
-    if (req.user && req.user.role === 'caterer') {
+    if (req.user?.role === 'caterer') {
       // Caterers can view stats for their own account
       if (filters.userId && filters.userId !== req.user.id) {
         return res.status(403).json({ error: 'You can only view your own statistics' });

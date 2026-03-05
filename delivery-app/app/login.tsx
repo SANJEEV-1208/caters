@@ -49,7 +49,7 @@ export default function LoginScreen() {
   }, [isAuthenticated, user?.role, user?.caterType, loading, pathname]);
 
   // 🔹 Redirect if correct role is already logged in
-  if (isAuthenticated && user && user.role === "customer") {
+  if (isAuthenticated && user?.role === "customer") {
     return <Redirect href="/(authenticated)/customer/caterer-selection" />;
   }
 

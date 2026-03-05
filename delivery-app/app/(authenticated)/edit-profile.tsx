@@ -110,53 +110,62 @@ export default function EditProfileScreen() {
     }
   };
 
+  const validateCatererFields = (): boolean => {
+    if (!user || user.role !== "caterer") return true;
+
+    if (user.caterType === "restaurant") {
+      if (!restaurantName.trim()) {
+        Alert.alert("Required", "Please enter restaurant name");
+        return false;
+      }
+      if (!restaurantAddress.trim()) {
+        Alert.alert("Required", "Please enter restaurant address");
+        return false;
+      }
+    } else {
+      if (!serviceName.trim()) {
+        Alert.alert("Required", "Please enter service name");
+        return false;
+      }
+      if (!address.trim()) {
+        Alert.alert("Required", "Please enter your address");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const buildUpdateData = (): Record<string, string | undefined> => {
+    const baseData: Record<string, string | undefined> = {
+      profilePicture: profilePicture || undefined,
+      name: name.trim() || undefined,
+      phone: phone.trim() || undefined,
+    };
+
+    if (!user) return baseData;
+
+    if (user.role === "customer") {
+      baseData.address = address.trim() || undefined;
+    } else if (user.role === "caterer" && user.caterType === "restaurant") {
+      baseData.restaurantName = restaurantName.trim() || undefined;
+      baseData.restaurantAddress = restaurantAddress.trim() || undefined;
+    } else if (user.role === "caterer") {
+      baseData.serviceName = serviceName.trim() || undefined;
+      baseData.address = address.trim() || undefined;
+    }
+
+    return baseData;
+  };
+
   const handleSaveProfile = async () => {
     if (!user) return;
 
-    // Validation
-    if (user.role === "caterer") {
-      if (user.caterType === "restaurant") {
-        if (!restaurantName.trim()) {
-          Alert.alert("Required", "Please enter restaurant name");
-          return;
-        }
-        if (!restaurantAddress.trim()) {
-          Alert.alert("Required", "Please enter restaurant address");
-          return;
-        }
-      } else {
-        if (!serviceName.trim()) {
-          Alert.alert("Required", "Please enter service name");
-          return;
-        }
-        if (!address.trim()) {
-          Alert.alert("Required", "Please enter your address");
-          return;
-        }
-      }
-    }
+    if (!validateCatererFields()) return;
 
     try {
       setLoading(true);
 
-      const updateData: Record<string, string | undefined> = {
-        profilePicture: profilePicture || undefined,
-        name: name.trim() || undefined,
-        phone: phone.trim() || undefined,
-      };
-
-      if (user.role === "customer") {
-        updateData.address = address.trim() || undefined;
-      } else if (user.role === "caterer") {
-        if (user.caterType === "restaurant") {
-          updateData.restaurantName = restaurantName.trim() || undefined;
-          updateData.restaurantAddress = restaurantAddress.trim() || undefined;
-        } else {
-          updateData.serviceName = serviceName.trim() || undefined;
-          updateData.address = address.trim() || undefined;
-        }
-      }
-
+      const updateData = buildUpdateData();
       const updatedUser = await updateUserProfile(user.id, updateData);
 
       // IMPORTANT: Preserve the token from the current user

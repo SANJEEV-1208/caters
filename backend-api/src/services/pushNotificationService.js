@@ -34,7 +34,7 @@ async function sendPushNotification(pushToken, { title, body, data = {} }) {
 
     const result = await response.json();
 
-    if (result.data && result.data.status === 'ok') {
+    if (result.data?.status === 'ok') {
       console.log('✅ Push notification sent successfully');
       return true;
     } else {

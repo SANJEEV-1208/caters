@@ -49,7 +49,7 @@ export default function RestaurantLoginScreen() {
   }, [isAuthenticated, user?.role, user?.caterType, loading, pathname]);
 
   // 🔹 Redirect if correct role is already logged in
-  if (isAuthenticated && user && user.role === "caterer" && user.caterType === "restaurant") {
+  if (isAuthenticated && user?.role === "caterer" && user?.caterType === "restaurant") {
     return <Redirect href="/(authenticated)/caterer/restaurant/dashboard" />;
   }
 
