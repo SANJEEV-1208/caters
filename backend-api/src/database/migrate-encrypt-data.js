@@ -188,44 +188,39 @@ async function verifyMigration() {
   }
 }
 
-async function main() {
-  console.log('🔐 Data Encryption Migration Script');
-  console.log('===================================\n');
+console.log('🔐 Data Encryption Migration Script');
+console.log('===================================\n');
 
-  // Check if encryption key is set
-  if (!process.env.ENCRYPTION_KEY) {
-    console.error('❌ ERROR: ENCRYPTION_KEY environment variable not set!');
-    console.error('Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
-    process.exit(1);
-  }
-
-  console.log('✓ Encryption key found\n');
-
-  try {
-    // Run migrations
-    await migrateUsers();
-    console.log('');
-    await migrateApartments();
-    console.log('');
-    await migrateOrders();
-    console.log('');
-
-    // Verify
-    await verifyMigration();
-
-    console.log('\n✅ Migration completed successfully!');
-    console.log('\n⚠️  IMPORTANT NEXT STEPS:');
-    console.log('1. Verify encrypted data is correct');
-    console.log('2. Update application code to use encrypted fields');
-    console.log('3. After full deployment, you can drop old plaintext columns');
-    console.log('   (phone, address, delivery_address, guest_phone)\n');
-
-    process.exit(0);
-  } catch (error) {
-    console.error('\n❌ Migration failed:', error);
-    process.exit(1);
-  }
+// Check if encryption key is set
+if (!process.env.ENCRYPTION_KEY) {
+  console.error('❌ ERROR: ENCRYPTION_KEY environment variable not set!');
+  console.error('Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+  process.exit(1);
 }
 
-// Run migration
-main();
+console.log('✓ Encryption key found\n');
+
+try {
+  // Run migrations
+  await migrateUsers();
+  console.log('');
+  await migrateApartments();
+  console.log('');
+  await migrateOrders();
+  console.log('');
+
+  // Verify
+  await verifyMigration();
+
+  console.log('\n✅ Migration completed successfully!');
+  console.log('\n⚠️  IMPORTANT NEXT STEPS:');
+  console.log('1. Verify encrypted data is correct');
+  console.log('2. Update application code to use encrypted fields');
+  console.log('3. After full deployment, you can drop old plaintext columns');
+  console.log('   (phone, address, delivery_address, guest_phone)\n');
+
+  process.exit(0);
+} catch (error) {
+  console.error('\n❌ Migration failed:', error);
+  process.exit(1);
+}

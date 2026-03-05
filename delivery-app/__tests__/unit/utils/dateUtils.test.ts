@@ -222,7 +222,6 @@ describe('dateUtils', () => {
 
   describe('Date Consistency', () => {
     test('should maintain consistency across date functions', () => {
-      const today = getTodayIST();
       const tomorrow = getTomorrowIST();
       const after1Day = getDateAfterDaysIST(1);
 

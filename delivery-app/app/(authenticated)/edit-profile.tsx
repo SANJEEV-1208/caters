@@ -111,7 +111,7 @@ export default function EditProfileScreen() {
   };
 
   const validateCatererFields = (): boolean => {
-    if (!user || user.role !== "caterer") return true;
+    if (!user || user?.role !== "caterer") return true;
 
     if (user.caterType === "restaurant") {
       if (!restaurantName.trim()) {

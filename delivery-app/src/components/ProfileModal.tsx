@@ -21,6 +21,13 @@ export default function ProfileModal({ visible, onClose }: ProfileModalProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
 
+  const getUserRoleLabel = () => {
+    if (!user) return "";
+    if (user.role === "customer") return "Customer";
+    if (user.caterType === "restaurant") return "Restaurant";
+    return "Home Kitchen";
+  };
+
   const handleClose = () => {
     onClose();
   };
@@ -87,11 +94,7 @@ export default function ProfileModal({ visible, onClose }: ProfileModalProps) {
               )}
               <Text style={styles.userName}>{user.name}</Text>
               <Text style={styles.userRole}>
-                {user.role === "customer"
-                  ? "Customer"
-                  : user.caterType === "restaurant"
-                  ? "Restaurant"
-                  : "Home Kitchen"}
+                {getUserRoleLabel()}
               </Text>
             </View>
 

@@ -2,9 +2,22 @@
  * Data Encryption Utility
  * AES-256-CBC encryption for sensitive data (phone numbers, addresses)
  *
- * Security Note: Using AES-256-CBC with random IV for each encryption.
- * CBC mode is appropriate here as we're not using this for authentication.
- * Each encrypted value gets a unique random IV, preventing pattern analysis.
+ * Security Implementation:
+ * - Algorithm: AES-256-CBC (FIPS 197 compliant)
+ * - Padding: PKCS#7 (automatic in Node.js crypto.createCipheriv)
+ * - IV: Random 16-byte IV generated for each encryption using crypto.randomBytes
+ * - Key: 256-bit key from environment variable
+ *
+ * Mode Selection Rationale:
+ * CBC mode is suitable for this use case because:
+ * 1. Data at rest encryption (not network transmission)
+ * 2. No need for authenticated encryption (data integrity verified by application logic)
+ * 3. Random IV prevents pattern analysis across encrypted values
+ * 4. Simpler than GCM for database storage scenarios
+ *
+ * Note: For scenarios requiring authenticated encryption (AEAD), consider AES-256-GCM.
+ * However, for database field encryption without authentication requirements, CBC with
+ * random IVs provides adequate confidentiality.
  */
 
 const crypto = require('node:crypto');

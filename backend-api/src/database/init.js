@@ -34,15 +34,14 @@ async function initializeDatabase() {
 
 // Run directly from command line
 if (require.main === module) {
-  initializeDatabase()
-    .then(() => {
-      console.log('Done!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Failed:', error);
-      process.exit(1);
-    });
+  try {
+    await initializeDatabase();
+    console.log('Done!');
+    process.exit(0);
+  } catch (error) {
+    console.error('Failed:', error);
+    process.exit(1);
+  }
 }
 
 module.exports = initializeDatabase;

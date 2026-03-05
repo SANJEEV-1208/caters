@@ -1,7 +1,6 @@
 const pool = require('../config/database');
 
-async function checkAndFixMigration() {
-  try {
+try {
     console.log('🔍 Checking current database state...\n');
 
     // Step 1: Check if customer_id is nullable
@@ -93,12 +92,9 @@ async function checkAndFixMigration() {
     console.log('   - guest_phone: exists ✓');
     console.log('   - Constraint: enforces customer OR guest ✓');
 
-    process.exit(0);
-  } catch (error) {
-    console.error('\n❌ Error:', error.message);
-    console.error('Full error:', error);
-    process.exit(1);
-  }
+  process.exit(0);
+} catch (error) {
+  console.error('\n❌ Error:', error.message);
+  console.error('Full error:', error);
+  process.exit(1);
 }
-
-checkAndFixMigration();
