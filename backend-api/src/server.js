@@ -50,7 +50,7 @@ const corsOptions = {
           'https://www.kaaspro.com',
           undefined, // Allow mobile apps (no origin header)
         ];
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));
@@ -211,8 +211,8 @@ async function runMigrations() {
 
     if (!auditLogsTableCheck.rows[0].exists) {
       console.log('🔧 Creating audit_logs table...');
-      const fs = require('fs');
-      const path = require('path');
+      const fs = require('node:fs');
+      const path = require('node:path');
       const auditLogsSql = fs.readFileSync(
         path.join(__dirname, 'database', 'migrations', '002_create_audit_logs.sql'),
         'utf8'
@@ -233,8 +233,8 @@ async function runMigrations() {
 
     if (!securityAlertsTableCheck.rows[0].exists) {
       console.log('🔧 Creating security_alerts table...');
-      const fs = require('fs');
-      const path = require('path');
+      const fs = require('node:fs');
+      const path = require('node:path');
       const securityAlertsSql = fs.readFileSync(
         path.join(__dirname, 'database', 'migrations', '004_create_alerts_table.sql'),
         'utf8'
@@ -253,19 +253,37 @@ async function runMigrations() {
   }
 }
 
-// Start server - Listen on all network interfaces (0.0.0.0) for mobile device access
-app.listen(PORT, '0.0.0.0', async () => {
-  const localIp = getLocalIpAddress();
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Network access: http://${localIp}:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
-  console.log(`\n📱 Mobile app should connect to: http://${localIp}:${PORT}/api`);
+// Initialize database on first request (for Vercel serverless)
+// Disabled to prevent timeouts - run migrations manually if needed
+// let dbInitialized = false;
+// async function ensureDatabaseInitialized() {
+//   if (!dbInitialized) {
+//     await checkAndInitializeDatabase();
+//     dbInitialized = true;
+//   }
+// }
 
-  // Auto-initialize database if needed
-  await checkAndInitializeDatabase();
+// Middleware to ensure database is initialized (for Vercel)
+// app.use(async (req, res, next) => {
+//   await ensureDatabaseInitialized();
+//   next();
+// });
 
-  // Start APM memory monitoring
-  startMemoryMonitoring(5); // Monitor every 5 minutes
-});
+// Start server - Only run if not in serverless environment (Vercel)
+if (process.env.VERCEL !== '1' && require.main === module) {
+  app.listen(PORT, '0.0.0.0', async () => {
+    const localIp = getLocalIpAddress();
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Network access: http://${localIp}:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV}`);
+    console.log(`\n📱 Mobile app should connect to: http://${localIp}:${PORT}/api`);
+
+    // Auto-initialize database if needed
+    await checkAndInitializeDatabase();
+
+    // Start APM memory monitoring
+    startMemoryMonitoring(5); // Monitor every 5 minutes
+  });
+}
 
 module.exports = app;

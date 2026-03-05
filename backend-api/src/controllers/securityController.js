@@ -49,7 +49,7 @@ async function getSecurityOverview(req, res) {
  */
 async function getAlerts(req, res) {
   try {
-    const limit = parseInt(req.query.limit) || 50;
+    const limit = Number.parseInt(req.query.limit) || 50;
     const alerts = await alertService.getRecentAlerts(limit);
 
     res.json({
@@ -68,7 +68,7 @@ async function getAlerts(req, res) {
  */
 async function getAlertStats(req, res) {
   try {
-    const hours = parseInt(req.query.hours) || 24;
+    const hours = Number.parseInt(req.query.hours) || 24;
     const stats = await alertService.getAlertStats(hours);
 
     res.json(stats);
@@ -112,7 +112,7 @@ function getHealthStatus(req, res) {
  */
 async function getFailedLogins(req, res) {
   try {
-    const hours = parseInt(req.query.hours) || 24;
+    const hours = Number.parseInt(req.query.hours) || 24;
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const result = await require('../config/database').query(
@@ -147,7 +147,7 @@ async function getFailedLogins(req, res) {
  */
 async function getSuspiciousActivities(req, res) {
   try {
-    const hours = parseInt(req.query.hours) || 24;
+    const hours = Number.parseInt(req.query.hours) || 24;
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const result = await require('../config/database').query(
@@ -189,7 +189,7 @@ async function getSuspiciousActivities(req, res) {
 async function getActivityByIP(req, res) {
   try {
     const { ipAddress } = req.params;
-    const hours = parseInt(req.query.hours) || 24;
+    const hours = Number.parseInt(req.query.hours) || 24;
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const result = await require('../config/database').query(

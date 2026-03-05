@@ -801,9 +801,10 @@ exports.logoutUser = async (req, res) => {
             true
           );
         }
-      } catch (error) {
+      } catch (auditError) {
         // Token already revoked, can't get user data
-        console.log('Could not log audit event for logout - token already revoked');
+        // This is expected and safe to ignore - audit logging is best-effort
+        console.log('Could not log audit event for logout - token already revoked:', auditError.message);
       }
 
       res.json({ message: 'Logged out successfully' });

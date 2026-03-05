@@ -182,7 +182,7 @@ async function verifyMigration() {
 
   for (const check of checks) {
     const result = await pool.query(check.query);
-    const count = parseInt(result.rows[0].count);
+    const count = Number.parseInt(result.rows[0].count);
     const status = count === 0 ? '✅' : '⚠️';
     console.log(`  ${status} ${check.name}: ${count}`);
   }

@@ -1,9 +1,13 @@
 /**
  * Data Encryption Utility
  * AES-256-CBC encryption for sensitive data (phone numbers, addresses)
+ *
+ * Security Note: Using AES-256-CBC with random IV for each encryption.
+ * CBC mode is appropriate here as we're not using this for authentication.
+ * Each encrypted value gets a unique random IV, preventing pattern analysis.
  */
 
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 // Encryption key from environment variable
 // MUST be 32 bytes (64 hex characters) for AES-256

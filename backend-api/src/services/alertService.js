@@ -94,7 +94,7 @@ async function checkBruteForceAttempts(phone, ipAddress) {
       [windowStart, phone, ipAddress]
     );
 
-    const failedCount = parseInt(result.rows[0].failed_count);
+    const failedCount = Number.parseInt(result.rows[0].failed_count);
 
     if (failedCount >= ALERT_THRESHOLDS.FAILED_LOGIN_ATTEMPTS) {
       await sendAlert(
@@ -133,7 +133,7 @@ async function checkRapidOrders(userId) {
       [userId, windowStart]
     );
 
-    const orderCount = parseInt(result.rows[0].order_count);
+    const orderCount = Number.parseInt(result.rows[0].order_count);
 
     if (orderCount >= ALERT_THRESHOLDS.RAPID_ORDERS) {
       await sendAlert(
@@ -266,15 +266,15 @@ async function getAlertStats(hours = 24) {
 
     return {
       time_period_hours: hours,
-      total_alerts: parseInt(result.rows[0].total_alerts),
-      critical_alerts: parseInt(result.rows[0].critical_alerts),
-      error_alerts: parseInt(result.rows[0].error_alerts),
-      warning_alerts: parseInt(result.rows[0].warning_alerts),
-      brute_force_attempts: parseInt(result.rows[0].brute_force_attempts),
-      high_value_orders: parseInt(result.rows[0].high_value_orders),
-      rapid_orders: parseInt(result.rows[0].rapid_orders),
-      unacknowledged: parseInt(result.rows[0].unacknowledged),
-      unresolved: parseInt(result.rows[0].unresolved),
+      total_alerts: Number.parseInt(result.rows[0].total_alerts),
+      critical_alerts: Number.parseInt(result.rows[0].critical_alerts),
+      error_alerts: Number.parseInt(result.rows[0].error_alerts),
+      warning_alerts: Number.parseInt(result.rows[0].warning_alerts),
+      brute_force_attempts: Number.parseInt(result.rows[0].brute_force_attempts),
+      high_value_orders: Number.parseInt(result.rows[0].high_value_orders),
+      rapid_orders: Number.parseInt(result.rows[0].rapid_orders),
+      unacknowledged: Number.parseInt(result.rows[0].unacknowledged),
+      unresolved: Number.parseInt(result.rows[0].unresolved),
     };
   } catch (error) {
     console.error('Error fetching alert stats:', error);

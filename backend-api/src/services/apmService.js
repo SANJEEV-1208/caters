@@ -211,7 +211,7 @@ function getHealthStatus() {
   const metrics = getMetrics();
 
   // Determine health based on metrics
-  const errorRate = parseFloat(metrics.requests.errorRate);
+  const errorRate = Number.parseFloat(metrics.requests.errorRate);
   const memoryUsage = metrics.memory.heapUsed / metrics.memory.heapTotal;
 
   let status = 'healthy';

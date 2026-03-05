@@ -12,16 +12,16 @@ const auditService = require('../services/auditService');
 exports.getAuditLogs = async (req, res) => {
   try {
     const filters = {
-      userId: req.query.userId ? parseInt(req.query.userId) : undefined,
+      userId: req.query.userId ? Number.parseInt(req.query.userId) : undefined,
       userRole: req.query.userRole,
       actionType: req.query.actionType,
       actionCategory: req.query.actionCategory,
       entityType: req.query.entityType,
-      success: req.query.success !== undefined ? req.query.success === 'true' : undefined,
+      success: req.query.success === undefined ? undefined : req.query.success === 'true',
       startDate: req.query.startDate,
       endDate: req.query.endDate,
-      limit: req.query.limit ? parseInt(req.query.limit) : 100,
-      offset: req.query.offset ? parseInt(req.query.offset) : 0,
+      limit: req.query.limit ? Number.parseInt(req.query.limit) : 100,
+      offset: req.query.offset ? Number.parseInt(req.query.offset) : 0,
     };
 
     // Authorization: Users can only view their own logs unless they're caterers viewing their business logs
@@ -52,7 +52,7 @@ exports.getAuditLogs = async (req, res) => {
 exports.getAuditStats = async (req, res) => {
   try {
     const filters = {
-      userId: req.query.userId ? parseInt(req.query.userId) : undefined,
+      userId: req.query.userId ? Number.parseInt(req.query.userId) : undefined,
       startDate: req.query.startDate,
       endDate: req.query.endDate,
     };
@@ -86,18 +86,18 @@ exports.getUserActivity = async (req, res) => {
     const { limit = 50, offset = 0 } = req.query;
 
     // Authorization check
-    if (req.user && req.user.id !== parseInt(userId)) {
+    if (req.user && req.user.id !== Number.parseInt(userId)) {
       return res.status(403).json({ error: 'You can only view your own activity' });
     }
 
     const logs = await auditService.getAuditLogs({
-      userId: parseInt(userId),
-      limit: parseInt(limit),
-      offset: parseInt(offset),
+      userId: Number.parseInt(userId),
+      limit: Number.parseInt(limit),
+      offset: Number.parseInt(offset),
     });
 
     res.json({
-      userId: parseInt(userId),
+      userId: Number.parseInt(userId),
       totalLogs: logs.length,
       logs,
     });

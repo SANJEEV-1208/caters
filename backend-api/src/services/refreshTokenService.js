@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 // Token expiry durations
 const ACCESS_TOKEN_EXPIRY = '15m';  // 15 minutes
