@@ -117,9 +117,9 @@ exports.createOrder = async (req, res) => {
     const createdOrder = result.rows[0];
 
     if (isGuestOrder) {
-      console.log(`Guest order created: ${orderId}, Guest: ${guestName} (${guestPhone}), Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+      console.log(`Guest order created, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
     } else {
-      console.log(`Order created by customer ${customerId}: ${orderId}, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+      console.log(`Order created, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
     }
 
     // Log order creation

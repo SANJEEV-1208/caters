@@ -48,8 +48,9 @@ const ALERT_TYPES = {
 async function sendAlert(level, type, message, metadata = {}) {
   const timestamp = new Date().toISOString();
 
-  // Console logging
-  console.log(`[${timestamp}] SECURITY ALERT [${level.toUpperCase()}] - ${type}: ${message}`);
+  // Console logging (sanitize message to prevent log injection)
+  const sanitizedMessage = message.replace(/[\r\n\t]/g, ' ').substring(0, 500);
+  console.log(`[${timestamp}] SECURITY ALERT [${level.toUpperCase()}] - ${type}: ${sanitizedMessage}`);
 
   if (Object.keys(metadata).length > 0) {
     console.log('  Details:', JSON.stringify(metadata, null, 2));

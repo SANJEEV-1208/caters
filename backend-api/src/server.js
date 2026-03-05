@@ -76,7 +76,9 @@ app.use(performanceMiddleware());
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  // Sanitize path to prevent log injection
+  const sanitizedPath = req.path.replace(/[\r\n\t]/g, '').substring(0, 200);
+  console.log(`${new Date().toISOString()} - ${req.method} ${sanitizedPath}`);
   next();
 });
 
@@ -121,16 +123,16 @@ async function checkAndInitializeDatabase() {
 
     const tableExists = result.rows[0].exists;
 
-    if (!tableExists) {
-      console.log('🔧 Database tables not found. Initializing database...');
-      const initializeDatabase = require('./database/init');
-      await initializeDatabase();
-      console.log('✅ Database initialized successfully!');
-    } else {
+    if (tableExists) {
       console.log('✅ Database already initialized');
 
       // Run migrations for existing databases
       await runMigrations();
+    } else {
+      console.log('🔧 Database tables not found. Initializing database...');
+      const initializeDatabase = require('./database/init');
+      await initializeDatabase();
+      console.log('✅ Database initialized successfully!');
     }
   } catch (error) {
     console.error('⚠️ Database check/initialization error:', error.message);
@@ -152,12 +154,12 @@ async function runMigrations() {
       )`
     );
 
-    if (!pinHashCheck.rows[0].exists) {
+    if (pinHashCheck.rows[0].exists) {
+      console.log('✓ pin_hash column already exists');
+    } else {
       console.log('🔧 Adding pin_hash column to users table...');
       await pool.query('ALTER TABLE users ADD COLUMN pin_hash VARCHAR(255)');
       console.log('✅ pin_hash column added successfully');
-    } else {
-      console.log('✓ pin_hash column already exists');
     }
 
     // Migration 2: Add profile_picture column if it doesn't exist
@@ -168,12 +170,12 @@ async function runMigrations() {
       )`
     );
 
-    if (!profilePictureCheck.rows[0].exists) {
+    if (profilePictureCheck.rows[0].exists) {
+      console.log('✓ profile_picture column already exists');
+    } else {
       console.log('🔧 Adding profile_picture column to users table...');
       await pool.query('ALTER TABLE users ADD COLUMN profile_picture TEXT');
       console.log('✅ profile_picture column added successfully');
-    } else {
-      console.log('✓ profile_picture column already exists');
     }
 
     // Migration 3: Create push_tokens table if it doesn't exist
@@ -184,7 +186,9 @@ async function runMigrations() {
       )`
     );
 
-    if (!pushTokensTableCheck.rows[0].exists) {
+    if (pushTokensTableCheck.rows[0].exists) {
+      console.log('✓ push_tokens table already exists');
+    } else {
       console.log('🔧 Creating push_tokens table...');
       await pool.query(`
         CREATE TABLE push_tokens (
@@ -197,8 +201,6 @@ async function runMigrations() {
         )
       `);
       console.log('✅ push_tokens table created successfully');
-    } else {
-      console.log('✓ push_tokens table already exists');
     }
 
     // Migration 4: Create audit_logs table if it doesn't exist
@@ -209,7 +211,9 @@ async function runMigrations() {
       )`
     );
 
-    if (!auditLogsTableCheck.rows[0].exists) {
+    if (auditLogsTableCheck.rows[0].exists) {
+      console.log('✓ audit_logs table already exists');
+    } else {
       console.log('🔧 Creating audit_logs table...');
       const fs = require('node:fs');
       const path = require('node:path');
@@ -219,8 +223,6 @@ async function runMigrations() {
       );
       await pool.query(auditLogsSql);
       console.log('✅ audit_logs table created successfully');
-    } else {
-      console.log('✓ audit_logs table already exists');
     }
 
     // Migration 5: Create security_alerts table if it doesn't exist
@@ -231,7 +233,9 @@ async function runMigrations() {
       )`
     );
 
-    if (!securityAlertsTableCheck.rows[0].exists) {
+    if (securityAlertsTableCheck.rows[0].exists) {
+      console.log('✓ security_alerts table already exists');
+    } else {
       console.log('🔧 Creating security_alerts table...');
       const fs = require('node:fs');
       const path = require('node:path');
@@ -241,8 +245,6 @@ async function runMigrations() {
       );
       await pool.query(securityAlertsSql);
       console.log('✅ security_alerts table created successfully');
-    } else {
-      console.log('✓ security_alerts table already exists');
     }
 
     console.log('✅ All migrations completed');

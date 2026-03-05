@@ -34,7 +34,7 @@ exports.getCustomerSubscriptions = async (req, res) => {
 exports.getCatererDetails = async (req, res) => {
   try {
     const { catererId } = req.params;
-    console.log(`[Get Caterer] Request for caterer ID: ${catererId}`);
+    console.log('[Get Caterer] Fetching caterer details');
 
     // First, check if user exists at all
     const userCheck = await pool.query(
@@ -43,11 +43,11 @@ exports.getCatererDetails = async (req, res) => {
     );
 
     if (userCheck.rows.length === 0) {
-      console.log(`[Get Caterer] User ${catererId} does not exist at all`);
+      console.log('[Get Caterer] User does not exist');
       return res.status(404).json({ error: 'User not found' });
     }
 
-    console.log(`[Get Caterer] User ${catererId} exists with role: ${userCheck.rows[0].role}`);
+    console.log(`[Get Caterer] User exists with role: ${userCheck.rows[0].role}`);
 
     const result = await pool.query(
       'SELECT * FROM users WHERE id = $1 AND role = $2',
@@ -57,7 +57,7 @@ exports.getCatererDetails = async (req, res) => {
     console.log(`[Get Caterer] Query result rows: ${result.rows.length}`);
 
     if (result.rows.length === 0) {
-      console.log(`[Get Caterer] User ${catererId} exists but is not a caterer (role: ${userCheck.rows[0].role})`);
+      console.log(`[Get Caterer] User exists but is not a caterer (role: ${userCheck.rows[0].role})`);
       return res.status(404).json({ error: 'Caterer not found' });
     }
 

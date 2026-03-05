@@ -147,7 +147,17 @@ exports.manualLinkCustomerToApartment = async (req, res) => {
     }
 
     // If apartmentId is null, it's a direct add (no apartment)
-    if (apartmentId !== null) {
+    if (apartmentId === null) {
+      // For direct add, check if customer is already added directly to this caterer
+      const existing = await pool.query(
+        'SELECT * FROM customer_apartments WHERE customer_id = $1 AND apartment_id IS NULL AND caterer_id = $2',
+        [customerId, catererId]
+      );
+
+      if (existing.rows.length > 0) {
+        return res.status(409).json({ error: 'Customer already added directly to this caterer' });
+      }
+    } else {
       // Check if apartment exists and belongs to caterer
       const apartmentCheck = await pool.query(
         'SELECT * FROM apartments WHERE id = $1 AND caterer_id = $2',
@@ -166,16 +176,6 @@ exports.manualLinkCustomerToApartment = async (req, res) => {
 
       if (existing.rows.length > 0) {
         return res.status(409).json({ error: 'Customer already linked to this apartment' });
-      }
-    } else {
-      // For direct add, check if customer is already added directly to this caterer
-      const existing = await pool.query(
-        'SELECT * FROM customer_apartments WHERE customer_id = $1 AND apartment_id IS NULL AND caterer_id = $2',
-        [customerId, catererId]
-      );
-
-      if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Customer already added directly to this caterer' });
       }
     }
 

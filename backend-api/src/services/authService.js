@@ -55,7 +55,7 @@ exports.loginUser = async (req, res) => {
     // Check if PIN is set (for customers added by caterer)
     if (!user.pin_hash) {
       // First-time login - no PIN set yet
-      console.log(`First-time login detected for user ${user.id}`);
+      console.log('First-time login detected - PIN setup required');
       return res.status(200).json({
         requiresPinSetup: true,
         userId: user.id,
@@ -133,7 +133,7 @@ exports.loginUser = async (req, res) => {
       refreshTokenExpiresAt: refreshTokenData.expiresAt
     };
 
-    console.log(`Login successful for user ${user.id} (${user.role}), refresh token expires in ${refreshTokenData.expiryDays} days`);
+    console.log(`Login successful, refresh token expires in ${refreshTokenData.expiryDays} days`);
 
     // Log successful login
     await auditService.logAuthEvent(
@@ -237,7 +237,7 @@ exports.signupCaterer = async (req, res) => {
       refreshTokenExpiresAt: refreshTokenData.expiresAt
     };
 
-    console.log(`Caterer signup successful for user ${user.id}, refresh token expires in ${refreshTokenData.expiryDays} days`);
+    console.log(`Caterer signup successful, refresh token expires in ${refreshTokenData.expiryDays} days`);
 
     // Log caterer signup
     await auditService.logAuthEvent(
@@ -341,10 +341,9 @@ exports.updatePaymentQrCode = async (req, res) => {
     const { id } = req.params;
     const { paymentQrCode } = req.body;
 
-    console.log(`[QR Update] User ${id} updating QR code, data length: ${paymentQrCode?.length || 0}`);
+    console.log(`[QR Update] User updating QR code, data length: ${paymentQrCode?.length || 0}`);
     if (paymentQrCode) {
-      const preview = paymentQrCode.substring(0, 100);
-      console.log(`[QR Update] QR code preview: ${preview}${paymentQrCode.length > 100 ? '...' : ''}`);
+      // Log QR code type without exposing the actual data
       console.log(`[QR Update] Is base64 image: ${/^data:image\/(png|jpeg|jpg|gif);base64,/.test(paymentQrCode)}`);
       console.log(`[QR Update] Is URL: ${/^https?:\/\//.test(paymentQrCode)}`);
     }
@@ -354,7 +353,7 @@ exports.updatePaymentQrCode = async (req, res) => {
     const oldUser = oldUserResult.rows[0];
 
     if (!oldUser) {
-      console.log(`[QR Update] User ${id} not found`);
+      console.log('[QR Update] User not found');
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -367,7 +366,7 @@ exports.updatePaymentQrCode = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    console.log(`[QR Update] Successfully updated QR code for user ${id}`);
+    console.log('[QR Update] Successfully updated QR code');
 
     const user = result.rows[0];
     const formattedUser = {
@@ -498,7 +497,7 @@ exports.signupRestaurant = async (req, res) => {
       token
     };
 
-    console.log(`Restaurant signup successful for user ${user.id}`);
+    console.log('Restaurant signup successful');
 
     // Log restaurant signup
     await auditService.logAuthEvent(
@@ -549,7 +548,7 @@ exports.setPin = async (req, res) => {
     }
 
     const user = userCheck.rows[0];
-    console.log('✓ User found:', user.phone, 'Has PIN:', !!user.pin_hash);
+    console.log('✓ User found, Has PIN:', !!user.pin_hash);
 
     // Check if PIN is already set
     if (user.pin_hash) {
@@ -692,7 +691,7 @@ exports.updateUserProfile = async (req, res) => {
       createdAt: user.created_at
     };
 
-    console.log(`Profile updated successfully for user ${user.id}`);
+    console.log('Profile updated successfully');
 
     // Log profile update
     await auditService.logProfileUpdate(user, userCheck.rows[0], updates, req);

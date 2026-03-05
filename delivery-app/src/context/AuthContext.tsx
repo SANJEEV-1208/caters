@@ -164,7 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const setupNotifications = async () => {
       // Only register for push notifications for customers
-      if (user && user.role === "customer" && !isLoading) {
+      if (user?.role === "customer" && !isLoading) {
         console.log('📱 Setting up push notifications for customer...');
         try {
           await registerForPushNotifications();
@@ -244,7 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // ✅ LOGOUT
   const logout = async () => {
     // Unregister push token if user is a customer
-    if (user && user.role === "customer") {
+    if (user?.role === "customer") {
       try {
         await unregisterPushToken();
         console.log('✓ Push token unregistered');

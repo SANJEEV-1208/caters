@@ -10,10 +10,10 @@ import {
 import { MenuItem } from '@/src/types/menu';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 // Mock console methods
-global.console = {
+globalThis.console = {
   ...console,
   log: jest.fn(),
   error: jest.fn(),
@@ -58,7 +58,7 @@ describe('catererMenuApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockMenuItems,
       });
@@ -73,7 +73,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle fetch menu items errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -104,7 +104,7 @@ describe('catererMenuApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => mockMenuItems,
@@ -123,7 +123,7 @@ describe('catererMenuApi', () => {
       const catererId = 2;
       const date = '2026-02-10';
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 200,
         json: async () => [],
@@ -135,7 +135,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle fetch by date errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         text: async () => 'Server error',
@@ -165,7 +165,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockMenuItem,
       });
@@ -177,7 +177,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle fetch menu item by ID errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -207,7 +207,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -240,7 +240,7 @@ describe('catererMenuApi', () => {
         inStock: true,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
       });
@@ -273,7 +273,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -314,7 +314,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -325,7 +325,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle update menu item errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -340,7 +340,7 @@ describe('catererMenuApi', () => {
     test('should delete menu item', async () => {
       const itemId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
       });
 
@@ -355,7 +355,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle delete menu item errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -384,7 +384,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -421,7 +421,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -432,7 +432,7 @@ describe('catererMenuApi', () => {
     });
 
     test('should handle toggle stock errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -470,7 +470,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -501,7 +501,7 @@ describe('catererMenuApi', () => {
         createdAt: '2026-02-01T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });

@@ -267,7 +267,7 @@ async function logMenuEvent(actionType, menuItem, user, req, oldItem = null) {
     entityId: menuItem.id,
     entityName: menuItem.name,
     oldValue: oldItem,
-    newValue: actionType !== ACTION_TYPES.MENU_DELETED ? menuItem : null,
+    newValue: actionType === ACTION_TYPES.MENU_DELETED ? null : menuItem,
     ipAddress: req?.ip || null,
     userAgent: req?.get?.('user-agent') || null,
     requestMethod: req?.method || null,

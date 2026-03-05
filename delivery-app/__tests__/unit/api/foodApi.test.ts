@@ -11,7 +11,7 @@ import {
 } from '@/src/api/foodApi';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 describe('foodApi', () => {
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('foodApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockFoods,
       });
@@ -54,7 +54,7 @@ describe('foodApi', () => {
     });
 
     test('should handle empty food list', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -89,7 +89,7 @@ describe('foodApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResults,
       });
@@ -106,7 +106,7 @@ describe('foodApi', () => {
     test('should handle search with special characters', async () => {
       const searchQuery = 'pizza & pasta';
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -119,7 +119,7 @@ describe('foodApi', () => {
     });
 
     test('should return empty array when no matches found', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -153,7 +153,7 @@ describe('foodApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockVegFoods,
       });
@@ -166,7 +166,7 @@ describe('foodApi', () => {
     });
 
     test('should return empty array when no veg items available', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -200,7 +200,7 @@ describe('foodApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockNonVegFoods,
       });
@@ -213,7 +213,7 @@ describe('foodApi', () => {
     });
 
     test('should return empty array when no non-veg items available', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -259,7 +259,7 @@ describe('foodApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockTrendingFoods,
       });
@@ -277,7 +277,7 @@ describe('foodApi', () => {
         { id: 2, name: 'Dosa', price: 80 },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockTrendingFoods,
       });
@@ -297,7 +297,7 @@ describe('foodApi', () => {
         { id: 4, name: 'Mexican', image: 'http://example.com/mexican.jpg' },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockCuisines,
       });
@@ -310,7 +310,7 @@ describe('foodApi', () => {
     });
 
     test('should return empty array when no cuisines available', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -329,7 +329,7 @@ describe('foodApi', () => {
         { id: 2, catererId: 2, name: 'Chinese', image: 'http://example.com/chinese.jpg' },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockCuisines,
       });
@@ -342,7 +342,7 @@ describe('foodApi', () => {
     });
 
     test('should handle fetch caterer cuisines errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -351,7 +351,7 @@ describe('foodApi', () => {
     });
 
     test('should return empty array when caterer has no cuisines', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -376,7 +376,7 @@ describe('foodApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -405,7 +405,7 @@ describe('foodApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -423,7 +423,7 @@ describe('foodApi', () => {
     });
 
     test('should handle create cuisine errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
       });
@@ -440,7 +440,7 @@ describe('foodApi', () => {
         message: 'Cuisine deleted successfully',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -457,7 +457,7 @@ describe('foodApi', () => {
     });
 
     test('should handle delete cuisine errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -471,7 +471,7 @@ describe('foodApi', () => {
       const catererId = 2;
 
       // Step 1: Get existing cuisines
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => [
           { id: 1, catererId: 2, name: 'Indian' },
@@ -483,7 +483,7 @@ describe('foodApi', () => {
       expect(existingCuisines).toHaveLength(2);
 
       // Step 2: Create new cuisine
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ id: 3, catererId: 2, name: 'Thai' }),
       });
@@ -492,7 +492,7 @@ describe('foodApi', () => {
       expect(newCuisine.id).toBe(3);
 
       // Step 3: Delete cuisine
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: 'Deleted' }),
       });
@@ -506,7 +506,7 @@ describe('foodApi', () => {
 
     test('should complete food filtering workflow', async () => {
       // Get all foods
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => [
           { id: 1, category: 'veg' },
@@ -519,7 +519,7 @@ describe('foodApi', () => {
       expect(allFoods).toHaveLength(3);
 
       // Get veg foods
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => [
           { id: 1, category: 'veg' },
@@ -531,7 +531,7 @@ describe('foodApi', () => {
       expect(vegFoods).toHaveLength(2);
 
       // Get non-veg foods
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => [{ id: 2, category: 'non-veg' }],
       });

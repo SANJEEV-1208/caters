@@ -118,7 +118,7 @@ exports.createMenuItem = async (req, res) => {
 
     const createdItem = result.rows[0];
 
-    console.log(`Menu item created by caterer ${catererId}:`, createdItem.name);
+    console.log('Menu item created successfully');
 
     // Log menu item creation
     await auditService.logMenuEvent(

@@ -15,10 +15,10 @@ import {
 import { Apartment, CustomerApartment } from '@/src/types/apartment';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 // Mock console methods
-global.console = {
+globalThis.console = {
   ...console,
   log: jest.fn(),
   error: jest.fn(),
@@ -52,7 +52,7 @@ describe('apartmentApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockApartments,
       });
@@ -67,7 +67,7 @@ describe('apartmentApi', () => {
     });
 
     test('should handle fetch apartments errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -76,7 +76,7 @@ describe('apartmentApi', () => {
     });
 
     test('should return empty array when caterer has no apartments', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -109,7 +109,7 @@ describe('apartmentApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockLinks,
       });
@@ -124,7 +124,7 @@ describe('apartmentApi', () => {
     });
 
     test('should handle fetch links errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -150,7 +150,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -177,7 +177,7 @@ describe('apartmentApi', () => {
         accessCode: 'TEST123',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
       });
@@ -198,7 +198,7 @@ describe('apartmentApi', () => {
     test('should delete apartment', async () => {
       const apartmentId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
       });
 
@@ -213,7 +213,7 @@ describe('apartmentApi', () => {
     });
 
     test('should handle delete apartment errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -253,7 +253,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -288,7 +288,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -307,7 +307,7 @@ describe('apartmentApi', () => {
         addedVia: 'manual' as const,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         json: async () => ({ error: 'Customer already linked to apartment' }),
@@ -326,7 +326,7 @@ describe('apartmentApi', () => {
         addedVia: 'manual' as const,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => {
@@ -354,7 +354,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -374,7 +374,7 @@ describe('apartmentApi', () => {
     });
 
     test('should handle invalid access code', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
         json: async () => ({ error: 'Invalid access code' }),
@@ -386,7 +386,7 @@ describe('apartmentApi', () => {
     });
 
     test('should handle generic link errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => ({}),
@@ -476,7 +476,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockApartment,
       });
@@ -494,7 +494,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:30:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockLink,
       });
@@ -519,7 +519,7 @@ describe('apartmentApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockLink,
       });

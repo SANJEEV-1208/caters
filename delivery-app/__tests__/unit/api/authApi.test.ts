@@ -10,7 +10,7 @@ import {
 import { User, SignupData } from '@/src/types/auth';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 describe('authApi', () => {
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('authApi', () => {
         name: 'John Doe',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -45,7 +45,7 @@ describe('authApi', () => {
     });
 
     test('should return null when user not found (404)', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -56,7 +56,7 @@ describe('authApi', () => {
     });
 
     test('should throw error for other HTTP errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -65,7 +65,7 @@ describe('authApi', () => {
     });
 
     test('should handle network errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(loginUser('+919876543210')).rejects.toThrow('Network error');
     });
@@ -79,7 +79,7 @@ describe('authApi', () => {
         serviceName: 'Spice Kitchen',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockCaterer,
       });
@@ -109,7 +109,7 @@ describe('authApi', () => {
         address: signupData.address,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -140,7 +140,7 @@ describe('authApi', () => {
         address: '123 Main St',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         json: async () => ({ error: 'Phone number already exists' }),
       });
@@ -156,7 +156,7 @@ describe('authApi', () => {
         address: '123 Main St',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         json: async () => ({}),
       });
@@ -174,7 +174,7 @@ describe('authApi', () => {
         name: 'John Doe',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -185,7 +185,7 @@ describe('authApi', () => {
     });
 
     test('should return null when user not found', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -212,7 +212,7 @@ describe('authApi', () => {
         address: customerData.address,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -246,7 +246,7 @@ describe('authApi', () => {
         name: customerData.name,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -262,7 +262,7 @@ describe('authApi', () => {
         phone: '+919222222222',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         json: async () => ({ error: 'Customer already exists' }),
       });
@@ -289,7 +289,7 @@ describe('authApi', () => {
         address: restaurantData.restaurantAddress,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -314,7 +314,7 @@ describe('authApi', () => {
         restaurantAddress: '789 Food St',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         json: async () => ({ error: 'Restaurant already registered' }),
       });
@@ -332,7 +332,7 @@ describe('authApi', () => {
         name: 'John Doe',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -344,7 +344,7 @@ describe('authApi', () => {
     });
 
     test('should return null when user not found', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -355,7 +355,7 @@ describe('authApi', () => {
     });
 
     test('should handle network errors gracefully', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       const user = await getUserById(1);
 
@@ -377,7 +377,7 @@ describe('authApi', () => {
         paymentQrCode: qrCodeUrl,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUser,
       });
@@ -396,7 +396,7 @@ describe('authApi', () => {
     });
 
     test('should handle update QR code errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -407,7 +407,7 @@ describe('authApi', () => {
     });
 
     test('should handle network errors', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(updatePaymentQrCode(2, 'http://example.com/qr.png')).rejects.toThrow(
         'Network error'
