@@ -91,7 +91,7 @@ function recordRequest(endpoint, method, statusCode, responseTime) {
 
   // Log slow requests (>1 second)
   if (responseTime > 1000) {
-    const sanitizedKey = key.replace(/[\r\n\t]/g, '').substring(0, 100);
+    const sanitizedKey = key.replaceAll(/[\r\n\t]/g, '').substring(0, 100);
     console.warn(`⚠️ Slow request: ${sanitizedKey} took ${responseTime}ms`);
   }
 }

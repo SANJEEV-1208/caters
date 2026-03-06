@@ -536,14 +536,14 @@ exports.setPin = async (req, res) => {
     }
 
     // Check if user exists
-    console.log('🔍 Checking if user exists:', userId);
+    console.log('🔍 Checking if user exists');
     const userCheck = await pool.query(
       'SELECT * FROM users WHERE id = $1',
       [userId]
     );
 
     if (userCheck.rows.length === 0) {
-      console.log('❌ User not found:', userId);
+      console.log('❌ User not found');
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -552,7 +552,7 @@ exports.setPin = async (req, res) => {
 
     // Check if PIN is already set
     if (user.pin_hash) {
-      console.log('⚠️ PIN already set for user:', userId);
+      console.log('⚠️ PIN already set for user');
       return res.status(400).json({ error: 'PIN is already set. Please use login instead.' });
     }
 

@@ -48,7 +48,7 @@ export default function TableQRViewScreen() {
       }
 
       // Download file
-      const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
+      const filename = `${tableNumber}_qr.png`.replaceAll(/\s+/g, '_');
       const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
 
       const downloadResult = await (FileSystem as any).downloadAsync(
@@ -96,7 +96,7 @@ export default function TableQRViewScreen() {
       }
 
       // Download file to temp directory
-      const filename = `${tableNumber}_qr.png`.replace(/\s+/g, '_');
+      const filename = `${tableNumber}_qr.png`.replaceAll(/\s+/g, '_');
       const fileUri = `${(FileSystem as any).cacheDirectory}${filename}`;
 
       const downloadResult = await (FileSystem as any).downloadAsync(

@@ -11,10 +11,10 @@ import { Order } from '@/src/types/order';
 import { CartItem } from '@/src/context/CartContext';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 // Mock console methods to suppress logs during tests
-global.console = {
+globalThis.console = {
   ...console,
   log: jest.fn(),
   error: jest.fn(),

@@ -116,10 +116,14 @@ exports.createOrder = async (req, res) => {
 
     const createdOrder = result.rows[0];
 
+    // Sanitize user-controlled data before logging
+    const sanitizedPaymentMethod = String(paymentMethod).replaceAll(/[\r\n\t]/g, '').substring(0, 20);
+    const sanitizedAmount = Number(totalAmount).toFixed(2);
+
     if (isGuestOrder) {
-      console.log(`Guest order created, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+      console.log(`Guest order created, Payment: ${sanitizedPaymentMethod}, Amount: ${sanitizedAmount}`);
     } else {
-      console.log(`Order created, Payment: ${paymentMethod}, Amount: ${totalAmount}`);
+      console.log(`Order created, Payment: ${sanitizedPaymentMethod}, Amount: ${sanitizedAmount}`);
     }
 
     // Log order creation

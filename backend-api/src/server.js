@@ -77,7 +77,7 @@ app.use(performanceMiddleware());
 // Request logging middleware
 app.use((req, res, next) => {
   // Sanitize path to prevent log injection
-  const sanitizedPath = req.path.replace(/[\r\n\t]/g, '').substring(0, 200);
+  const sanitizedPath = req.path.replaceAll(/[\r\n\t]/g, '').substring(0, 200);
   console.log(`${new Date().toISOString()} - ${req.method} ${sanitizedPath}`);
   next();
 });

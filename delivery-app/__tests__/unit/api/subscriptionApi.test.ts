@@ -8,10 +8,10 @@ import {
 import { Subscription, User } from '@/src/types/auth';
 
 // Mock global fetch
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 // Mock console methods
-global.console = {
+globalThis.console = {
   ...console,
   log: jest.fn(),
   error: jest.fn(),
