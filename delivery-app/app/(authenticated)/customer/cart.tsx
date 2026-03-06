@@ -12,7 +12,7 @@ import { Order } from "@/src/types/order";
 import { getCatererDetails } from "@/src/api/subscriptionApi";
 import { User } from "@/src/types/auth";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
-import { getTodayIST, getTomorrowIST, getCurrentTimestampIST, getISTDate, formatDateIST } from "@/src/utils/dateUtils";
+import { getTodayIST, getTomorrowIST, getCurrentTimestampIST, formatDateIST } from "@/src/utils/dateUtils";
 
 export default function Cart() {
   const { cart, totalAmount, addToCart, removeFromCart, removeMultipleItems, reorderItems, clearCart } = useCart();

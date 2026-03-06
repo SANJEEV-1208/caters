@@ -16,7 +16,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
-import OrderCard from "@/src/components/caterer/OrderCard";
 import { getCatererOrders } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
 import { formatTimeIST } from "@/src/utils/dateUtils";

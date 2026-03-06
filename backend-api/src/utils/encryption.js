@@ -1,23 +1,22 @@
 /**
  * Data Encryption Utility
- * AES-256-CBC encryption for sensitive data (phone numbers, addresses)
+ * AES-256-GCM authenticated encryption for sensitive data (phone numbers, addresses)
  *
  * Security Implementation:
- * - Algorithm: AES-256-CBC (FIPS 197 compliant)
- * - Padding: PKCS#7 (automatic in Node.js crypto.createCipheriv)
- * - IV: Random 16-byte IV generated for each encryption using crypto.randomBytes
+ * - Algorithm: AES-256-GCM (Galois/Counter Mode - FIPS 197 compliant)
+ * - Authentication: Built-in authentication tag (AEAD - Authenticated Encryption with Associated Data)
+ * - IV: Random 12-byte IV (nonce) generated for each encryption using crypto.randomBytes
  * - Key: 256-bit key from environment variable
+ * - Auth Tag: 16-byte authentication tag appended to ciphertext
  *
- * Mode Selection Rationale:
- * CBC mode is suitable for this use case because:
- * 1. Data at rest encryption (not network transmission)
- * 2. No need for authenticated encryption (data integrity verified by application logic)
- * 3. Random IV prevents pattern analysis across encrypted values
- * 4. Simpler than GCM for database storage scenarios
+ * GCM Mode Benefits:
+ * 1. Authenticated Encryption: Provides both confidentiality AND integrity/authenticity
+ * 2. Detects tampering: Any modification to ciphertext will fail authentication
+ * 3. Industry standard: Recommended by NIST, used in TLS 1.3, IPsec
+ * 4. No padding needed: GCM is a stream cipher mode
+ * 5. Secure for both data at rest and data in transit
  *
- * Note: For scenarios requiring authenticated encryption (AEAD), consider AES-256-GCM.
- * However, for database field encryption without authentication requirements, CBC with
- * random IVs provides adequate confidentiality.
+ * Format: IV:encryptedData:authTag (all hex-encoded, colon-separated)
  */
 
 const crypto = require('node:crypto');
@@ -25,8 +24,9 @@ const crypto = require('node:crypto');
 // Encryption key from environment variable
 // MUST be 32 bytes (64 hex characters) for AES-256
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'a'.repeat(64); // Default for dev only!
-const ALGORITHM = 'aes-256-cbc';
-const IV_LENGTH = 16; // AES block size
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 12; // GCM recommended nonce length (96 bits)
+const AUTH_TAG_LENGTH = 16; // GCM auth tag length (128 bits)
 
 /**
  * Validate encryption key
@@ -42,9 +42,9 @@ function validateEncryptionKey() {
 }
 
 /**
- * Encrypt text using AES-256-CBC
+ * Encrypt text using AES-256-GCM
  * @param {string} text - Plain text to encrypt
- * @returns {string} - Encrypted text in format: iv:encryptedData
+ * @returns {string} - Encrypted text in format: iv:encryptedData:authTag
  */
 function encrypt(text) {
   if (!text) return null;
@@ -52,10 +52,10 @@ function encrypt(text) {
   try {
     validateEncryptionKey();
 
-    // Generate random IV (Initialization Vector)
+    // Generate random IV (nonce) for GCM
     const iv = crypto.randomBytes(IV_LENGTH);
 
-    // Create cipher
+    // Create cipher with GCM mode
     const cipher = crypto.createCipheriv(
       ALGORITHM,
       Buffer.from(ENCRYPTION_KEY, 'hex'),
@@ -66,8 +66,11 @@ function encrypt(text) {
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
 
-    // Return IV + encrypted data (separated by colon)
-    return iv.toString('hex') + ':' + encrypted;
+    // Get authentication tag (GCM specific)
+    const authTag = cipher.getAuthTag();
+
+    // Return IV + encrypted data + auth tag (all separated by colons)
+    return iv.toString('hex') + ':' + encrypted + ':' + authTag.toString('hex');
   } catch (error) {
     console.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
@@ -75,9 +78,10 @@ function encrypt(text) {
 }
 
 /**
- * Decrypt text using AES-256-CBC
- * @param {string} encryptedText - Encrypted text in format: iv:encryptedData
+ * Decrypt text using AES-256-GCM
+ * @param {string} encryptedText - Encrypted text in format: iv:encryptedData:authTag
  * @returns {string} - Decrypted plain text
+ * @throws {Error} - If authentication fails (data tampered)
  */
 function decrypt(encryptedText) {
   if (!encryptedText) return null;
@@ -91,29 +95,50 @@ function decrypt(encryptedText) {
   try {
     validateEncryptionKey();
 
-    // Split IV and encrypted data
+    // Split IV, encrypted data, and auth tag
     const parts = encryptedText.split(':');
-    if (parts.length !== 2) {
+
+    // Handle both legacy CBC format (2 parts) and new GCM format (3 parts)
+    if (parts.length === 2) {
+      console.warn('⚠️ Decrypting legacy CBC format - consider re-encrypting with GCM');
+      // Legacy CBC decryption (for backward compatibility during migration)
+      const iv = Buffer.from(parts[0], 'hex');
+      const encrypted = parts[1];
+      const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      return decrypted;
+    }
+
+    if (parts.length !== 3) {
       throw new Error('Invalid encrypted data format');
     }
 
     const iv = Buffer.from(parts[0], 'hex');
     const encrypted = parts[1];
+    const authTag = Buffer.from(parts[2], 'hex');
 
-    // Create decipher
+    // Create decipher with GCM mode
     const decipher = crypto.createDecipheriv(
       ALGORITHM,
       Buffer.from(ENCRYPTION_KEY, 'hex'),
       iv
     );
 
-    // Decrypt the text
+    // Set authentication tag (must be done before decryption)
+    decipher.setAuthTag(authTag);
+
+    // Decrypt the text (will throw error if auth tag verification fails)
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
     return decrypted;
   } catch (error) {
     console.error('Decryption error:', error);
+    // Distinguish between authentication failure and other errors
+    if (error.message.includes('Unsupported state or unable to authenticate data')) {
+      throw new Error('Authentication failed - data may have been tampered with');
+    }
     throw new Error('Failed to decrypt data');
   }
 }

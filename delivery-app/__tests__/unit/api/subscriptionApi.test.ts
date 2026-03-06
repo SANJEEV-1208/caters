@@ -38,7 +38,7 @@ describe('subscriptionApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockSubscriptions,
       });
@@ -55,7 +55,7 @@ describe('subscriptionApi', () => {
     test('should return empty array when no subscriptions', async () => {
       const customerId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -66,7 +66,7 @@ describe('subscriptionApi', () => {
     });
 
     test('should handle fetch subscriptions errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -87,7 +87,7 @@ describe('subscriptionApi', () => {
         address: '123 Food Street',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockCaterer,
       });
@@ -102,7 +102,7 @@ describe('subscriptionApi', () => {
     });
 
     test('should handle fetch caterer details errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -144,7 +144,7 @@ describe('subscriptionApi', () => {
         serviceName: 'Food Hub',
       };
 
-      (global.fetch as jest.Mock)
+      (globalThis.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
           json: async () => mockSubscriptions,
@@ -169,7 +169,7 @@ describe('subscriptionApi', () => {
     test('should return empty array when customer has no subscriptions', async () => {
       const customerId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -183,7 +183,7 @@ describe('subscriptionApi', () => {
     test('should handle errors when fetching subscribed caterers', async () => {
       const customerId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -206,7 +206,7 @@ describe('subscriptionApi', () => {
         isExisting: false,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ id: 3, customerId: 1, catererId: 4 }),
       });
@@ -237,7 +237,7 @@ describe('subscriptionApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock)
+      (globalThis.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: false,
           status: 409,
@@ -264,7 +264,7 @@ describe('subscriptionApi', () => {
       const customerId = 1;
       const catererId = 4;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => ({ error: 'Server error' }),
@@ -277,7 +277,7 @@ describe('subscriptionApi', () => {
       const customerId = 1;
       const catererId = 4;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         json: async () => ({}),
@@ -293,7 +293,7 @@ describe('subscriptionApi', () => {
     test('should remove subscription', async () => {
       const subscriptionId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
       });
 
@@ -310,7 +310,7 @@ describe('subscriptionApi', () => {
     test('should handle remove subscription errors', async () => {
       const subscriptionId = 999;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -333,7 +333,7 @@ describe('subscriptionApi', () => {
         catererId: 5,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockNewSubscription,
       });
@@ -356,7 +356,7 @@ describe('subscriptionApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockSubscriptions,
       });
@@ -366,7 +366,7 @@ describe('subscriptionApi', () => {
       expect(subscriptions.some((s) => s.catererId === 5)).toBe(true);
 
       // Step 3: Remove subscription
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
       });
 
@@ -382,7 +382,7 @@ describe('subscriptionApi', () => {
       const catererId = 2;
 
       // Create subscription
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ id: 1, customerId: 1, catererId: 2 }),
       });
@@ -398,7 +398,7 @@ describe('subscriptionApi', () => {
         serviceName: 'Spice Kitchen',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockCaterer,
       });

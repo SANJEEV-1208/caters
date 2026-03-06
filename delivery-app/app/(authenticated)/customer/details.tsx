@@ -4,7 +4,6 @@
     StyleSheet,
     ScrollView,
     Image,
-    Pressable,
     TouchableOpacity,
     StatusBar,
   } from "react-native";

@@ -175,7 +175,7 @@ describe('CartContext', () => {
         {
           id: 1,
           name: 'Coffee',
-          price: 45.50,
+          price: 45.5,
           category: 'veg',
           cuisine: 'Beverage',
           image: 'http://example.com/coffee.jpg',

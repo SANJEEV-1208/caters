@@ -341,7 +341,7 @@ exports.updatePaymentQrCode = async (req, res) => {
     const { id } = req.params;
     const { paymentQrCode } = req.body;
 
-    console.log(`[QR Update] User updating QR code, data length: ${paymentQrCode?.length || 0}`);
+    console.log('[QR Update] User updating QR code');
     if (paymentQrCode) {
       // Log QR code type without exposing the actual data
       console.log(`[QR Update] Is base64 image: ${/^data:image\/(png|jpeg|jpg|gif);base64,/.test(paymentQrCode)}`);

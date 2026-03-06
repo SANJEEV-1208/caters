@@ -28,7 +28,6 @@ import {
   type PerformanceMetrics,
   type FailedLogin,
   type SuspiciousActivity,
-  type Alert,
 } from '../../../src/api/securityApi';
 import { router } from 'expo-router';
 

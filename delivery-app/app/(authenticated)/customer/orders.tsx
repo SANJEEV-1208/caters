@@ -16,9 +16,8 @@ import { useRouter } from "expo-router";
 import { Order } from "@/src/types/order";
 import { getCustomerOrders } from "@/src/api/orderApi";
 import { getOrders as getLocalOrders } from "@/src/utils/orderStorage";
-import { useCart } from "@/src/context/CartContext";
 import { useAuth } from "@/src/context/AuthContext";
-import { getISTDate, formatTimeIST, formatDateIST } from "@/src/utils/dateUtils";
+import { formatTimeIST } from "@/src/utils/dateUtils";
 
 export default function OrderHistory() {
   const router = useRouter();

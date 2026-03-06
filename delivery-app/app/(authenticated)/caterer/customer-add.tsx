@@ -158,14 +158,14 @@ export default function CustomerAddScreen() {
       });
 
       // Step 2: Create subscription (customer-caterer relationship)
-      await createSubscription(newCustomer.id, user?.id!);
+      await createSubscription(newCustomer.id, user!.id);
 
       // Step 3: Link to apartment if selected
       if (selectedApartmentId || addDirectly) {
         await addCustomerToApartment({
           customerId: newCustomer.id,
           apartmentId: selectedApartmentId || null,
-          catererId: user?.id!,
+          catererId: user!.id,
           addedVia: "manual",
         });
       }

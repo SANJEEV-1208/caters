@@ -15,7 +15,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import CustomerCard from "@/src/components/caterer/CustomerCard";
-import { getCustomersByCaterer, getCustomersByApartment } from "@/src/api/apartmentApi";
+import { getCustomersByCaterer } from "@/src/api/apartmentApi";
 
 type Customer = {
   id: number;

@@ -2,7 +2,6 @@
     View,
     Text,
     StyleSheet,
-    ScrollView,
     Image,
     TouchableOpacity,
     FlatList,

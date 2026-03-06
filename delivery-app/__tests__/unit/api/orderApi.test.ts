@@ -65,7 +65,7 @@ describe('orderApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 201,
         json: async () => mockResponse,
@@ -99,7 +99,7 @@ describe('orderApi', () => {
         status: 'pending' as const,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         text: async () => JSON.stringify({ error: 'Invalid order data' }),
@@ -122,7 +122,7 @@ describe('orderApi', () => {
         status: 'pending' as const,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         text: async () => 'Internal server error',
@@ -147,7 +147,7 @@ describe('orderApi', () => {
 
       const fetchError: any = new Error('fetch failed');
       fetchError.message = 'fetch failed: connection refused';
-      (global.fetch as jest.Mock).mockRejectedValue(fetchError);
+      (globalThis.fetch as jest.Mock).mockRejectedValue(fetchError);
 
       await expect(createOrder(orderData)).rejects.toThrow(
         'Cannot connect to server. Please check your network connection and ensure the backend is running.'
@@ -174,7 +174,7 @@ describe('orderApi', () => {
         createdAt: '2026-02-04T11:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 201,
         json: async () => mockResponse,
@@ -221,7 +221,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -236,7 +236,7 @@ describe('orderApi', () => {
     });
 
     test('should handle fetch customer orders errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -265,7 +265,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -279,7 +279,7 @@ describe('orderApi', () => {
     });
 
     test('should handle fetch caterer orders errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -326,7 +326,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -359,7 +359,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -406,7 +406,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -465,7 +465,7 @@ describe('orderApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrders,
       });
@@ -499,7 +499,7 @@ describe('orderApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrder,
       });
@@ -511,7 +511,7 @@ describe('orderApi', () => {
     });
 
     test('should handle fetch order by ID errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });
@@ -540,7 +540,7 @@ describe('orderApi', () => {
         createdAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockOrder,
       });
@@ -584,7 +584,7 @@ describe('orderApi', () => {
           createdAt: '2026-02-04T10:00:00.000Z',
         };
 
-        (global.fetch as jest.Mock).mockResolvedValue({
+        (globalThis.fetch as jest.Mock).mockResolvedValue({
           ok: true,
           json: async () => mockOrder,
         });
@@ -595,7 +595,7 @@ describe('orderApi', () => {
     });
 
     test('should handle update order status errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });

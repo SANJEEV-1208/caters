@@ -60,7 +60,7 @@ describe('tablesApi', () => {
         total: 5,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -87,7 +87,7 @@ describe('tablesApi', () => {
         restaurantName: 'Test Restaurant',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         json: async () => ({ error: 'Invalid table count' }),
@@ -103,7 +103,7 @@ describe('tablesApi', () => {
         restaurantName: 'Test Restaurant',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => ({}),
@@ -119,7 +119,7 @@ describe('tablesApi', () => {
         restaurantName: 'Test Restaurant',
       };
 
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(createBulkTables(requestData)).rejects.toThrow('Network error');
       expect(console.error).toHaveBeenCalledWith(
@@ -155,7 +155,7 @@ describe('tablesApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockTables,
       });
@@ -174,7 +174,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle fetch tables errors with error message', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
         json: async () => ({ error: 'Caterer not found' }),
@@ -184,7 +184,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle fetch tables errors without error message', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => ({}),
@@ -194,7 +194,7 @@ describe('tablesApi', () => {
     });
 
     test('should return empty array when caterer has no tables', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => [],
       });
@@ -219,7 +219,7 @@ describe('tablesApi', () => {
         updatedAt: '2026-02-04T10:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockTable,
       });
@@ -237,7 +237,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle get table by ID errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
         json: async () => ({ error: 'Table not found' }),
@@ -265,7 +265,7 @@ describe('tablesApi', () => {
         updatedAt: '2026-02-04T11:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUpdatedTable,
       });
@@ -300,7 +300,7 @@ describe('tablesApi', () => {
         updatedAt: '2026-02-04T11:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUpdatedTable,
       });
@@ -328,7 +328,7 @@ describe('tablesApi', () => {
         updatedAt: '2026-02-04T11:00:00.000Z',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockUpdatedTable,
       });
@@ -340,7 +340,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle update table errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         json: async () => ({ error: 'Invalid table number' }),
@@ -356,7 +356,7 @@ describe('tablesApi', () => {
     test('should delete table', async () => {
       const tableId = 1;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({ message: 'Table deleted successfully' }),
       });
@@ -373,7 +373,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle delete table errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
         json: async () => ({ error: 'Table not found' }),
@@ -383,7 +383,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle network errors during delete', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (globalThis.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(deleteTable(1)).rejects.toThrow('Network error');
       expect(console.error).toHaveBeenCalledWith('Delete table error:', expect.any(Error));
@@ -407,7 +407,7 @@ describe('tablesApi', () => {
         } as RestaurantTable,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
@@ -426,7 +426,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle regenerate QR errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 404,
         json: async () => ({ error: 'Table not found' }),
@@ -436,7 +436,7 @@ describe('tablesApi', () => {
     });
 
     test('should handle generic regenerate errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: false,
         status: 500,
         json: async () => ({}),
@@ -457,7 +457,7 @@ describe('tablesApi', () => {
         restaurantName: 'Spice Kitchen',
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           message: '10 tables created',
@@ -483,7 +483,7 @@ describe('tablesApi', () => {
         },
       ];
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockTables,
       });
@@ -492,7 +492,7 @@ describe('tablesApi', () => {
       expect(tables).toHaveLength(1);
 
       // Step 3: Update table status
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ ...mockTables[0], isActive: false }),
       });
@@ -501,7 +501,7 @@ describe('tablesApi', () => {
       expect(updatedTable.isActive).toBe(false);
 
       // Step 4: Regenerate QR code
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           table: { ...mockTables[0], qrCodeUrl: 'http://example.com/new-qr.png' },
@@ -512,7 +512,7 @@ describe('tablesApi', () => {
       expect(regeneratedTable.qrCodeUrl).toBe('http://example.com/new-qr.png');
 
       // Step 5: Delete table
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({ message: 'Deleted' }),
       });
@@ -528,7 +528,7 @@ describe('tablesApi', () => {
       const tableId = 1;
 
       // Deactivate table
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           id: 1,
@@ -546,7 +546,7 @@ describe('tablesApi', () => {
       expect(deactivated.isActive).toBe(false);
 
       // Reactivate table
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           id: 1,
