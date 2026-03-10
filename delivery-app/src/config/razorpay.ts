@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+
 
 // Access environment variables from .env file
 // Note: In Expo, you need to use expo-constants to access env variables

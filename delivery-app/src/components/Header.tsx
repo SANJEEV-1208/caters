@@ -6,8 +6,8 @@ import { useRouter } from "expo-router";
 import ProfileModal from "@/src/components/ProfileModal";
 
 interface HeaderProps {
-  onFilterPress?: () => void;
-  showFilter?: boolean;
+  readonly onFilterPress?: () => void;
+  readonly showFilter?: boolean;
 }
 
 export default function Header({ onFilterPress, showFilter = false }: HeaderProps) {

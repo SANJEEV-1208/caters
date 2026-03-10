@@ -318,7 +318,7 @@ export default function RestaurantOrders() {
                 )}
 
                 <Text style={styles.itemCount}>
-                  {item.items.length} item{item.items.length !== 1 ? "s" : ""}
+                  {item.items.length} item{item.items.length === 1 ? "" : "s"}
                 </Text>
                 <Text style={styles.totalAmount}>₹{item.totalAmount}</Text>
 

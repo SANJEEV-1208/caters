@@ -14,10 +14,10 @@ import { MenuItem } from "@/src/types/menu";
 import { getCatererMenuItems } from "@/src/api/catererMenuApi";
 
 type ItemHistoryModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  onSelectItem: (item: MenuItem) => void;
-  catererId: number;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly onSelectItem: (item: MenuItem) => void;
+  readonly catererId: number;
 };
 
 export default function ItemHistoryModal({

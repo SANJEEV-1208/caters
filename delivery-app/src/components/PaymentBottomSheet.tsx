@@ -19,12 +19,12 @@ import QrCodePaymentModal from './QrCodePaymentModal';
 type PaymentMethod = "upi" | "cod";
 
 type PaymentBottomSheetProps = {
-  visible: boolean;
-  onClose: () => void;
-  totalAmount: number;
-  onConfirmOrder: (paymentMethod: PaymentMethod, transactionId?: string, paymentProofImage?: string) => void;
-  catererQrCode?: string;
-  catererName?: string;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly totalAmount: number;
+  readonly onConfirmOrder: (paymentMethod: PaymentMethod, transactionId?: string, paymentProofImage?: string) => void;
+  readonly catererQrCode?: string;
+  readonly catererName?: string;
 };
 
 export default function PaymentBottomSheet({

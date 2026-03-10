@@ -1,9 +1,9 @@
 import { Pressable, Text, StyleSheet } from "react-native";
 
 type Props = {
-  title: string;
-  active?: boolean;
-  onPress: () => void;
+  readonly title: string;
+  readonly active?: boolean;
+  readonly onPress: () => void;
 };
 
 export default function MealTypeButton({ title, active, onPress }: Props) {

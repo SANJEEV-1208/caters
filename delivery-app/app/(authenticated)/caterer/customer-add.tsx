@@ -73,12 +73,12 @@ export default function CustomerAddScreen() {
 
       const result = await searchUserByPhone(normalizedPhone);
       if (result) {
-        if (result.role !== "customer") {
-          Alert.alert("Error", "This user is not a customer");
-          setFoundUser(null);
+        if (result.role === "customer") {
+          setFoundUser(result);
           setShowCreateForm(false);
         } else {
-          setFoundUser(result);
+          Alert.alert("Error", "This user is not a customer");
+          setFoundUser(null);
           setShowCreateForm(false);
         }
       } else {

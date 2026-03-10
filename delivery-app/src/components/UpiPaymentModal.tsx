@@ -32,11 +32,11 @@ const UPI_APPS: UpiApp[] = [
 ];
 
 type UpiPaymentModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  amount: number;
-  onSuccess: (transactionId: string) => void;
-  onFailure: (error: string) => void;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly amount: number;
+  readonly onSuccess: (transactionId: string) => void;
+  readonly onFailure: (error: string) => void;
 };
 
 export default function UpiPaymentModal({

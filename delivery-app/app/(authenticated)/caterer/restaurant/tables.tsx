@@ -65,7 +65,7 @@ export default function TablesScreen() {
       );
       Alert.alert(
         'Success',
-        `${table.tableNumber} is now ${!table.isActive ? 'active' : 'inactive'}`
+        `${table.tableNumber} is now ${table.isActive ? 'inactive' : 'active'}`
       );
     } catch (error) {
       console.error('Toggle active error:', error);

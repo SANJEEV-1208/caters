@@ -13,9 +13,9 @@ type Customer = {
 };
 
 type CustomerCardProps = {
-  customer: Customer;
-  onPress?: () => void;
-  onRemove?: () => void;
+  readonly customer: Customer;
+  readonly onPress?: () => void;
+  readonly onRemove?: () => void;
 };
 
 export default function CustomerCard({

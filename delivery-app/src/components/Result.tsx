@@ -4,7 +4,7 @@
   import { FoodItem } from "@/src/types/menu";
 
   type Props = {
-    item: FoodItem;
+    readonly item: FoodItem;
   };
 
   export default function Result({ item }: Props) {

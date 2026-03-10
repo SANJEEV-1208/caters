@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { FoodItem } from "@/src/types/menu";
 
 type Props = {
-  item: FoodItem;
+  readonly item: FoodItem;
 };
 
 export default function SearchResult({ item }: Props) {

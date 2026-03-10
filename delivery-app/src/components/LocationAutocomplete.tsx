@@ -18,9 +18,9 @@ interface LocationSuggestion {
 }
 
 interface Props {
-  value: string;
-  onSelect: (address: string) => void;
-  placeholder?: string;
+  readonly value: string;
+  readonly onSelect: (address: string) => void;
+  readonly placeholder?: string;
 }
 
 export default function LocationAutocomplete({ value, onSelect, placeholder }: Props) {

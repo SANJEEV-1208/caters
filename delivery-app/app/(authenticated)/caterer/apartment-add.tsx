@@ -158,9 +158,9 @@ export default function ApartmentAddScreen() {
               }}
             >
               <Ionicons
-                name={!useCustomCode ? "radio-button-on" : "radio-button-off"}
+                name={useCustomCode ? "radio-button-off" : "radio-button-on"}
                 size={20}
-                color={!useCustomCode ? "#10B981" : "#9CA3AF"}
+                color={useCustomCode ? "#9CA3AF" : "#10B981"}
               />
               <Text
                 style={[

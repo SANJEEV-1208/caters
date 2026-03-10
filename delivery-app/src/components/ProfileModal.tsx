@@ -13,8 +13,8 @@ import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "expo-router";
 
 interface ProfileModalProps {
-  visible: boolean;
-  onClose: () => void;
+  readonly visible: boolean;
+  readonly onClose: () => void;
 }
 
 export default function ProfileModal({ visible, onClose }: ProfileModalProps) {

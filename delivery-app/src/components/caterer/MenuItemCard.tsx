@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   StyleSheet,
-  Pressable,
   TouchableOpacity,
   Switch,
 } from "react-native";
@@ -12,10 +11,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { MenuItem } from "@/src/types/menu";
 
 type MenuItemCardProps = {
-  item: MenuItem;
-  onToggleStock?: (id: number, inStock: boolean) => void;
-  onEdit?: (item: MenuItem) => void;
-  onDelete?: (id: number) => void;
+  readonly item: MenuItem;
+  readonly onToggleStock?: (id: number, inStock: boolean) => void;
+  readonly onEdit?: (item: MenuItem) => void;
+  readonly onDelete?: (id: number) => void;
 };
 
 export default function MenuItemCard({

@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 type StatsCardProps = {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color?: string;
-  onPress?: () => void;
+  readonly title: string;
+  readonly value: string | number;
+  readonly subtitle?: string;
+  readonly icon: keyof typeof Ionicons.glyphMap;
+  readonly color?: string;
+  readonly onPress?: () => void;
 };
 
 export default function StatsCard({

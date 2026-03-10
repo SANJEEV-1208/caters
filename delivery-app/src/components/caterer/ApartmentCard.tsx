@@ -4,12 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { Apartment } from "@/src/types/apartment";
 
 type ApartmentCardProps = {
-  apartment: Apartment;
-  customerCount?: number;
-  onPress?: () => void;
-  onEdit?: (id: number, name: string) => void;
-  onDelete?: (id: number, name: string) => void;
-  onViewCustomers?: (apartmentId: number, apartmentName: string) => void;
+  readonly apartment: Apartment;
+  readonly customerCount?: number;
+  readonly onPress?: () => void;
+  readonly onEdit?: (id: number, name: string) => void;
+  readonly onDelete?: (id: number, name: string) => void;
+  readonly onViewCustomers?: (apartmentId: number, apartmentName: string) => void;
 };
 
 export default function ApartmentCard({

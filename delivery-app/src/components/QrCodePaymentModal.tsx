@@ -14,12 +14,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { CloudinaryImagePicker } from "./CloudinaryImagePicker";
 
 type QrCodePaymentModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  qrCodeUrl: string;
-  amount: number;
-  catererName: string;
-  onSuccess: (transactionId: string, paymentProofImage: string) => void;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly qrCodeUrl: string;
+  readonly amount: number;
+  readonly catererName: string;
+  readonly onSuccess: (transactionId: string, paymentProofImage: string) => void;
 };
 
 export default function QrCodePaymentModal({

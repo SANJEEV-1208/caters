@@ -141,8 +141,8 @@ export default function RestaurantCheckout() {
         deliveryDate: getTodayIST(),
         status: "pending",
         // Guest order fields (only used when customerId is not provided)
-        guestName: !user ? customerName : undefined,
-        guestPhone: !user ? fullPhone : undefined,
+        guestName: user ? undefined : customerName,
+        guestPhone: user ? undefined : fullPhone,
       };
 
       console.log('Creating order:', JSON.stringify(order, null, 2));

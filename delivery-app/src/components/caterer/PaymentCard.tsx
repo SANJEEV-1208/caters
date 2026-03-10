@@ -4,10 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Order } from "@/src/types/order";
 
 type PaymentCardProps = {
-  order: Order;
-  customerName?: string;
-  onPress?: () => void;
-  onMarkReceived?: (orderId: number) => void;
+  readonly order: Order;
+  readonly customerName?: string;
+  readonly onPress?: () => void;
+  readonly onMarkReceived?: (orderId: number) => void;
 };
 
 export default function PaymentCard({ order, customerName, onPress, onMarkReceived }: PaymentCardProps) {
