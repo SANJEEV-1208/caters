@@ -75,6 +75,7 @@ export default function QRScannerScreen() {
         ]
       );
     } catch (error: unknown) {
+      console.error('QR code scan error:', error);
       Alert.alert(
         'Invalid QR Code',
         'This QR code cannot be read. Please try scanning again or contact restaurant staff.',

@@ -281,6 +281,7 @@ export const setPin = async (userId: number, pin: string): Promise<User> => {
           console.error('❌ Validation details:', errorJson.details);
         }
       } catch (e) {
+        console.error('❌ Failed to parse error response:', e);
         errorMessage = errorText || errorMessage;
       }
 

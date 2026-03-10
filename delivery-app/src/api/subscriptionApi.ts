@@ -16,6 +16,7 @@ export const getCustomerSubscriptions = async (customerId: number): Promise<Subs
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.error || errorJson.message || errorMessage;
       } catch (e) {
+        console.error('Failed to parse error response:', e);
         errorMessage = errorText || errorMessage;
       }
       throw new Error(errorMessage);

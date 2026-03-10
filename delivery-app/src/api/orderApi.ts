@@ -32,6 +32,7 @@ export const createOrder = async (orderData: Omit<Order, "id" | "createdAt">): P
           errorMessage = `${errorMessage} - ${details}`;
         }
       } catch (e) {
+        console.error('Failed to parse error response:', e);
         errorMessage = errorText || errorMessage;
       }
 

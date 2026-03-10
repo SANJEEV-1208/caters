@@ -180,41 +180,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ✅ LOGIN
   const login = async (phone: string, pin?: string): Promise<boolean> => {
-    try {
-      const response = await apiLoginUser(phone, pin); // returns User, LoginResponse, or null
+    const response = await apiLoginUser(phone, pin); // returns User, LoginResponse, or null
 
-      if (!response) return false;
+    if (!response) return false;
 
-      // Check if user needs to set PIN (first-time login)
-      if ('requiresPinSetup' in response && response.requiresPinSetup) {
-        // Throw error with setup info - login screen will catch and navigate
-        const error = new Error('PIN_SETUP_REQUIRED') as any;
-        error.setupData = {
-          userId: response.userId,
-          phone: response.phone,
-          name: response.name,
-        };
-        throw error;
-      }
-
-      // Normal login - save user and tokens
-      const userData = response as User;
-
-      // Save tokens securely
-      if (userData.token) {
-        await saveAccessToken(userData.token!);
-      }
-      if (userData.refreshToken) {
-        await saveRefreshToken(userData.refreshToken!);
-        console.log('✅ Refresh token saved - persistent login enabled');
-      }
-
-      setUser(userData);
-      return true;
-    } catch (error) {
-      // Re-throw all errors (login screen will handle display)
+    // Check if user needs to set PIN (first-time login)
+    if ('requiresPinSetup' in response && response.requiresPinSetup) {
+      // Throw error with setup info - login screen will catch and navigate
+      const error = new Error('PIN_SETUP_REQUIRED') as any;
+      error.setupData = {
+        userId: response.userId,
+        phone: response.phone,
+        name: response.name,
+      };
       throw error;
     }
+
+    // Normal login - save user and tokens
+    const userData = response as User;
+
+    // Save tokens securely
+    if (userData.token) {
+      await saveAccessToken(userData.token);
+    }
+    if (userData.refreshToken) {
+      await saveRefreshToken(userData.refreshToken);
+      console.log('✅ Refresh token saved - persistent login enabled');
+    }
+
+    setUser(userData);
+    return true;
   };
 
   // ✅ SIGNUP (Caterer)
@@ -226,10 +221,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Save tokens securely
       if (userData.token) {
-        await saveAccessToken(userData.token!);
+        await saveAccessToken(userData.token);
       }
       if (userData.refreshToken) {
-        await saveRefreshToken(userData.refreshToken!);
+        await saveRefreshToken(userData.refreshToken);
         console.log('✅ Refresh token saved - persistent login enabled');
       }
 

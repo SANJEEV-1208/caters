@@ -97,7 +97,7 @@ export default function UpiPaymentModal({
     // Simulate payment verification
     setTimeout(() => {
       setProcessing(false);
-      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
       onSuccess(mockTransactionId);
     }, 3500);
   };
@@ -115,7 +115,7 @@ export default function UpiPaymentModal({
 
     setTimeout(() => {
       setProcessing(false);
-      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
       onSuccess(mockTransactionId);
     }, 3500);
   };

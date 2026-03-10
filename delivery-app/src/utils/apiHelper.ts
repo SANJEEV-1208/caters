@@ -109,7 +109,7 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
   // Merge provided headers with auth headers
   const mergedHeaders = {
     ...headers,
-    ...(options.headers || {}),
+    ...options.headers,
   };
 
   let response = await fetch(url, {
@@ -138,7 +138,7 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
       const newHeaders = await getAuthHeaders();
       const retryMergedHeaders = {
         ...newHeaders,
-        ...(options.headers || {}),
+        ...options.headers,
       };
 
       response = await fetch(url, {
@@ -197,7 +197,7 @@ export const optionalAuthFetch = async (url: string, options: RequestInit = {}):
   // Merge provided headers with auth headers (includes token if available)
   const mergedHeaders = {
     ...headers,
-    ...(options.headers || {}),
+    ...options.headers,
   };
 
   const response = await fetch(url, {
@@ -224,11 +224,11 @@ export const isTokenExpired = (token: string): boolean => {
 
     // Decode payload (base64url)
     const payload = parts[1];
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = payload.replaceAll(/-/g, '+').replaceAll(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .map((c) => '%' + ('00' + (c.codePointAt(0) ?? 0).toString(16)).slice(-2))
         .join('')
     );
 

@@ -82,6 +82,7 @@ export default function PaymentQrScreen() {
                 setQrCodeUrl("");
                 Alert.alert("Success", "Payment QR code removed");
               } catch (error) {
+                console.error("Failed to remove QR code:", error);
                 Alert.alert("Error", "Failed to remove QR code");
               } finally {
                 setLoading(false);
@@ -242,7 +243,17 @@ export default function PaymentQrScreen() {
         </View>
 
         {/* Action Buttons */}
-        {!user?.paymentQrCode ? (
+        {user?.paymentQrCode ? (
+          // Show Remove button when QR code exists
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => { void handleRemove(); }}
+            disabled={loading}
+          >
+            <Ionicons name="trash-outline" size={20} color="#EF4444" />
+            <Text style={styles.removeButtonText}>Remove QR Code</Text>
+          </TouchableOpacity>
+        ) : (
           // Show Save button when no QR code exists
           <TouchableOpacity
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
@@ -257,16 +268,6 @@ export default function PaymentQrScreen() {
                 <Text style={styles.saveButtonText}>Save QR Code</Text>
               </>
             )}
-          </TouchableOpacity>
-        ) : (
-          // Show Remove button when QR code exists
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => { void handleRemove(); }}
-            disabled={loading}
-          >
-            <Ionicons name="trash-outline" size={20} color="#EF4444" />
-            <Text style={styles.removeButtonText}>Remove QR Code</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
