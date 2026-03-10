@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { signupRestaurant } from "@/src/api/authApi";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +20,7 @@ export default function RestaurantSignupScreen() {
   const [restaurantAddress, setRestaurantAddress] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
-  const [pin, setPinState] = useState("");
+  const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
@@ -166,7 +166,7 @@ export default function RestaurantSignupScreen() {
               style={styles.phoneInput}
               placeholder="10-digit number"
               value={phone}
-              onChangeText={(text) => { setPhone(text.replace(/[^0-9]/g, "").slice(0, 10)); }}
+              onChangeText={(text) => { setPhone(text.replaceAll(/\D/g, "").slice(0, 10)); }}
               editable={!loading}
               keyboardType="phone-pad"
               maxLength={10}
@@ -190,7 +190,7 @@ export default function RestaurantSignupScreen() {
               keyboardType="numeric"
               maxLength={6}
               value={pin}
-              onChangeText={setPinState}
+              onChangeText={setPin}
               secureTextEntry={!showPin}
               editable={!loading}
             />

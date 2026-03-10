@@ -242,7 +242,7 @@ export function formatUptime(seconds: number): string {
  * Format timestamp to relative time
  */
 export function formatRelativeTime(timestamp: string): string {
-  const now = new Date().getTime();
+  const now = Date.now();
   const past = new Date(timestamp).getTime();
   const diffMs = now - past;
   const diffMins = Math.floor(diffMs / 60000);

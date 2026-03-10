@@ -3,8 +3,8 @@ import { User } from "@/src/types/auth";
 import { Ionicons } from "@expo/vector-icons";
 
 type CatererCardProps = {
-  caterer: User;
-  onPress: () => void;
+  readonly caterer: User;
+  readonly onPress: () => void;
 };
 
 export default function CatererCard({ caterer, onPress }: CatererCardProps) {

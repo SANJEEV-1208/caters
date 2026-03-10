@@ -17,7 +17,6 @@ import { getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
-import { MenuItem } from "@/src/types/menu";
 import { CartItem } from "@/src/context/CartContext";
 
 export default function RestaurantCheckout() {

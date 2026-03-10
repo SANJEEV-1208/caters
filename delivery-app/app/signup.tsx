@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
@@ -21,7 +21,7 @@ export default function SignupScreen() {
   const [serviceName, setServiceName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [pin, setPinState] = useState("");
+  const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
@@ -175,7 +175,7 @@ export default function SignupScreen() {
                 keyboardType="numeric"
                 maxLength={6}
                 value={pin}
-                onChangeText={setPinState}
+                onChangeText={setPin}
                 secureTextEntry={!showPin}
               />
               <TouchableOpacity

@@ -78,7 +78,7 @@ const getStatusLabel = (status: string) => {
     preparing: "Preparing",
     delivered: "Delivered",
   };
-  return (status in labels) ? labels[status as keyof typeof labels] : status;
+  return labels[status] ?? status;
 };
 
 const getUniqueTables = (orders: Order[]) => {

@@ -165,7 +165,9 @@ describe('CartContext', () => {
     test('should return 0 for empty cart', () => {
       const cart: CartItem[] = [];
 
-      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      // Empty cart should have 0 total (reduce returns initial value)
+      expect(cart.length).toBe(0);
+      const total = cart.length === 0 ? 0 : cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
       expect(total).toBe(0);
     });

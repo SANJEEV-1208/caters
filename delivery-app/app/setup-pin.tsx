@@ -14,10 +14,10 @@ import { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
-import { setPin } from "@/src/api/authApi";
+import { setPin as savePinToApi } from "@/src/api/authApi";
 
 export default function SetupPinScreen() {
-  const [pin, setLocalPin] = useState("");
+  const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -61,7 +61,7 @@ export default function SetupPinScreen() {
     try {
       setLoading(true);
 
-      const result = await setPin(userId, pin);
+      const result = await savePinToApi(userId, pin);
 
       // Save user to context (includes token)
       await login(result.phone, pin);
@@ -127,7 +127,7 @@ export default function SetupPinScreen() {
                 style={styles.input}
                 placeholder="Enter your PIN"
                 value={pin}
-                onChangeText={setLocalPin}
+                onChangeText={setPin}
                 keyboardType="numeric"
                 maxLength={6}
                 secureTextEntry={!showPin}

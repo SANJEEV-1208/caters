@@ -17,10 +17,10 @@ export type DayFilter = {
 };
 
 interface DayFilterModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSelectDay: (day: DayFilter) => void;
-  selectedDay: DayFilter;
+  readonly visible: boolean;
+  readonly onClose: () => void;
+  readonly onSelectDay: (day: DayFilter) => void;
+  readonly selectedDay: DayFilter;
 }
 
 export default function DayFilterModal({

@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   const [phone, setPhone] = useState("");
-  const [pin, setPinState] = useState("");
+  const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -165,7 +165,7 @@ export default function LoginScreen() {
               keyboardType="numeric"
               maxLength={6}
               value={pin}
-              onChangeText={setPinState}
+              onChangeText={setPin}
               secureTextEntry={!showPin}
             />
             <TouchableOpacity

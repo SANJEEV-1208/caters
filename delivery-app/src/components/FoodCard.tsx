@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { MenuItem, FoodItem } from "@/src/types/menu";
 
 type Props = {
-  item: FoodItem | MenuItem;
+  readonly item: FoodItem | MenuItem;
 };
 
 export default function FoodCard({ item }: Props) {

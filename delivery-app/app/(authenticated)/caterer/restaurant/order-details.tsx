@@ -76,7 +76,7 @@ export default function RestaurantOrderDetails() {
       preparing: "delivered",
       delivered: null,
     };
-    return currentStatus in workflow ? workflow[currentStatus as keyof typeof workflow] : null;
+    return workflow[currentStatus] ?? null;
   };
 
   const getStatusColor = (status: string) => {
@@ -86,7 +86,7 @@ export default function RestaurantOrderDetails() {
       preparing: "#8B5CF6",
       delivered: "#10B981",
     };
-    return (status in colors) ? colors[status as keyof typeof colors] : "#6B7280";
+    return colors[status] ?? "#6B7280";
   };
 
   const getStatusLabel = (status: string) => {
@@ -96,7 +96,7 @@ export default function RestaurantOrderDetails() {
       preparing: "Preparing",
       delivered: "Delivered",
     };
-    return status in labels ? labels[status as keyof typeof labels] : status;
+    return labels[status] ?? status;
   };
 
   if (loading) {

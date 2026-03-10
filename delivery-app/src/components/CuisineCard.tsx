@@ -9,7 +9,7 @@
   }
 
   type Props = {
-    item: CuisineItem;
+    readonly item: CuisineItem;
   };
 
   export default function CuisineCard({ item }: Props) {

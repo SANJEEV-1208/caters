@@ -52,7 +52,7 @@ jest.mock('expo-asset', () => ({
 }));
 
 // Silence console warnings in tests
-global.console = {
+globalThis.console = {
   ...console,
   warn: jest.fn(),
   error: jest.fn(),

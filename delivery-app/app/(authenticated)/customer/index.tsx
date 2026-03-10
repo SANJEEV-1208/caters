@@ -13,12 +13,15 @@ import { MenuItem } from "@/src/types/menu";
 import { useRouter } from "expo-router";
 import { getISTDate } from "@/src/utils/dateUtils";
 
+type MealType = "all" | "breakfast" | "lunch" | "dinner" | "snack";
+type Category = "all" | "veg" | "non-veg";
+
 export default function HomeScreen() {
   const [allMenuItems, setAllMenuItems] = useState<MenuItem[]>([]);
   const [foods, setFoods] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMealType, setSelectedMealType] = useState<"all" | "breakfast" | "lunch" | "dinner" | "snack">("all");
-  const [selectedCategory, setSelectedCategory] = useState<"all" | "veg" | "non-veg">("all");
+  const [selectedMealType, setSelectedMealType] = useState<MealType>("all");
+  const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState<DayFilter>({
     label: 'Today',
