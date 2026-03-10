@@ -40,7 +40,7 @@ export const MockRazorpayCheckout = {
       // Simulate a delay for payment processing
       setTimeout(() => {
         // Simulate payment success (for cancellation testing, manually reject in code)
-        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
         resolve({
           razorpay_payment_id: mockPaymentId,
           razorpay_order_id: `order_mock_${Date.now()}`,
@@ -59,11 +59,11 @@ export const validateTestCard = (cardNumber: string): boolean => {
     '6074820000000000', // RuPay
   ];
 
-  const cleanCard = cardNumber.replace(/\s/g, '');
+  const cleanCard = cardNumber.replaceAll(/\s/g, '');
   return testCards.includes(cleanCard);
 };
 
 // Generate mock payment ID
 export const generateMockPaymentId = (): string => {
-  return `pay_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `pay_mock_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 };
