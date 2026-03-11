@@ -110,12 +110,12 @@ export default function LoginForm({
   }, [isAuthenticated, user?.role, user?.caterType, loading, pathname, currentPath, expectedRole, expectedCaterType]);
 
   const handleLogin = async () => {
-    if (!phone || phone.length !== 10) {
+    if (phone?.length !== 10) {
       showErrorAlert("Please enter a valid 10-digit phone number");
       return;
     }
 
-    if (!pin || pin.length !== 4) {
+    if (pin?.length !== 4) {
       showErrorAlert("Please enter your 4-digit PIN");
       return;
     }
