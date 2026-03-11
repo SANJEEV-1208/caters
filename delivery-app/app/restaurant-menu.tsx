@@ -220,7 +220,7 @@ export default function RestaurantMenuBrowser() {
             <View style={styles.menuCard}>
               <View style={styles.cardRow}>
                 {/* Image with Overlay */}
-                {item.image && (
+                {!!item.image && (
                   <View style={styles.imageContainer}>
                     <Image source={{ uri: item.image }} style={styles.itemImage} />
                     <View style={[
@@ -236,7 +236,7 @@ export default function RestaurantMenuBrowser() {
                 <View style={styles.cardContent}>
                   <View style={styles.cardTop}>
                     <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-                    {item.description && (
+                    {!!item.description && (
                       <Text style={styles.itemDescription} numberOfLines={2}>
                         {item.description}
                       </Text>

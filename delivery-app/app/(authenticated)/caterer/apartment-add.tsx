@@ -224,7 +224,7 @@ export default function ApartmentAddScreen() {
         </View>
 
         {/* Preview Card */}
-        {(formData.name || formData.address) && (
+        {(!!formData.name || !!formData.address) && (
           <View style={styles.previewSection}>
             <Text style={styles.previewTitle}>Preview</Text>
             <View style={styles.previewCard}>
@@ -241,7 +241,7 @@ export default function ApartmentAddScreen() {
                   </Text>
                 </View>
               </View>
-              {formData.accessCode && (
+              {!!formData.accessCode && (
                 <View style={styles.previewCodeRow}>
                   <View style={styles.previewCodeBadge}>
                     <Ionicons name="key" size={14} color="#10B981" />

@@ -107,7 +107,7 @@ export default function PaymentQrScreen() {
         </View>
 
         {/* Current QR Code Preview */}
-        {qrCodeUrl && (
+        {!!qrCodeUrl && (
           <View style={styles.previewCard}>
             <Text style={styles.label}>Current QR Code</Text>
             <View style={styles.qrPreview}>

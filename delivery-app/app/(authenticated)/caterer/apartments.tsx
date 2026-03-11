@@ -88,6 +88,7 @@ export default function ApartmentsScreen() {
     }
   };
 
+  // FIXED: Correct syntax for showConfirmAlert call
   const handleDelete = (id: number, name: string) => {
     showConfirmAlert(
       `Are you sure you want to delete "${name}"? This will remove all customer associations.`,
@@ -96,8 +97,6 @@ export default function ApartmentsScreen() {
       },
       undefined,
       "Delete Apartment"
-        },
-      ]
     );
   };
 

@@ -88,9 +88,9 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
     setUploadProgress(0);
 
     try {
-      // Get file extension from URI
+      // Get file extension from URI – use .at(-1) for cleaner access
       const uriParts = asset.uri?.split('.') || [];
-      const fileType = uriParts[uriParts.length - 1];
+      const fileType = uriParts.at(-1) ?? ''; // prefer .at(-1) over [length-1]
       const mimeType = `image/${fileType === 'jpg' ? 'jpeg' : fileType}`;
 
       const formData = new FormData();

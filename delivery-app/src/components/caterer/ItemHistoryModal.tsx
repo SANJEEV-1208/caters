@@ -145,7 +145,7 @@ export default function ItemHistoryModal({
                     </View>
 
                     {/* Description */}
-                    {item.description && (
+                    {!!item.description && (
                       <Text style={styles.itemDescription} numberOfLines={2}>
                         {item.description}
                       </Text>

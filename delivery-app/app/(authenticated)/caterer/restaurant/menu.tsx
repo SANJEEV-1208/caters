@@ -168,7 +168,7 @@ export default function RestaurantMenu() {
                   </View>
                 </View>
 
-                {item.description && (
+                {!!item.description && (
                   <Text style={styles.itemDescription} numberOfLines={2}>
                     {item.description}
                   </Text>

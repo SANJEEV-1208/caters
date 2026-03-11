@@ -112,7 +112,7 @@ export default function MenuEditScreen() {
         cuisine: formData.cuisine,
         type: formData.type,
         image: formData.image.trim(),
-        availableDates: selectedDates.sort(),
+        availableDates: [...selectedDates].sort((a, b) => a.localeCompare(b)),
         inStock: formData.inStock,
       });
 

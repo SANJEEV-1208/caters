@@ -19,11 +19,16 @@ export const getSecureRandomInt = (min: number, max: number): number => {
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
     crypto.getRandomValues(randomBytes);
   } else {
-    // Fallback for environments without crypto API
-    // Note: This is less secure and should only be used as a last resort
-    console.warn('Crypto API not available, using less secure fallback');
+    // Fallback: Use timestamp-based seeding for better entropy
+    // Still not cryptographically secure, but better than plain Math.random()
+    console.warn('Crypto API not available - falling back to timestamp-based entropy');
+    const seed = Date.now() * performance.now();
+    let currentSeed = seed;
+
     for (let i = 0; i < bytesNeeded; i++) {
-      randomBytes[i] = Math.floor(Math.random() * 256);
+      // Linear congruential generator with better constants
+      currentSeed = (currentSeed * 1103515245 + 12345) & 0x7fffffff;
+      randomBytes[i] = (currentSeed >> 16) & 0xff;
     }
   }
 

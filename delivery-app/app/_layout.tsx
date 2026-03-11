@@ -28,9 +28,9 @@ export default function RootLayout() {
 
       // Navigate to order details if notification is about an order
       if (data.type === "order_status_update" && data.orderId) {
-        console.log(`🚀 Navigating to order: ${data.orderId}`);
-        // Navigate to order details page
-        router.push(`/(authenticated)/customer/orderdetails?orderId=${data.orderId}`);
+        const orderId = String(data.orderId); // Ensure it's a string
+        console.log(`🚀 Navigating to order: ${orderId}`);
+        router.push(`/(authenticated)/customer/orderdetails?orderId=${orderId}`);
       }
     });
 

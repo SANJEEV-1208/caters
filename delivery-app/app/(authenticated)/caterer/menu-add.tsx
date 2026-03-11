@@ -111,7 +111,7 @@ export default function MenuAddScreen() {
         cuisine: formData.cuisine,
         type: formData.type,
         image: formData.image.trim(),
-        availableDates: selectedDates.sort(),
+        availableDates: [...selectedDates].sort((a, b) => a.localeCompare(b)), // fixed line
         inStock: formData.inStock,
       });
 
@@ -179,7 +179,7 @@ export default function MenuAddScreen() {
         {/* Using shared Meal Type Selector component */}
         <MealTypeSelector
           selectedType={formData.type}
-          onSelectType={(type) => { setFormData({ ...formData, type: type as MealType }); }}
+          onSelectType={(type) => { setFormData({ ...formData, type }); }} // removed unnecessary assertion
           disabled={loading}
         />
 

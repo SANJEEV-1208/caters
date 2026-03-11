@@ -182,7 +182,7 @@ function getMetrics() {
     .slice(0, 10);
 
   // Get latest memory snapshot
-  const latestMemory = performanceMetrics.memory.snapshots[performanceMetrics.memory.snapshots.length - 1];
+  const latestMemory = performanceMetrics.memory.snapshots.at(-1);
 
   return {
     requests: {

@@ -336,7 +336,7 @@ export default function RestaurantCheckout() {
             </View>
 
             {/* Show transaction ID if UPI was used */}
-            {paymentMethod === "upi" && transactionId && (
+            {paymentMethod === "upi" && !!transactionId && (
               <View style={styles.transactionInfo}>
                 <Ionicons name="checkmark-circle" size={20} color="#22C55E" />
                 <Text style={styles.transactionText}>
