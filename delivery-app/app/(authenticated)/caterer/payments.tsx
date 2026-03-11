@@ -17,6 +17,7 @@ import { getCatererOrders, updateOrderStatus } from "@/src/api/orderApi";
 import { getUserById } from "@/src/api/authApi";
 import { Order } from "@/src/types/order";
 import { User } from "@/src/types/auth";
+import { screenStyles } from "@/src/styles/screenStyles";
 
 type PaymentFilter = "all" | "upi" | "cod" | "received" | "pending";
 
@@ -192,14 +193,14 @@ export default function PaymentsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={screenStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#10B981" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -326,10 +327,6 @@ export default function PaymentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -354,12 +351,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 32,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
   },
   statsContainer: {
     marginBottom: 20,

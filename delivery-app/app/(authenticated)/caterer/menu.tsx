@@ -15,6 +15,7 @@ import MenuItemCard from "@/src/components/caterer/MenuItemCard";
 import { getCatererMenuItems, deleteMenuItem, toggleStock } from "@/src/api/catererMenuApi";
 import { MenuItem } from "@/src/types/menu";
 import { showErrorAlert, showDeleteConfirm } from "@/src/utils/alertHelpers";
+import { screenStyles } from "@/src/styles/screenStyles";
 
 const CATEGORIES = ["All", "Veg", "Non-Veg"];
 
@@ -135,14 +136,14 @@ export default function MenuScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={screenStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#10B981" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Menu Management</Text>
@@ -220,7 +221,7 @@ export default function MenuScreen() {
             onDelete={handleDelete}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={screenStyles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -242,7 +243,7 @@ export default function MenuScreen() {
 
       {/* FAB - Add Menu Item */}
       <TouchableOpacity
-        style={styles.fab}
+        style={screenStyles.fab}
         onPress={() => router.push("/(authenticated)/caterer/menu-add")}
       >
         <Ionicons name="add" size={28} color="#FFFFFF" />
@@ -252,16 +253,6 @@ export default function MenuScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-  },
   header: {
     backgroundColor: "#FFFFFF",
     padding: 16,
@@ -336,10 +327,6 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: "#FFFFFF",
   },
-  listContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   emptyState: {
     paddingVertical: 60,
     alignItems: "center",
@@ -355,21 +342,5 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     marginTop: 4,
     textAlign: "center",
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });

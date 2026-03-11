@@ -14,6 +14,7 @@ import OrderCard from "@/src/components/caterer/OrderCard";
 import { getCatererOrders } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
 import { getTodayIST, getTomorrowIST, getDateAfterDaysIST } from "@/src/utils/dateUtils";
+import { screenStyles } from "@/src/styles/screenStyles";
 
 const DATE_FILTERS = ["Today", "Tomorrow", "Week", "All"];
 const STATUS_FILTERS = ["All", "Pending", "Confirmed", "Preparing", "Out for Delivery", "Delivered"];
@@ -120,14 +121,14 @@ export default function CatererOrdersScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={screenStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#10B981" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Orders</Text>
@@ -219,7 +220,7 @@ export default function CatererOrdersScreen() {
         data={filteredOrders}
         keyExtractor={(item) => item.id?.toString() || item.orderId}
         renderItem={({ item }) => <OrderCard order={item} />}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={screenStyles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -243,16 +244,6 @@ export default function CatererOrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -341,10 +332,6 @@ const styles = StyleSheet.create({
   },
   statusBadgeTextActive: {
     color: "#10B981",
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 32,
   },
   emptyState: {
     paddingVertical: 60,

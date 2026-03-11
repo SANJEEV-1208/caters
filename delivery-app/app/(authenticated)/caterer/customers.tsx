@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import CustomerCard from "@/src/components/caterer/CustomerCard";
 import { getCustomersByCaterer } from "@/src/api/apartmentApi";
+import { screenStyles } from "@/src/styles/screenStyles";
 
 type Customer = {
   id: number;
@@ -94,7 +95,7 @@ export default function CustomersScreen() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
         <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-        <View style={styles.loadingContainer}>
+        <View style={screenStyles.loadingContainer}>
           <ActivityIndicator size="large" color="#10B981" />
         </View>
       </SafeAreaView>
@@ -104,7 +105,7 @@ export default function CustomersScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F8F8' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
-      <View style={styles.container}>
+      <View style={screenStyles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Customers</Text>
@@ -160,7 +161,7 @@ export default function CustomersScreen() {
         data={filteredCustomers}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <CustomerCard customer={item} />}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={screenStyles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -184,7 +185,7 @@ export default function CustomersScreen() {
 
       {/* FAB - Add Customer */}
       <TouchableOpacity
-        style={styles.fab}
+        style={screenStyles.fab}
         onPress={() => router.push("/(authenticated)/caterer/customer-add")}
       >
         <Ionicons name="person-add" size={24} color="#FFFFFF" />
@@ -195,16 +196,6 @@ export default function CustomersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-  },
   header: {
     backgroundColor: "#FFFFFF",
     padding: 16,
@@ -271,10 +262,6 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: "#FFFFFF",
   },
-  listContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   emptyState: {
     paddingVertical: 60,
     alignItems: "center",
@@ -290,21 +277,5 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     marginTop: 4,
     textAlign: "center",
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });
