@@ -4,7 +4,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
   StatusBar,
@@ -15,6 +14,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { setPin as savePinToApi } from "@/src/api/authApi";
+import { showValidationError, showSuccessAlert, showErrorAlert } from "@/src/utils/alertHelpers";
 
 export default function SetupPinScreen() {
   const [pin, setPin] = useState("");
@@ -39,22 +39,22 @@ export default function SetupPinScreen() {
 
     // Validation
     if (!pin || !confirmPin) {
-      Alert.alert("Error", "Please enter and confirm your PIN");
+      showValidationError("PIN", "Please enter and confirm your PIN");
       return;
     }
 
     if (pin.length < 4 || pin.length > 6) {
-      Alert.alert("Invalid PIN", "PIN must be 4-6 digits");
+      showValidationError("PIN", "PIN must be 4-6 digits");
       return;
     }
 
     if (!/^\d+$/.test(pin)) {
-      Alert.alert("Invalid PIN", "PIN must contain only numbers");
+      showValidationError("PIN", "PIN must contain only numbers");
       return;
     }
 
     if (pin !== confirmPin) {
-      Alert.alert("PIN Mismatch", "PINs do not match. Please try again.");
+      showValidationError("PIN Mismatch", "PINs do not match. Please try again.");
       return;
     }
 
@@ -66,30 +66,23 @@ export default function SetupPinScreen() {
       // Save user to context (includes token)
       await login(result.phone, pin);
 
-      Alert.alert(
-        "Success! 🎉",
+      showSuccessAlert(
         "Your PIN has been set successfully. You can now use it to login.",
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              // Navigate based on role
-              if (result.role === "customer") {
-                router.replace("/(authenticated)/customer/caterer-selection");
-              } else if (result.role === "caterer") {
-                const dashboardPath = result.caterType === "restaurant"
-                  ? "/(authenticated)/caterer/restaurant/dashboard"
-                  : "/(authenticated)/caterer/dashboard";
-                router.replace(dashboardPath);
-              }
-            },
-          },
-        ]
+        () => {
+          // Navigate based on role
+          if (result.role === "customer") {
+            router.replace("/(authenticated)/customer/caterer-selection");
+          } else if (result.role === "caterer") {
+            const dashboardPath = result.caterType === "restaurant"
+              ? "/(authenticated)/caterer/restaurant/dashboard"
+              : "/(authenticated)/caterer/dashboard";
+            router.replace(dashboardPath);
+          }
+        }
       );
     } catch (error) {
       console.error("❌ Set PIN error:", error);
-      Alert.alert(
-        "Error",
+      showErrorAlert(
         error instanceof Error ? error.message : "Failed to set PIN. Please try again."
       );
     } finally {

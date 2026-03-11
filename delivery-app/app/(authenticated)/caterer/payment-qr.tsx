@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -15,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { updatePaymentQrCode } from "@/src/api/authApi";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
+import { showValidationError, showSuccessAlert, showErrorAlert, showDeleteConfirm } from "@/src/utils/alertHelpers";
 
 export default function PaymentQrScreen() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function PaymentQrScreen() {
     if (!user?.id) return;
 
     if (!qrCodeUrl.trim()) {
-      Alert.alert("Error", "Please upload or enter a QR code image");
+      showValidationError("QR Code", "Please upload or enter a QR code image");
       return;
     }
 
@@ -40,7 +40,7 @@ export default function PaymentQrScreen() {
       try {
         new URL(qrCodeUrl);
       } catch {
-        Alert.alert("Error", "Please enter a valid URL");
+        showValidationError("URL", "Please enter a valid URL");
         return;
       }
     }
@@ -49,14 +49,10 @@ export default function PaymentQrScreen() {
     try {
       const updatedUser = await updatePaymentQrCode(user.id, qrCodeUrl.trim());
       setUser(updatedUser); // Update user in context
-      Alert.alert(
-        "Success",
-        "Payment QR code updated successfully",
-        [{ text: "OK", onPress: () => router.back() }]
-      );
+      showSuccessAlert("Payment QR code updated successfully", () => router.back());
     } catch (error) {
       console.error("Failed to update QR code:", error);
-      Alert.alert("Error", "Failed to update QR code. Please try again.");
+      showErrorAlert("Failed to update QR code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -65,32 +61,24 @@ export default function PaymentQrScreen() {
   const handleRemove = async () => {
     if (!user?.id) return;
 
-    Alert.alert(
-      "Remove QR Code",
-      "Are you sure you want to remove your payment QR code? Customers won't be able to pay via UPI.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => {
-            void (async () => {
-              setLoading(true);
-              try {
-                const updatedUser = await updatePaymentQrCode(user.id, "");
-                setUser(updatedUser);
-                setQrCodeUrl("");
-                Alert.alert("Success", "Payment QR code removed");
-              } catch (error) {
-                console.error("Failed to remove QR code:", error);
-                Alert.alert("Error", "Failed to remove QR code");
-              } finally {
-                setLoading(false);
-              }
-            })();
-          },
-        },
-      ]
+    showDeleteConfirm(
+      "your payment QR code",
+      () => {
+        void (async () => {
+          setLoading(true);
+          try {
+            const updatedUser = await updatePaymentQrCode(user.id, "");
+            setUser(updatedUser);
+            setQrCodeUrl("");
+            showSuccessAlert("Payment QR code removed");
+          } catch (error) {
+            console.error("Failed to remove QR code:", error);
+            showErrorAlert("Failed to remove QR code");
+          } finally {
+            setLoading(false);
+          }
+        })();
+      }
     );
   };
 

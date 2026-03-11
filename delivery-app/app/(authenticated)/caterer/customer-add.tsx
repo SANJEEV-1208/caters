@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
@@ -17,6 +16,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import { searchUserByPhone, createCustomer } from "@/src/api/authApi";
 import { getCatererApartments, addCustomerToApartment } from "@/src/api/apartmentApi";
 import { createSubscription } from "@/src/api/subscriptionApi";
+import { showValidationError, showSuccessAlert, showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 
 type User = {
   id: number;
@@ -61,7 +61,7 @@ export default function CustomerAddScreen() {
 
   const handleSearch = async () => {
     if (!phone.trim() || phone.length < 10) {
-      Alert.alert("Error", "Please enter a valid phone number");
+      showValidationError("Phone Number", "Please enter a valid phone number");
       return;
     }
 
@@ -77,7 +77,7 @@ export default function CustomerAddScreen() {
           setFoundUser(result);
           setShowCreateForm(false);
         } else {
-          Alert.alert("Error", "This user is not a customer");
+          showErrorAlert("This user is not a customer");
           setFoundUser(null);
           setShowCreateForm(false);
         }
@@ -88,7 +88,7 @@ export default function CustomerAddScreen() {
       }
     } catch (error) {
       console.error("Failed to search user:", error);
-      Alert.alert("Error", "Failed to search for user");
+      showErrorAlert("Failed to search for user");
     } finally {
       setSearching(false);
     }
@@ -98,7 +98,7 @@ export default function CustomerAddScreen() {
     if (!foundUser || !user?.id) return;
 
     if (!addDirectly && !selectedApartmentId) {
-      Alert.alert("Error", "Please select an apartment or choose direct add");
+      showValidationError("Apartment Selection", "Please select an apartment or choose direct add");
       return;
     }
 
@@ -119,16 +119,16 @@ export default function CustomerAddScreen() {
         });
       }
 
-      Alert.alert(
+      showInfoAlert(
         "Success",
         isNewSubscription
           ? `Customer added successfully!\n\n${foundUser.name} can now place orders from your service.`
           : `Customer subscription updated!\n\n${foundUser.name} is already subscribed to your service.`,
-        [{ text: "OK", onPress: () => router.back() }]
+        () => router.back()
       );
     } catch (error) {
       console.error("Failed to add customer:", error);
-      Alert.alert("Error", "Failed to add customer. Please try again.");
+      showErrorAlert("Failed to add customer. Please try again.");
     } finally {
       setAdding(false);
     }
@@ -136,12 +136,12 @@ export default function CustomerAddScreen() {
 
   const handleCreateCustomer = async () => {
     if (!customerName.trim()) {
-      Alert.alert("Error", "Please enter customer name");
+      showValidationError("Customer Name", "Please enter customer name");
       return;
     }
 
     if (!addDirectly && !selectedApartmentId) {
-      Alert.alert("Error", "Please select an apartment or choose direct add");
+      showValidationError("Apartment Selection", "Please select an apartment or choose direct add");
       return;
     }
 
@@ -170,15 +170,13 @@ export default function CustomerAddScreen() {
         });
       }
 
-      Alert.alert(
-        "Success",
+      showSuccessAlert(
         `Customer created successfully!\n\n${newCustomer.name} can now place orders from your service.`,
-        [{ text: "OK", onPress: () => router.back() }]
+        () => router.back()
       );
     } catch (error: unknown) {
       console.error("Failed to create customer:", error);
-      Alert.alert(
-        "Error",
+      showErrorAlert(
         error instanceof Error ? error.message : "Failed to create customer. Please try again."
       );
     } finally {

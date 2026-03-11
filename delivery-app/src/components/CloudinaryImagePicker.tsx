@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { CLOUDINARY_CONFIG, getCloudinaryUploadUrl } from '../config/cloudinary';
+import { showWarningAlert, showSuccessAlert, showErrorAlert, showConfirmAlert } from '../utils/alertHelpers';
 
 interface CloudinaryImagePickerProps {
   onImageUploaded: (url: string) => void;
@@ -41,10 +41,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (permissionResult.granted === false) {
-        Alert.alert(
-          'Permission Required',
-          'You need to grant permission to access your photos.'
-        );
+        showWarningAlert('You need to grant permission to access your photos.');
         return;
       }
 
@@ -69,23 +66,20 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       }
     } catch (error) {
       console.error('Image selection error:', error);
-      Alert.alert('Error', 'Failed to select image. Please try again.');
+      showErrorAlert('Failed to select image. Please try again.');
     }
   };
 
   const uploadToCloudinary = async (asset: ImagePicker.ImagePickerAsset) => {
     if (!asset.base64) {
-      Alert.alert('Error', 'Image data not available. Please try again.');
+      showErrorAlert('Image data not available. Please try again.');
       return;
     }
 
     // Validate Cloudinary config
     if (CLOUDINARY_CONFIG.cloudName === 'YOUR_CLOUD_NAME' ||
         !CLOUDINARY_CONFIG.cloudName) {
-      Alert.alert(
-        'Configuration Required',
-        'Please configure your Cloudinary credentials in the .env file.\n\nSee documentation for setup instructions.'
-      );
+      showErrorAlert('Please configure your Cloudinary credentials in the .env file.\n\nSee documentation for setup instructions.');
       setSelectedImageUri(null);
       return;
     }
@@ -124,7 +118,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
           onImageUploaded(imageUrl);
           setUploading(false);
 
-          Alert.alert('Success', 'Image uploaded successfully!');
+          showSuccessAlert('Image uploaded successfully!');
         } else {
           throw new Error(`Upload failed with status ${xhr.status}`);
         }
@@ -143,13 +137,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image. Please try again.';
 
-      Alert.alert(
-        'Upload Failed',
+      showConfirmAlert(
         errorMessage,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Retry', onPress: () => { void uploadToCloudinary(asset); } },
-        ]
+        () => { void uploadToCloudinary(asset); },
+        undefined,
+        'Upload Failed'
       );
     }
   };

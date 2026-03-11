@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
@@ -14,6 +13,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import { signupRestaurant } from "@/src/api/authApi";
 import { Ionicons } from "@expo/vector-icons";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
+import { showValidationError, showSuccessAlert, showWarningAlert, showErrorAlert } from "@/src/utils/alertHelpers";
 
 export default function RestaurantSignupScreen() {
   const [restaurantName, setRestaurantName] = useState("");
@@ -31,35 +31,35 @@ export default function RestaurantSignupScreen() {
   const handleSignup = async () => {
     // Validate all fields
     if (!restaurantName.trim()) {
-      Alert.alert("Required", "Please enter your restaurant name");
+      showValidationError("Restaurant Name", "Please enter your restaurant name");
       return;
     }
     if (!restaurantAddress.trim()) {
-      Alert.alert("Required", "Please enter your restaurant address");
+      showValidationError("Restaurant Address", "Please enter your restaurant address");
       return;
     }
     if (!ownerName.trim()) {
-      Alert.alert("Required", "Please enter owner/manager name");
+      showValidationError("Owner/Manager Name", "Please enter owner/manager name");
       return;
     }
     if (phone.length !== 10) {
-      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
+      showValidationError("Phone Number", "Please enter a valid 10-digit phone number");
       return;
     }
     if (!pin.trim()) {
-      Alert.alert("Required", "Please create a PIN to secure your account");
+      showValidationError("PIN", "Please create a PIN to secure your account");
       return;
     }
     if (pin.length < 4 || pin.length > 6) {
-      Alert.alert("Invalid PIN", "PIN must be 4-6 digits");
+      showValidationError("PIN", "PIN must be 4-6 digits");
       return;
     }
     if (!/^\d+$/.test(pin)) {
-      Alert.alert("Invalid PIN", "PIN must contain only numbers");
+      showValidationError("PIN", "PIN must contain only numbers");
       return;
     }
     if (pin !== confirmPin) {
-      Alert.alert("PIN Mismatch", "PINs do not match. Please try again.");
+      showValidationError("PIN Mismatch", "PINs do not match. Please try again.");
       return;
     }
 
@@ -87,22 +87,19 @@ export default function RestaurantSignupScreen() {
       setUser(userWithType);
 
       if(userWithType){
-        Alert.alert(
-          "Registration Successful", 
-          "Account created successfully!", 
-          [
-            {text: "OK", onPress: () => router.replace("/(authenticated)/caterer/restaurant/dashboard")}
-          ]
+        showSuccessAlert(
+          "Account created successfully!",
+          () => router.replace("/(authenticated)/caterer/restaurant/dashboard")
         );
       }
-      
+
       // Will be redirected to (authenticated) by root layout
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       if (errorMessage.includes("already exists")) {
-        Alert.alert("Already Registered", "This phone number is already registered. Please login to upgrade your account to restaurant.");
+        showWarningAlert("This phone number is already registered. Please login to upgrade your account to restaurant.");
       } else {
-        Alert.alert("Error", `Registration failed: ${errorMessage}`);
+        showErrorAlert(`Registration failed: ${errorMessage}`);
       }
     } finally {
       setLoading(false);

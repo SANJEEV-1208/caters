@@ -13,6 +13,7 @@ import { getCatererDetails } from "@/src/api/subscriptionApi";
 import { User } from "@/src/types/auth";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
 import { getTodayIST, getTomorrowIST, getCurrentTimestampIST, formatDateIST } from "@/src/utils/dateUtils";
+import { showErrorAlert, showWarningAlert, showSuccessAlert, showInfoAlert, showConfirmAlert } from "@/src/utils/alertHelpers";
 
 export default function Cart() {
   const { cart, totalAmount, addToCart, removeFromCart, removeMultipleItems, reorderItems, clearCart } = useCart();
@@ -93,10 +94,9 @@ export default function Cart() {
           const dateLabel = dateToValidate === getTodayIST() ? 'today' : formatDeliveryDate();
 
           // Show alert about removed items
-          Alert.alert(
+          showInfoAlert(
             "Items Removed",
-            `${unavailableItems.length} item(s) in your cart are not available for ${dateLabel} and have been removed.`,
-            [{ text: "OK" }]
+            `${unavailableItems.length} item(s) in your cart are not available for ${dateLabel} and have been removed.`
           );
         }
       } catch (error) {
@@ -136,10 +136,9 @@ export default function Cart() {
           removeMultipleItems(unavailableIds);
 
           // Show alert about removed items
-          Alert.alert(
+          showInfoAlert(
             "Items Removed",
-            `${unavailableItems.length} item(s) in your cart are not available for ${formatDeliveryDate()} and have been removed.`,
-            [{ text: "OK" }]
+            `${unavailableItems.length} item(s) in your cart are not available for ${formatDeliveryDate()} and have been removed.`
           );
         }
       } catch (error) {
@@ -187,23 +186,17 @@ export default function Cart() {
   const showReorderResult = (availableCount: number, unavailableCount: number) => {
     if (availableCount > 0) {
       if (unavailableCount > 0) {
-        Alert.alert(
-          "Partially Reordered",
-          `${availableCount} item(s) added to cart. ${unavailableCount} item(s) from your previous order are not available today.`,
-          [{ text: "OK" }]
+        showWarningAlert(
+          `${availableCount} item(s) added to cart. ${unavailableCount} item(s) from your previous order are not available today.`
         );
       } else {
-        Alert.alert(
-          "Success",
-          "All items from your previous order have been added to cart!",
-          [{ text: "OK" }]
-        );
+        showSuccessAlert("All items from your previous order have been added to cart!");
       }
     } else {
-      Alert.alert(
+      showInfoAlert(
         "Cannot Reorder",
         "None of the items from your previous order are available today. Please browse the current menu.",
-        [{ text: "OK", onPress: () => { if (router.canGoBack()) router.back(); } }]
+        () => { if (router.canGoBack()) router.back(); }
       );
     }
   };
@@ -235,10 +228,9 @@ export default function Cart() {
         showReorderResult(available.length, unavailable.length);
       } catch (error) {
         console.error("Failed to validate menu items:", error);
-        Alert.alert(
-          "Error",
+        showErrorAlert(
           "Unable to verify item availability. Please browse the menu instead.",
-          [{ text: "OK", onPress: () => { if (router.canGoBack()) router.back(); } }]
+          () => { if (router.canGoBack()) router.back(); }
         );
       } finally {
         setIsProcessingReorder(false);
@@ -253,13 +245,13 @@ export default function Cart() {
 
     // Validate user
     if (!user?.id) {
-      Alert.alert("Error", "You are not logged in. Please login again.");
+      showErrorAlert("You are not logged in. Please login again.");
       return;
     }
 
     // Validate cart
     if (cart.length === 0) {
-      Alert.alert("Error", "Your cart is empty. Please add items before placing an order.");
+      showErrorAlert("Your cart is empty. Please add items before placing an order.");
       return;
     }
 
@@ -287,19 +279,14 @@ export default function Cart() {
 
     // Runtime check: catererId can be null if none of the above sources provided a value
     if (catererId == null) {
-      Alert.alert(
-        "Missing Caterer Information",
+      showConfirmAlert(
         "Please go back to the home screen, select a caterer, and add items to your cart again.",
-        [
-          {
-            text: "Clear Cart & Go Back",
-            onPress: () => {
-              clearCart();
-              router.push("/(authenticated)/customer/caterer-selection");
-            },
-          },
-          { text: "Cancel", style: "cancel" },
-        ]
+        () => {
+          clearCart();
+          router.push("/(authenticated)/customer/caterer-selection");
+        },
+        undefined,
+        "Missing Caterer Information"
       );
       return;
     }
@@ -314,10 +301,8 @@ export default function Cart() {
       if (unavailableItems.length > 0) {
         const unavailableNames = unavailableItems.map(item => item.name).join(', ');
 
-        Alert.alert(
-          "Items Not Available",
-          `The following items are not available for ${formatDeliveryDate()}: ${unavailableNames}\n\nPlease remove them from your cart or select a different date.`,
-          [{ text: "OK" }]
+        showWarningAlert(
+          `The following items are not available for ${formatDeliveryDate()}: ${unavailableNames}\n\nPlease remove them from your cart or select a different date.`
         );
 
         // Re-open the payment modal so user can modify cart
@@ -326,11 +311,7 @@ export default function Cart() {
       }
     } catch (error) {
       console.error("Failed to validate cart items before checkout:", error);
-      Alert.alert(
-        "Validation Error",
-        "Unable to verify item availability. Please try again.",
-        [{ text: "OK" }]
-      );
+      showErrorAlert("Unable to verify item availability. Please try again.");
       return;
     }
 
@@ -378,7 +359,7 @@ export default function Cart() {
       });
     } catch (err) {
       console.error("Failed to create order:", err);
-      Alert.alert("Error", "Failed to place order. Please try again.");
+      showErrorAlert("Failed to place order. Please try again.");
     }
   };
 
@@ -427,11 +408,7 @@ export default function Cart() {
             if (router.canGoBack()) {
               router.back();
             } else {
-              Alert.alert(
-                "Navigation Error",
-                "Unable to go back. Please try again or use the navigation menu.",
-                [{ text: "OK" }]
-              );
+              showErrorAlert("Unable to go back. Please try again or use the navigation menu.");
             }
           }} 
           style={styles.backButton}

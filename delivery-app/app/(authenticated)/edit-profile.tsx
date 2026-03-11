@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
@@ -17,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/src/context/AuthContext";
 import { updateUserProfile } from "@/src/api/authApi";
+import { showValidationError, showSuccessAlert, showWarningAlert, showErrorAlert } from "@/src/utils/alertHelpers";
 
 export default function EditProfileScreen() {
   const { user, setUser } = useAuth();
@@ -39,7 +39,7 @@ export default function EditProfileScreen() {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permissionResult.granted) {
-        Alert.alert("Permission Required", "Please allow access to your photo library");
+        showWarningAlert("Please allow access to your photo library");
         return;
       }
 
@@ -57,7 +57,7 @@ export default function EditProfileScreen() {
       }
     } catch (error) {
       console.error("❌ Image picker error:", error);
-      Alert.alert("Error", "Failed to pick image");
+      showErrorAlert("Failed to pick image");
     }
   };
 
@@ -69,7 +69,7 @@ export default function EditProfileScreen() {
       const uploadPreset = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
       if (!cloudName || !uploadPreset) {
-        Alert.alert("Configuration Error", "Cloudinary is not configured. Please contact support.");
+        showErrorAlert("Cloudinary is not configured. Please contact support.");
         return;
       }
 
@@ -104,7 +104,7 @@ export default function EditProfileScreen() {
       }
     } catch (error) {
       console.error("❌ Cloudinary upload error:", error);
-      Alert.alert("Upload Failed", "Failed to upload image. Please try again.");
+      showErrorAlert("Failed to upload image. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -115,20 +115,20 @@ export default function EditProfileScreen() {
 
     if (user.caterType === "restaurant") {
       if (!restaurantName.trim()) {
-        Alert.alert("Required", "Please enter restaurant name");
+        showValidationError("Restaurant Name", "Please enter restaurant name");
         return false;
       }
       if (!restaurantAddress.trim()) {
-        Alert.alert("Required", "Please enter restaurant address");
+        showValidationError("Restaurant Address", "Please enter restaurant address");
         return false;
       }
     } else {
       if (!serviceName.trim()) {
-        Alert.alert("Required", "Please enter service name");
+        showValidationError("Service Name", "Please enter service name");
         return false;
       }
       if (!address.trim()) {
-        Alert.alert("Required", "Please enter your address");
+        showValidationError("Address", "Please enter your address");
         return false;
       }
     }
@@ -175,12 +175,10 @@ export default function EditProfileScreen() {
         token: user.token, // Preserve existing token
       });
 
-      Alert.alert("Success", "Profile updated successfully", [
-        { text: "OK", onPress: () => router.back() }
-      ]);
+      showSuccessAlert("Profile updated successfully", () => router.back());
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      Alert.alert("Error", `Failed to update profile: ${errorMessage}`);
+      showErrorAlert(`Failed to update profile: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

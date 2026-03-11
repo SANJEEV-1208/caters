@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   Modal,
   Pressable,
@@ -16,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { CloudinaryImagePicker } from "@/src/components/CloudinaryImagePicker";
 import { createCatererCuisine, deleteCatererCuisine } from "@/src/api/foodApi";
+import { showValidationError, showSuccessAlert, showErrorAlert, showDeleteConfirm } from "@/src/utils/alertHelpers";
 
 interface CuisineItem {
   id: number;
@@ -47,12 +47,12 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
 
   const handleAddCuisine = async () => {
     if (!newCuisineName.trim()) {
-      Alert.alert("Error", "Please enter a cuisine name");
+      showValidationError("Cuisine Name", "Please enter a cuisine name");
       return;
     }
 
     if (!newCuisineImage.trim()) {
-      Alert.alert("Error", "Please upload a cuisine image");
+      showValidationError("Cuisine Image", "Please upload a cuisine image");
       return;
     }
 
@@ -67,11 +67,10 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
       setNewCuisineName("");
       setNewCuisineImage("");
       setShowAddModal(false);
-      Alert.alert("Success", "Cuisine added successfully");
+      showSuccessAlert("Cuisine added successfully");
     } catch (error) {
       console.error("Failed to add cuisine:", error);
-      Alert.alert(
-        "Error",
+      showErrorAlert(
         `Failed to add cuisine: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     } finally {
@@ -80,34 +79,26 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
   };
 
   const handleDeleteCuisine = (cuisineId: number, cuisineName: string) => {
-    Alert.alert(
-      "Delete Cuisine",
-      `Are you sure you want to delete "${cuisineName}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await deleteCatererCuisine(cuisineId);
-              const updatedCuisines = cuisines.filter((c) => c.id !== cuisineId);
-              onCuisinesUpdated(updatedCuisines);
-              // If deleted cuisine was selected, select first available
-              if (selectedCuisine === cuisineName && updatedCuisines.length > 0) {
-                onSelectCuisine(updatedCuisines[0].name);
-              }
-              Alert.alert("Success", "Cuisine deleted successfully");
-            } catch (error) {
-              console.error("Failed to delete cuisine:", error);
-              Alert.alert("Error", "Failed to delete cuisine");
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
+    showDeleteConfirm(
+      `"${cuisineName}"`,
+      async () => {
+        try {
+          setLoading(true);
+          await deleteCatererCuisine(cuisineId);
+          const updatedCuisines = cuisines.filter((c) => c.id !== cuisineId);
+          onCuisinesUpdated(updatedCuisines);
+          // If deleted cuisine was selected, select first available
+          if (selectedCuisine === cuisineName && updatedCuisines.length > 0) {
+            onSelectCuisine(updatedCuisines[0].name);
+          }
+          showSuccessAlert("Cuisine deleted successfully");
+        } catch (error) {
+          console.error("Failed to delete cuisine:", error);
+          showErrorAlert("Failed to delete cuisine");
+        } finally {
+          setLoading(false);
+        }
+      }
     );
   };
 
