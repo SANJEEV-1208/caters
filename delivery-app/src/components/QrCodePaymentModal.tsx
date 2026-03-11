@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CloudinaryImagePicker } from "./CloudinaryImagePicker";
+import { modalStyles } from '@/src/styles/modalStyles';
+import { ModalHeader } from '@/src/components/common';
 
 type QrCodePaymentModalProps = {
   readonly visible: boolean;
@@ -71,14 +73,8 @@ export default function QrCodePaymentModal({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerContent}>
-              <Ionicons name="qr-code" size={24} color="#10B981" />
-              <Text style={styles.headerTitle}>Scan QR to Pay</Text>
-            </View>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#1A1A1A" />
-            </TouchableOpacity>
+          <View style={styles.headerWrapper}>
+            <ModalHeader title="Scan QR to Pay" onClose={handleClose} icon="qr-code" />
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -173,7 +169,7 @@ export default function QrCodePaymentModal({
                 Transaction ID from your payment app *
               </Text>
               <TextInput
-                style={styles.transactionInput}
+                style={modalStyles.input}
                 placeholder="e.g., 123456789012"
                 value={transactionId}
                 onChangeText={setTransactionId}
@@ -184,13 +180,13 @@ export default function QrCodePaymentModal({
             {/* Confirm Button */}
             <TouchableOpacity
               style={[
-                styles.confirmButton,
-                (!paymentProofImage.trim() || !transactionId.trim() || isConfirming) && styles.confirmButtonDisabled,
+                modalStyles.primaryButton,
+                (!paymentProofImage.trim() || !transactionId.trim() || isConfirming) && modalStyles.primaryButtonDisabled,
               ]}
               onPress={handleConfirmPayment}
               disabled={!paymentProofImage.trim() || !transactionId.trim() || isConfirming}
             >
-              <Text style={styles.confirmButtonText}>
+              <Text style={modalStyles.primaryButtonText}>
                 {isConfirming ? "Confirming..." : "Confirm Payment & Place Order"}
               </Text>
             </TouchableOpacity>
@@ -218,26 +214,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: "90%",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  headerWrapper: {
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
-  },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  closeButton: {
-    padding: 4,
   },
   scrollContent: {
     padding: 20,
@@ -376,30 +356,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#1A1A1A",
     marginBottom: 8,
-  },
-  transactionInput: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
-    color: "#1A1A1A",
-  },
-  confirmButton: {
-    backgroundColor: "#10B981",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  confirmButtonDisabled: {
-    backgroundColor: "#D1D5DB",
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
   },
   cancelButton: {
     backgroundColor: "#FFFFFF",

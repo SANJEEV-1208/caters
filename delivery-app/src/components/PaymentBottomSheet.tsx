@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import QrCodePaymentModal from './QrCodePaymentModal';
+import { modalStyles } from '@/src/styles/modalStyles';
 
 type PaymentMethod = "upi" | "cod";
 
@@ -219,14 +220,14 @@ export default function PaymentBottomSheet({
         {/* Confirm Button */}
         <TouchableOpacity
           style={[
-            styles.confirmButton,
-            !selectedMethod && styles.confirmButtonDisabled,
+            modalStyles.primaryButton,
+            !selectedMethod && modalStyles.primaryButtonDisabled,
           ]}
           onPress={handleConfirm}
           disabled={!selectedMethod}
           activeOpacity={0.8}
         >
-          <Text style={styles.confirmButtonText}>Confirm Order</Text>
+          <Text style={modalStyles.primaryButtonText}>Confirm Order</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -370,29 +371,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
-  },
-
-  confirmButton: {
-    backgroundColor: "#10B981",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-
-  confirmButtonDisabled: {
-    backgroundColor: "#D1D5DB",
-    shadowOpacity: 0,
-  },
-
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    letterSpacing: 0.5,
   },
 });

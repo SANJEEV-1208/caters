@@ -16,6 +16,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { modalStyles } from '@/src/styles/modalStyles';
 
 type UpiApp = {
   id: string;
@@ -194,7 +195,7 @@ export default function UpiPaymentModal({
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Enter UPI ID</Text>
                 <TextInput
-                  style={styles.upiInput}
+                  style={modalStyles.input}
                   placeholder="example@upi"
                   value={upiId}
                   onChangeText={setUpiId}
@@ -204,14 +205,14 @@ export default function UpiPaymentModal({
                 />
                 <TouchableOpacity
                   style={[
-                    styles.payButton,
-                    !upiId.trim() && styles.payButtonDisabled,
+                    modalStyles.primaryButton,
+                    !upiId.trim() && modalStyles.primaryButtonDisabled,
                   ]}
                   onPress={handleUpiIdSubmit}
                   disabled={!upiId.trim()}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.payButtonText}>Verify & Pay</Text>
+                  <Text style={modalStyles.primaryButtonText}>Verify & Pay</Text>
                 </TouchableOpacity>
               </View>
 
@@ -430,40 +431,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#9CA3AF",
     fontWeight: "600",
-  },
-
-  upiInput: {
-    backgroundColor: "#F8F9FA",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#1A1A1A",
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    marginBottom: 12,
-  },
-
-  payButton: {
-    backgroundColor: "#10B981",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    shadowColor: "#10B981",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-
-  payButtonDisabled: {
-    backgroundColor: "#D1D5DB",
-    shadowOpacity: 0,
-  },
-
-  payButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
   },
 
   qrContainer: {

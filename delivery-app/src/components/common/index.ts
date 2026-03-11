@@ -9,3 +9,6 @@ export { default as Button } from './Button';
 export { HeaderComponent } from './HeaderComponent';
 export { FormSectionWrapper } from './FormSectionWrapper';
 export { LoadingStateButton } from './LoadingStateButton';
+export { FormTextInput } from './FormTextInput';
+export { Badge } from './Badge';
+export { ModalHeader } from './ModalHeader';
