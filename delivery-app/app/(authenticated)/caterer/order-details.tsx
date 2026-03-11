@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -13,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { getOrderById, updateOrderStatus } from "@/src/api/orderApi";
 import { Order } from "@/src/types/order";
 import { formatDateTimeIST, formatDateIST } from "@/src/utils/dateUtils";
+import { showErrorAlert, showSuccessAlert, showConfirmAlert } from "@/src/utils/alertHelpers";
 
 const STATUS_COLORS: Record<Order["status"], string> = {
   pending: "#F59E0B",
@@ -40,9 +40,7 @@ export default function OrderDetailsScreen() {
       setOrder(data);
     } catch (error) {
       console.error("Failed to load order:", error);
-      Alert.alert("Error", "Failed to load order details", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      showErrorAlert("Failed to load order details", () => router.back());
     } finally {
       setLoading(false);
     }
@@ -55,27 +53,21 @@ export default function OrderDetailsScreen() {
     try {
       const updated = await updateOrderStatus(order.id, newStatus);
       setOrder(updated);
-      Alert.alert("Success", `Order marked as ${newStatus.replace('_', ' ')}`);
+      showSuccessAlert(`Order marked as ${newStatus.replace('_', ' ')}`);
     } catch (error) {
       console.error("Failed to update status:", error);
-      Alert.alert("Error", "Failed to update order status");
+      showErrorAlert("Failed to update order status");
     } finally {
       setUpdating(false);
     }
   };
 
   const handleCancelOrder = () => {
-    Alert.alert(
-      "Cancel Order",
+    showConfirmAlert(
       "Are you sure you want to cancel this order?",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes, Cancel",
-          style: "destructive",
-          onPress: () => { void handleStatusUpdate("cancelled"); },
-        },
-      ]
+      () => { void handleStatusUpdate("cancelled"); },
+      undefined,
+      "Cancel Order"
     );
   };
 

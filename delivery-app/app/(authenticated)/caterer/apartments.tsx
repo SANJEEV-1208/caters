@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import ApartmentCard from "@/src/components/caterer/ApartmentCard";
 import { getCatererApartments, deleteApartment, getCustomerApartmentLinks } from "@/src/api/apartmentApi";
+import { showErrorAlert, showSuccessAlert, showConfirmAlert } from "@/src/utils/alertHelpers";
 
 type Apartment = {
   id: number;
@@ -63,7 +64,7 @@ export default function ApartmentsScreen() {
       setApartments(apartmentsWithCounts);
     } catch (error) {
       console.error("Failed to load apartments:", error);
-      Alert.alert("Error", "Failed to load apartments");
+      showErrorAlert("Failed to load apartments");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -79,25 +80,21 @@ export default function ApartmentsScreen() {
     try {
       await deleteApartment(id);
       setApartments(prev => prev.filter(apt => apt.id !== id));
-      Alert.alert("Success", "Apartment deleted successfully");
+      showSuccessAlert("Apartment deleted successfully");
     } catch (error) {
       console.error("Failed to delete apartment:", error);
-      Alert.alert("Error", "Failed to delete apartment");
+      showErrorAlert("Failed to delete apartment");
     }
   };
 
   const handleDelete = (id: number, name: string) => {
-    Alert.alert(
-      "Delete Apartment",
+    showConfirmAlert(
       `Are you sure you want to delete "${name}"? This will remove all customer associations.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            performDelete(id).catch(console.error);
-          },
+      () => {
+        performDelete(id).catch(console.error);
+      },
+      undefined,
+      "Delete Apartment"
         },
       ]
     );

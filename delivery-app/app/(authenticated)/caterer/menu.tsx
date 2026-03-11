@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +14,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import MenuItemCard from "@/src/components/caterer/MenuItemCard";
 import { getCatererMenuItems, deleteMenuItem, toggleStock } from "@/src/api/catererMenuApi";
 import { MenuItem } from "@/src/types/menu";
+import { showErrorAlert, showDeleteConfirm } from "@/src/utils/alertHelpers";
 
 const CATEGORIES = ["All", "Veg", "Non-Veg"];
 
@@ -71,7 +71,7 @@ export default function MenuScreen() {
       setMenuItems(items);
     } catch (error) {
       console.error("Failed to load menu items:", error);
-      Alert.alert("Error", "Failed to load menu items");
+      showErrorAlert("Failed to load menu items");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -106,7 +106,7 @@ export default function MenuScreen() {
       );
     } catch (error) {
       console.error("Failed to toggle stock:", error);
-      Alert.alert("Error", "Failed to update stock status");
+      showErrorAlert("Failed to update stock status");
     }
   };
 
@@ -123,25 +123,14 @@ export default function MenuScreen() {
       setMenuItems(prev => prev.filter(item => item.id !== id));
     } catch (error) {
       console.error("Failed to delete item:", error);
-      Alert.alert("Error", "Failed to delete menu item");
+      showErrorAlert("Failed to delete menu item");
     }
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert(
-      "Delete Menu Item",
-      "Are you sure you want to delete this item?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            performDelete(id).catch(console.error);
-          },
-        },
-      ]
-    );
+    showDeleteConfirm("this menu item", () => {
+      performDelete(id).catch(console.error);
+    });
   };
 
   if (loading) {

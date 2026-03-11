@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
@@ -16,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { createApartment } from "@/src/api/apartmentApi";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
+import { showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 
 export default function ApartmentAddScreen() {
   const router = useRouter();
@@ -48,11 +48,11 @@ export default function ApartmentAddScreen() {
   const handleSubmit = async () => {
     // Validation
     if (!formData.name.trim()) {
-      Alert.alert("Error", "Please enter apartment name");
+      showErrorAlert("Please enter apartment name");
       return;
     }
     if (!formData.address.trim()) {
-      Alert.alert("Error", "Please enter apartment address");
+      showErrorAlert("Please enter apartment address");
       return;
     }
 
@@ -61,12 +61,12 @@ export default function ApartmentAddScreen() {
       : formData.accessCode || generateAccessCode();
 
     if (!finalAccessCode) {
-      Alert.alert("Error", "Please generate or enter an access code");
+      showErrorAlert("Please generate or enter an access code");
       return;
     }
 
     if (finalAccessCode.length < 4) {
-      Alert.alert("Error", "Access code must be at least 4 characters");
+      showErrorAlert("Access code must be at least 4 characters");
       return;
     }
 
@@ -81,15 +81,15 @@ export default function ApartmentAddScreen() {
         accessCode: finalAccessCode.toUpperCase(),
       });
 
-      Alert.alert(
+      showInfoAlert(
         "Success",
         `Apartment created successfully!\n\nAccess Code: ${finalAccessCode.toUpperCase()}\n\nShare this code with your customers to join.`,
-        [{ text: "OK", onPress: () => router.back() }]
+        () => router.back()
       );
     } catch (error) {
       console.error("Failed to create apartment:", error);
-      Alert.alert("Error", "Failed to create apartment");
-    } finally {
+      showErrorAlert("Failed to create apartment");
+    } finally{
       setLoading(false);
     }
   };

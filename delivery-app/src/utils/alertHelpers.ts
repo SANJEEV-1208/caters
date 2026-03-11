@@ -47,6 +47,10 @@ export const showValidationError = (field: string, message: string) => {
   Alert.alert('Validation Error', `${field}: ${message}`);
 };
 
+export const showInfoAlert = (title: string, message: string, onOk?: () => void) => {
+  Alert.alert(title, message, [{ text: 'OK', onPress: onOk }]);
+};
+
 export const showNetworkError = (onRetry?: () => void) => {
   Alert.alert(
     'Network Error',

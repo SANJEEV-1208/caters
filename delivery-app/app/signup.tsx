@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Alert,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
@@ -15,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
+import { showInfoAlert, showErrorAlert } from "@/src/utils/alertHelpers";
 
 export default function SignupScreen() {
   const [name, setName] = useState("");
@@ -32,35 +32,35 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     // Validate all fields
     if (!name.trim()) {
-      Alert.alert("Required", "Please enter your name");
+      showInfoAlert("Required", "Please enter your name");
       return;
     }
     if (!serviceName.trim()) {
-      Alert.alert("Required", "Please enter your catering service name");
+      showInfoAlert("Required", "Please enter your catering service name");
       return;
     }
     if (!address.trim()) {
-      Alert.alert("Required", "Please enter your address");
+      showInfoAlert("Required", "Please enter your address");
       return;
     }
     if (phone.length !== 10) {
-      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
+      showInfoAlert("Invalid Phone", "Please enter a valid 10-digit phone number");
       return;
     }
     if (!pin.trim()) {
-      Alert.alert("Required", "Please create a PIN to secure your account");
+      showInfoAlert("Required", "Please create a PIN to secure your account");
       return;
     }
     if (pin.length < 4 || pin.length > 6) {
-      Alert.alert("Invalid PIN", "PIN must be 4-6 digits");
+      showInfoAlert("Invalid PIN", "PIN must be 4-6 digits");
       return;
     }
     if (!/^\d+$/.test(pin)) {
-      Alert.alert("Invalid PIN", "PIN must contain only numbers");
+      showInfoAlert("Invalid PIN", "PIN must contain only numbers");
       return;
     }
     if (pin !== confirmPin) {
-      Alert.alert("PIN Mismatch", "PINs do not match. Please try again.");
+      showInfoAlert("PIN Mismatch", "PINs do not match. Please try again.");
       return;
     }
 
@@ -78,20 +78,18 @@ export default function SignupScreen() {
 
       if (success) {
         // Will be redirected to (authenticated) by root layout
-        Alert.alert(
-          "Registration Successful", 
-          "Account created successfully!", 
-          [
-            {text: "OK", onPress: () => router.replace("/(authenticated)/caterer/dashboard")}
-          ]
+        showInfoAlert(
+          "Registration Successful",
+          "Account created successfully!",
+          () => router.replace("/(authenticated)/caterer/dashboard")
         );
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       if (errorMessage.includes("already")) {
-        Alert.alert("Already Registered", "This phone number is already registered. Please login instead.");
+        showInfoAlert("Already Registered", "This phone number is already registered. Please login instead.");
       } else {
-        Alert.alert("Error", `Registration failed: ${errorMessage}`);
+        showErrorAlert(`Registration failed: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
