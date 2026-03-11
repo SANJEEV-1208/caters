@@ -18,6 +18,7 @@ import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
 import { CartItem } from "@/src/context/CartContext";
+import { getSecureRandomInt } from "@/src/utils/secureRandom";
 
 export default function RestaurantCheckout() {
   const router = useRouter();
@@ -121,7 +122,7 @@ export default function RestaurantCheckout() {
       console.log('Authenticated User:', user ? `${user.name} (${user.id})` : 'None (Guest)');
 
       // Create order ID
-      const orderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      const orderId = `ORD${Date.now()}${getSecureRandomInt(0, 1000)}`;
 
       // Create order object
       // For authenticated users: include customerId

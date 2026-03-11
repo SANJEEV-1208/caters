@@ -1,6 +1,8 @@
 // Mock Razorpay for testing in Expo Go
 // This simulates the Razorpay payment flow without requiring native modules
 
+import { getSecureRandomString } from './secureRandom';
+
 export interface RazorpayOptions {
   description: string;
   image: string;
@@ -40,7 +42,7 @@ export const MockRazorpayCheckout = {
       // Simulate a delay for payment processing
       setTimeout(() => {
         // Simulate payment success (for cancellation testing, manually reject in code)
-        const mockPaymentId = `pay_mock_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+        const mockPaymentId = `pay_mock_${Date.now()}_${getSecureRandomString(9)}`;
         resolve({
           razorpay_payment_id: mockPaymentId,
           razorpay_order_id: `order_mock_${Date.now()}`,
@@ -65,5 +67,5 @@ export const validateTestCard = (cardNumber: string): boolean => {
 
 // Generate mock payment ID
 export const generateMockPaymentId = (): string => {
-  return `pay_mock_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+  return `pay_mock_${Date.now()}_${getSecureRandomString(9)}`;
 };

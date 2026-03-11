@@ -17,6 +17,7 @@ import { createApartment } from "@/src/api/apartmentApi";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
 import { showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 import { HeaderComponent } from "@/src/components/common";
+import { getSecureRandomInt } from "@/src/utils/secureRandom";
 
 export default function ApartmentAddScreen() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function ApartmentAddScreen() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed ambiguous chars
     let code = "";
     for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
+      code += chars.charAt(getSecureRandomInt(0, chars.length));
     }
     return code;
   };

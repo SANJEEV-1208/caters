@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { modalStyles } from '@/src/styles/modalStyles';
+import { getSecureRandomString } from '@/src/utils/secureRandom';
 
 type UpiApp = {
   id: string;
@@ -98,7 +99,7 @@ export default function UpiPaymentModal({
     // Simulate payment verification
     setTimeout(() => {
       setProcessing(false);
-      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      const mockTransactionId = `txn_${Date.now()}_${getSecureRandomString(9)}`;
       onSuccess(mockTransactionId);
     }, 3500);
   };
@@ -116,7 +117,7 @@ export default function UpiPaymentModal({
 
     setTimeout(() => {
       setProcessing(false);
-      const mockTransactionId = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      const mockTransactionId = `txn_${Date.now()}_${getSecureRandomString(9)}`;
       onSuccess(mockTransactionId);
     }, 3500);
   };

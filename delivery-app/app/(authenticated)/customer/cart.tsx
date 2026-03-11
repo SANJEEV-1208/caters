@@ -14,6 +14,7 @@ import { User } from "@/src/types/auth";
 import { getMenuItemsByDate } from "@/src/api/catererMenuApi";
 import { getTodayIST, getTomorrowIST, getCurrentTimestampIST, formatDateIST } from "@/src/utils/dateUtils";
 import { showErrorAlert, showWarningAlert, showSuccessAlert, showInfoAlert, showConfirmAlert } from "@/src/utils/alertHelpers";
+import { getSecureRandomInt } from "@/src/utils/secureRandom";
 
 export default function Cart() {
   const { cart, totalAmount, addToCart, removeFromCart, removeMultipleItems, reorderItems, clearCart } = useCart();
@@ -315,7 +316,7 @@ export default function Cart() {
       return;
     }
 
-    const newOrderId = `ORD${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const newOrderId = `ORD${Date.now()}${getSecureRandomInt(0, 1000)}`;
 
     // Check if this is a restaurant order (has tableNumber from params)
     const tableNumberValue = tableNumber ? Number(tableNumber) : undefined;

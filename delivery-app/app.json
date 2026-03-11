@@ -18,7 +18,9 @@
       "softwareKeyboardLayoutMode": "pan",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sanjeev_s.deliveryapp"
+      "package": "com.sanjeev_s.deliveryapp",
+      "allowBackup": false,
+      "usesCleartextTraffic": false
     },
     "web": {
       "output": "static"
