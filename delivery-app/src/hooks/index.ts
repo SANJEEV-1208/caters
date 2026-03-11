@@ -4,3 +4,4 @@
  */
 
 export { useLoading } from './useLoading';
+export { useAsyncOperation } from './useAsyncOperation';
