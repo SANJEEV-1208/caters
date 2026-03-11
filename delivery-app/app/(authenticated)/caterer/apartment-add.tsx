@@ -16,6 +16,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import { createApartment } from "@/src/api/apartmentApi";
 import LocationAutocomplete from "@/src/components/LocationAutocomplete";
 import { showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
+import { HeaderComponent } from "@/src/components/common";
 
 export default function ApartmentAddScreen() {
   const router = useRouter();
@@ -99,13 +100,7 @@ export default function ApartmentAddScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Apartment</Text>
-        <View style={{ width: 24 }} />
-      </View>
+        <HeaderComponent title="Add Apartment" onBackPress={() => router.back()} />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {/* Info Card */}
@@ -282,24 +277,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
   },
   content: {
     flex: 1,

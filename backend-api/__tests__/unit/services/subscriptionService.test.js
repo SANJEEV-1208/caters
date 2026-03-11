@@ -6,21 +6,19 @@ const {
   createSubscription,
   deleteSubscription
 } = require('../../../src/services/subscriptionService');
+const { setupMocks, createMockRequestResponse, clearAllMocks } = require('../../helpers/testSetup');
 
-jest.mock('../../../src/config/database', () => ({
-  query: jest.fn(),
-}));
+// Setup mocks
+setupMocks();
 
 describe('Subscription Controller - Unit Tests', () => {
   let mockReq, mockRes;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockReq = { body: {}, params: {}, query: {} };
-    mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
-    };
+    clearAllMocks();
+    const mocks = createMockRequestResponse();
+    mockReq = mocks.mockReq;
+    mockRes = mocks.mockRes;
   });
 
   describe('getCustomerSubscriptions', () => {

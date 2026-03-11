@@ -14,6 +14,8 @@ import { useAuth } from "@/src/context/AuthContext";
 import ApartmentCard from "@/src/components/caterer/ApartmentCard";
 import { getCatererApartments, deleteApartment, getCustomerApartmentLinks } from "@/src/api/apartmentApi";
 import { showErrorAlert, showSuccessAlert, showConfirmAlert } from "@/src/utils/alertHelpers";
+import { HeaderComponent } from "@/src/components/common";
+import { screenStyles } from "@/src/styles/screenStyles";
 
 type Apartment = {
   id: number;
@@ -109,35 +111,29 @@ export default function ApartmentsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={screenStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#10B981" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={screenStyles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Apartments</Text>
-        <View style={{ width: 24 }} />
-      </View>
+      <HeaderComponent title="Apartments" onBackPress={() => router.back()} />
 
       {/* Stats Bar */}
-      <View style={styles.statsBar}>
-        <View style={styles.statItem}>
+      <View style={screenStyles.statsBar}>
+        <View style={screenStyles.statItem}>
           <Ionicons name="business" size={20} color="#10B981" />
-          <Text style={styles.statLabel}>Total Apartments</Text>
-          <Text style={styles.statValue}>{apartments.length}</Text>
+          <Text style={screenStyles.statLabel}>Total Apartments</Text>
+          <Text style={screenStyles.statValue}>{apartments.length}</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
+        <View style={screenStyles.statDivider} />
+        <View style={screenStyles.statItem}>
           <Ionicons name="people" size={20} color="#3B82F6" />
-          <Text style={styles.statLabel}>Total Customers</Text>
-          <Text style={styles.statValue}>
+          <Text style={screenStyles.statLabel}>Total Customers</Text>
+          <Text style={screenStyles.statValue}>
             {apartments.reduce((sum, apt) => sum + (apt.customerCount || 0), 0)}
           </Text>
         </View>
@@ -154,7 +150,7 @@ export default function ApartmentsScreen() {
             onViewCustomers={handleViewCustomers}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={screenStyles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -186,7 +182,7 @@ export default function ApartmentsScreen() {
       {/* FAB - Add Apartment */}
       {apartments.length > 0 && (
         <TouchableOpacity
-          style={styles.fab}
+          style={screenStyles.fab}
           onPress={() => router.push("/(authenticated)/caterer/apartment-add")}
         >
           <Ionicons name="add" size={28} color="#FFFFFF" />
@@ -197,65 +193,6 @@ export default function ApartmentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8F8F8",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  statsBar: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: "#E5E7EB",
-    marginHorizontal: 16,
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   emptyState: {
     paddingVertical: 80,
     paddingHorizontal: 32,
@@ -298,21 +235,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#10B981",
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });

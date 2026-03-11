@@ -7,21 +7,19 @@ const {
   createCatererCuisine,
   deleteCatererCuisine
 } = require('../../../src/services/cuisineService');
+const { setupMocks, createMockRequestResponse, clearAllMocks } = require('../../helpers/testSetup');
 
-jest.mock('../../../src/config/database', () => ({
-  query: jest.fn(),
-}));
+// Setup mocks
+setupMocks();
 
 describe('Cuisine Controller - Unit Tests', () => {
   let mockReq, mockRes;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockReq = { body: {}, params: {}, query: {} };
-    mockRes = {
-      json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis(),
-    };
+    clearAllMocks();
+    const mocks = createMockRequestResponse();
+    mockReq = mocks.mockReq;
+    mockRes = mocks.mockRes;
   });
 
   describe('getAllCuisines', () => {

@@ -17,6 +17,8 @@ import { searchUserByPhone, createCustomer } from "@/src/api/authApi";
 import { getCatererApartments, addCustomerToApartment } from "@/src/api/apartmentApi";
 import { createSubscription } from "@/src/api/subscriptionApi";
 import { showValidationError, showSuccessAlert, showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
+import { HeaderComponent } from "@/src/components/common";
+import ApartmentSelector from "@/src/components/caterer/ApartmentSelector";
 
 type User = {
   id: number;
@@ -189,13 +191,7 @@ export default function CustomerAddScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#F8F8F8" />
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Customer</Text>
-        <View style={{ width: 24 }} />
-      </View>
+        <HeaderComponent title="Add Customer" onBackPress={() => router.back()} />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {/* Phone Number Search */}
@@ -292,71 +288,19 @@ export default function CustomerAddScreen() {
             </View>
 
             {/* Apartment Selection */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Link to Apartment</Text>
-              <Text style={styles.sectionHint}>
-                Select an apartment or add customer directly
-              </Text>
-
-              {apartments.length > 0 ? (
-                <>
-                  {apartments.map((apt) => (
-                    <TouchableOpacity
-                      key={apt.id}
-                      style={[
-                        styles.apartmentOption,
-                        selectedApartmentId === apt.id && styles.apartmentOptionActive,
-                        addDirectly && styles.apartmentOptionDisabled,
-                      ]}
-                      onPress={() => {
-                        setSelectedApartmentId(apt.id);
-                        setAddDirectly(false);
-                      }}
-                      disabled={addDirectly}
-                    >
-                      <View style={styles.radioCircle}>
-                        {selectedApartmentId === apt.id && !addDirectly && (
-                          <View style={styles.radioCircleInner} />
-                        )}
-                      </View>
-                      <View style={styles.apartmentInfo}>
-                        <Text style={styles.apartmentName}>{apt.name}</Text>
-                        <Text style={styles.apartmentAddress}>{apt.address}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-
-                  <View style={styles.divider} />
-                </>
-              ) : (
-                <View style={styles.noApartmentsCard}>
-                  <Ionicons name="business-outline" size={32} color="#9CA3AF" />
-                  <Text style={styles.noApartmentsText}>No apartments created yet</Text>
-                </View>
-              )}
-
-              {/* Direct Add Option */}
-              <TouchableOpacity
-                style={[
-                  styles.directOption,
-                  addDirectly && styles.directOptionActive,
-                ]}
-                onPress={() => {
-                  setAddDirectly(!addDirectly);
-                  setSelectedApartmentId(null);
-                }}
-              >
-                <View style={styles.radioCircle}>
-                  {addDirectly && <View style={styles.radioCircleInner} />}
-                </View>
-                <View style={styles.directInfo}>
-                  <Text style={styles.directTitle}>Add Directly (No Apartment)</Text>
-                  <Text style={styles.directSubtitle}>
-                    Customer will be added without apartment linkage
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            <ApartmentSelector
+              apartments={apartments}
+              selectedApartmentId={selectedApartmentId}
+              addDirectly={addDirectly}
+              onSelectApartment={(id) => {
+                setSelectedApartmentId(id);
+                setAddDirectly(false);
+              }}
+              onToggleDirectAdd={() => {
+                setAddDirectly(!addDirectly);
+                setSelectedApartmentId(null);
+              }}
+            />
 
             {/* Create Button */}
             <TouchableOpacity
@@ -396,71 +340,19 @@ export default function CustomerAddScreen() {
             </View>
 
             {/* Apartment Selection */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Link to Apartment</Text>
-              <Text style={styles.sectionHint}>
-                Select an apartment or add customer directly
-              </Text>
-
-              {apartments.length > 0 ? (
-                <>
-                  {apartments.map((apt) => (
-                    <TouchableOpacity
-                      key={apt.id}
-                      style={[
-                        styles.apartmentOption,
-                        selectedApartmentId === apt.id && styles.apartmentOptionActive,
-                        addDirectly && styles.apartmentOptionDisabled,
-                      ]}
-                      onPress={() => {
-                        setSelectedApartmentId(apt.id);
-                        setAddDirectly(false);
-                      }}
-                      disabled={addDirectly}
-                    >
-                      <View style={styles.radioCircle}>
-                        {selectedApartmentId === apt.id && !addDirectly && (
-                          <View style={styles.radioCircleInner} />
-                        )}
-                      </View>
-                      <View style={styles.apartmentInfo}>
-                        <Text style={styles.apartmentName}>{apt.name}</Text>
-                        <Text style={styles.apartmentAddress}>{apt.address}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-
-                  <View style={styles.divider} />
-                </>
-              ) : (
-                <View style={styles.noApartmentsCard}>
-                  <Ionicons name="business-outline" size={32} color="#9CA3AF" />
-                  <Text style={styles.noApartmentsText}>No apartments created yet</Text>
-                </View>
-              )}
-
-              {/* Direct Add Option */}
-              <TouchableOpacity
-                style={[
-                  styles.directOption,
-                  addDirectly && styles.directOptionActive,
-                ]}
-                onPress={() => {
-                  setAddDirectly(!addDirectly);
-                  setSelectedApartmentId(null);
-                }}
-              >
-                <View style={styles.radioCircle}>
-                  {addDirectly && <View style={styles.radioCircleInner} />}
-                </View>
-                <View style={styles.directInfo}>
-                  <Text style={styles.directTitle}>Add Directly (No Apartment)</Text>
-                  <Text style={styles.directSubtitle}>
-                    Customer will be added without apartment linkage
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            <ApartmentSelector
+              apartments={apartments}
+              selectedApartmentId={selectedApartmentId}
+              addDirectly={addDirectly}
+              onSelectApartment={(id) => {
+                setSelectedApartmentId(id);
+                setAddDirectly(false);
+              }}
+              onToggleDirectAdd={() => {
+                setAddDirectly(!addDirectly);
+                setSelectedApartmentId(null);
+              }}
+            />
 
             {/* Add Button */}
             <TouchableOpacity
@@ -489,24 +381,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F8F8",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  backButton: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
   },
   content: {
     flex: 1,
@@ -594,96 +468,6 @@ const styles = StyleSheet.create({
   },
   verifiedBadge: {
     padding: 4,
-  },
-  apartmentOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-  },
-  apartmentOptionActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  apartmentOptionDisabled: {
-    opacity: 0.4,
-  },
-  radioCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  radioCircleInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#10B981",
-  },
-  apartmentInfo: {
-    flex: 1,
-  },
-  apartmentName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 2,
-  },
-  apartmentAddress: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E5E7EB",
-    marginVertical: 12,
-  },
-  directOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-  },
-  directOptionActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  directInfo: {
-    flex: 1,
-  },
-  directTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    marginBottom: 2,
-  },
-  directSubtitle: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  noApartmentsCard: {
-    alignItems: "center",
-    paddingVertical: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  noApartmentsText: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 8,
   },
   submitButton: {
     flexDirection: "row",
