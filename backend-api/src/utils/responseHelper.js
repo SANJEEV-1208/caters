@@ -106,7 +106,7 @@ const sendForbidden = (res, message = 'Forbidden') => {
  * @returns {boolean} True if exists, false otherwise
  */
 const checkResourceExists = (res, result, resource = 'Resource') => {
-  if (!result || !result.rows || result.rows.length === 0) {
+  if (!result?.rows?.length) {
     sendNotFound(res, resource);
     return false;
   }

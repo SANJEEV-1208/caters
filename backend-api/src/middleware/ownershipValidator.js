@@ -53,7 +53,7 @@ const validateOwnership = (
       const resource = await checkOwnership(table, resourceId, userId, ownerColumn);
 
       if (!resource) {
-        const resourceName = table.replace(/_/g, ' ').replace(/s$/, '');
+        const resourceName = table.replaceAll('_', ' ').replace(/s$/, '');
         return sendNotFound(res, resourceName);
       }
 

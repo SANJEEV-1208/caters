@@ -25,6 +25,54 @@ interface LoginFormProps {
   readonly currentPath: string;
 }
 
+// Helper function to check role mismatch
+const checkRoleMismatch = (
+  userRole: string,
+  userCaterType: string | undefined,
+  expectedRole: "customer" | "caterer",
+  expectedCaterType: string | undefined
+): { shouldLogout: boolean; message: string } => {
+  if (expectedRole === "customer" && userRole === "caterer") {
+    const loginPage = userCaterType === "restaurant" ? "Restaurant" : "Caterer";
+    return {
+      shouldLogout: true,
+      message: `This login is for customers only. Please use the ${loginPage} Login page.`,
+    };
+  }
+
+  if (expectedRole === "caterer" && userRole === "customer") {
+    const pageType = expectedCaterType === "restaurant" ? "restaurants" : "caterers";
+    return {
+      shouldLogout: true,
+      message: `This login is for ${pageType} only. Please use the Customer Login page.`,
+    };
+  }
+
+  if (expectedRole === "caterer" && expectedCaterType && userCaterType !== expectedCaterType) {
+    const currentType = expectedCaterType === "restaurant" ? "restaurants" : "home caterers";
+    const otherPage = expectedCaterType === "restaurant" ? "Caterer" : "Restaurant";
+    return {
+      shouldLogout: true,
+      message: `This login is for ${currentType} only. Please use the ${otherPage} Login page.`,
+    };
+  }
+
+  return { shouldLogout: false, message: "" };
+};
+
+// Helper function to handle PIN setup error
+const handlePinSetupError = (error: Error, router: any) => {
+  const setupData = (error as any).setupData;
+  router.push({
+    pathname: "/setup-pin",
+    params: {
+      userId: String(setupData?.userId ?? ""),
+      phone: setupData?.phone ?? "",
+      name: setupData?.name ?? "",
+    },
+  });
+};
+
 export default function LoginForm({
   title,
   subtitle,
@@ -45,34 +93,19 @@ export default function LoginForm({
 
   // Check for wrong role and show alert
   useEffect(() => {
-    if (pathname !== currentPath) return;
+    if (pathname !== currentPath || !isAuthenticated || !user || loading) {
+      return;
+    }
 
-    if (isAuthenticated && user && !loading) {
-      let shouldLogout = false;
-      let message = "";
+    const { shouldLogout, message } = checkRoleMismatch(
+      user.role,
+      user.caterType,
+      expectedRole,
+      expectedCaterType
+    );
 
-      if (expectedRole === "customer" && user.role === "caterer") {
-        if (user.caterType === "restaurant") {
-          message = "This login is for customers only. Please use the Restaurant Login page.";
-          shouldLogout = true;
-        } else if (user.caterType === "home") {
-          message = "This login is for customers only. Please use the Caterer Login page.";
-          shouldLogout = true;
-        }
-      } else if (expectedRole === "caterer") {
-        if (user.role === "customer") {
-          message = `This login is for ${expectedCaterType === "restaurant" ? "restaurants" : "caterers"} only. Please use the Customer Login page.`;
-          shouldLogout = true;
-        } else if (expectedCaterType && user.caterType !== expectedCaterType) {
-          const otherType = expectedCaterType === "restaurant" ? "home caterers" : "restaurants";
-          message = `This login is for ${expectedCaterType === "restaurant" ? "restaurants" : "home caterers"} only. Please use the ${otherType === "home caterers" ? "Caterer" : "Restaurant"} Login page.`;
-          shouldLogout = true;
-        }
-      }
-
-      if (shouldLogout) {
-        showErrorAlert(message, () => logout());
-      }
+    if (shouldLogout) {
+      showErrorAlert(message, () => logout());
     }
   }, [isAuthenticated, user?.role, user?.caterType, loading, pathname, currentPath, expectedRole, expectedCaterType]);
 
@@ -91,26 +124,14 @@ export default function LoginForm({
 
     try {
       const success = await login(fullPhone, pin);
-      if (success) {
-        // Navigation is handled by the root layout based on role
-      } else {
+      if (!success) {
         showErrorAlert("Login failed. Please check your credentials.");
       }
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (error.message === "PIN_SETUP_REQUIRED") {
-          const setupData = (error as any).setupData;
-          router.push({
-            pathname: "/setup-pin",
-            params: {
-              userId: String(setupData.userId),
-              phone: setupData.phone,
-              name: setupData.name,
-            },
-          });
-        } else {
-          showErrorAlert(error.message);
-        }
+      if (error instanceof Error && error.message === "PIN_SETUP_REQUIRED") {
+        handlePinSetupError(error, router);
+      } else if (error instanceof Error) {
+        showErrorAlert(error.message);
       } else {
         showErrorAlert("An unexpected error occurred");
       }
@@ -143,7 +164,7 @@ export default function LoginForm({
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={(text) => {
-                  const numbers = text.replace(/[^0-9]/g, "");
+                  const numbers = text.replaceAll(/\D/g, "");
                   setPhone(numbers.slice(0, 10));
                 }}
                 maxLength={10}
@@ -163,7 +184,7 @@ export default function LoginForm({
                 keyboardType="number-pad"
                 value={pin}
                 onChangeText={(text) => {
-                  const numbers = text.replace(/[^0-9]/g, "");
+                  const numbers = text.replaceAll(/\D/g, "");
                   setPin(numbers.slice(0, 4));
                 }}
                 maxLength={4}
@@ -217,9 +238,9 @@ export default function LoginForm({
                 <View style={styles.dividerLine} />
               </View>
 
-              {alternateLoginRoutes.map((route, index) => (
+              {alternateLoginRoutes.map((route) => (
                 <TouchableOpacity
-                  key={index}
+                  key={route.route}
                   onPress={() => router.push(route.route)}
                   style={styles.alternateButton}
                 >

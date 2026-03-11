@@ -29,7 +29,7 @@ export const validatePin = (pin: string): { valid: boolean; error?: string } => 
 };
 
 export const validateRequired = (value: string, fieldName: string): { valid: boolean; error?: string } => {
-  if (!value || !value.trim()) {
+  if (!value?.trim()) {
     return { valid: false, error: `${fieldName} is required` };
   }
   return { valid: true };
