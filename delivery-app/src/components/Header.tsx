@@ -8,9 +8,10 @@ import ProfileModal from "@/src/components/ProfileModal";
 interface HeaderProps {
   readonly onFilterPress?: () => void;
   readonly showFilter?: boolean;
+  readonly showProfile?: boolean;
 }
 
-export default function Header({ onFilterPress, showFilter = false }: HeaderProps) {
+export default function Header({ onFilterPress, showFilter = false, showProfile = true }: HeaderProps) {
   const { user, selectedCatererId } = useAuth();
   const router = useRouter();
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -52,24 +53,28 @@ export default function Header({ onFilterPress, showFilter = false }: HeaderProp
         )}
 
         {/* Profile Icon */}
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={() => setProfileModalVisible(true)}
-        >
-          {user?.profilePicture ? (
-            <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
-          ) : (
-            <View style={styles.profilePlaceholder}>
-              <Ionicons name="person" size={20} color="#10B981" />
-            </View>
-          )}
-        </TouchableOpacity>
+        {showProfile && (
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => setProfileModalVisible(true)}
+          >
+            {user?.profilePicture ? (
+              <Image source={{ uri: user.profilePicture }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.profilePlaceholder}>
+                <Ionicons name="person" size={20} color="#10B981" />
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
-      <ProfileModal
-        visible={profileModalVisible}
-        onClose={() => setProfileModalVisible(false)}
-      />
+      {showProfile && (
+        <ProfileModal
+          visible={profileModalVisible}
+          onClose={() => setProfileModalVisible(false)}
+        />
+      )}
     </View>
   );
 }

@@ -25,6 +25,20 @@ interface LoginFormProps {
   readonly currentPath: string;
 }
 
+// Helper function to get the correct login route based on user's actual role
+const getCorrectLoginRoute = (
+  userRole: string,
+  userCaterType: string | undefined
+): string => {
+  if (userRole === "customer") {
+    return "/login";
+  }
+  if (userRole === "caterer") {
+    return userCaterType === "restaurant" ? "/restaurant-login" : "/caterer-login";
+  }
+  return "/login";
+};
+
 // Helper function to check role mismatch
 const checkRoleMismatch = (
   userRole: string,
@@ -91,9 +105,9 @@ export default function LoginForm({
   const { login, logout, user, isAuthenticated } = useAuth();
   const fullPhone = "+91" + phone;
 
-  // Check for wrong role and show alert
+  // Check for wrong role and redirect appropriately
   useEffect(() => {
-    if (pathname !== currentPath || !isAuthenticated || !user || loading) {
+    if (pathname !== currentPath || !isAuthenticated || !user) {
       return;
     }
 
@@ -105,9 +119,20 @@ export default function LoginForm({
     );
 
     if (shouldLogout) {
-      showErrorAlert(message, () => logout());
+      // User logged in with wrong role - show alert and redirect to correct page
+      const correctRoute = getCorrectLoginRoute(user.role, user.caterType);
+
+      showErrorAlert(message, () => {
+        logout();
+        setLoading(false);
+        router.replace(correctRoute as any);
+      });
+    } else {
+      // Role matches - redirect to home dashboard
+      router.replace("/");
+      setLoading(false);
     }
-  }, [isAuthenticated, user?.role, user?.caterType, loading, pathname, currentPath, expectedRole, expectedCaterType]);
+  }, [isAuthenticated, user?.role, user?.caterType, pathname, currentPath, expectedRole, expectedCaterType, logout, router]);
 
   const handleLogin = async () => {
     if (phone?.length !== 10) {
@@ -115,8 +140,8 @@ export default function LoginForm({
       return;
     }
 
-    if (pin?.length !== 4) {
-      showErrorAlert("Please enter your 4-digit PIN");
+    if (pin && (pin.length < 4 || pin.length > 6)) {
+      showErrorAlert("Please enter a valid 4-6 digit PIN");
       return;
     }
 
@@ -124,8 +149,12 @@ export default function LoginForm({
 
     try {
       const success = await login(fullPhone, pin);
-      if (!success) {
+      if (success) {
+        // Don't redirect yet - let the useEffect check role first
+        // The useEffect will handle redirect or show error if wrong role
+      } else {
         showErrorAlert("Login failed. Please check your credentials.");
+        setLoading(false);
       }
     } catch (error: unknown) {
       if (error instanceof Error && error.message === "PIN_SETUP_REQUIRED") {
@@ -135,7 +164,6 @@ export default function LoginForm({
       } else {
         showErrorAlert("An unexpected error occurred");
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -175,19 +203,19 @@ export default function LoginForm({
 
           {/* PIN Input */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>PIN</Text>
+            <Text style={styles.label}>PIN (4-6 digits)</Text>
             <View style={styles.pinContainer}>
               <TextInput
                 style={styles.pinInput}
-                placeholder="Enter 4-digit PIN"
+                placeholder="Enter your PIN"
                 secureTextEntry={!showPin}
                 keyboardType="number-pad"
                 value={pin}
                 onChangeText={(text) => {
                   const numbers = text.replaceAll(/\D/g, "");
-                  setPin(numbers.slice(0, 4));
+                  setPin(numbers.slice(0, 6));
                 }}
-                maxLength={4}
+                maxLength={6}
                 placeholderTextColor="#9CA3AF"
               />
               <TouchableOpacity
@@ -219,7 +247,7 @@ export default function LoginForm({
           {/* Signup Link */}
           {signupRoute && (
             <TouchableOpacity
-              onPress={() => router.push(signupRoute)}
+              onPress={() => router.push(signupRoute as any)}
               style={styles.signupContainer}
             >
               <Text style={styles.signupText}>
@@ -241,7 +269,7 @@ export default function LoginForm({
               {alternateLoginRoutes.map((route) => (
                 <TouchableOpacity
                   key={route.route}
-                  onPress={() => router.push(route.route)}
+                  onPress={() => router.push(route.route as any)}
                   style={styles.alternateButton}
                 >
                   <Text style={styles.alternateButtonText}>{route.label}</Text>

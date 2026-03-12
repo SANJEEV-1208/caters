@@ -109,9 +109,9 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
             nestedScrollEnabled={true}
             keyboardShouldPersistTaps="handled"
           >
-            {suggestions.map((item) => (
+            {suggestions.map((item, index) => (
               <TouchableOpacity
-                key={item.place_id}
+                key={`${item.place_id}-${index}`}
                 style={styles.suggestionItem}
                 onPress={() => { handleSelectSuggestion(item); }}
                 activeOpacity={0.7}

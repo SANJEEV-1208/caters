@@ -38,6 +38,15 @@ export default function ProfileModal({ visible, onClose }: ProfileModalProps) {
   };
 
   const handleLogout = () => {
+    let loginRoute = "/login"; // Default to customer login
+
+            if (user?.role === "caterer") {
+              if (user.caterType === "restaurant") {
+                loginRoute = "/restaurant-login";
+              } else {
+                loginRoute = "/caterer-login";
+              }
+            }
     Alert.alert(
       "Logout",
       "Are you sure you want to logout?",
@@ -47,9 +56,10 @@ export default function ProfileModal({ visible, onClose }: ProfileModalProps) {
           text: "Logout",
           style: "destructive",
           onPress: () => {
+            // Determine correct login route before logout clears user
             logout();
             handleClose();
-            router.replace("/login");
+            router.replace(loginRoute as any);
           },
         },
       ]

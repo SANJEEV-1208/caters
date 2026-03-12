@@ -2,7 +2,7 @@ export type User = {
   id: number;
   phone: string;
   email?: string;        // For caterers (optional)
-  role: "customer" | "caterer";
+  role: "customer" | "caterer" | "admin" | "superadmin";
   name: string;
   serviceName?: string;  // For home kitchen caterers
   address?: string;      // For home kitchen caterers

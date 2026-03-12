@@ -31,7 +31,15 @@ export default function CatererTypeSelectionScreen() {
       contentContainerStyle={styles.contentContainer}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Select Your Service Type</Text>
+        <View style={styles.headerRow}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backLink}>←</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Your Service Type</Text>
+        </View>
         <Text style={styles.subtitle}>
           Choose how you want to use KaasproFoods
         </Text>
@@ -97,11 +105,6 @@ export default function CatererTypeSelectionScreen() {
         <Ionicons name="chevron-forward" size={24} color="#F59E0B" />
       </TouchableOpacity>
 
-      <View style={styles.footer}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backLink}>← Back</Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 }
@@ -117,18 +120,30 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 32,
-    marginTop: 16,
+    marginTop: 26,
+    paddingTop: 16,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  backButton: {
+    marginRight: 8,
   },
   title: {
     fontSize: 28,
     fontWeight: "700",
     color: "#1A1A1A",
-    marginBottom: 8,
+    flex: 1,
+    paddingLeft: 18,
   },
   subtitle: {
     fontSize: 14,
     color: "#6B7280",
     lineHeight: 20,
+    marginBottom: 24,
+    paddingLeft: 50,
   },
   optionCard: {
     backgroundColor: "#FFFFFF",
@@ -175,16 +190,10 @@ const styles = StyleSheet.create({
     color: "#4B5563",
     lineHeight: 16,
   },
-  footer: {
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    alignItems: "center",
-  },
   backLink: {
-    fontSize: 14,
+    fontSize: 34,
     color: "#10B981",
     fontWeight: "600",
+    paddingRight: 12,
   },
 });

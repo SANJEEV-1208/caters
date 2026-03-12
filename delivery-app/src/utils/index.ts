@@ -5,5 +5,5 @@
 
 export * from './alertHelpers';
 export * from './validation';
-export { default as apiHelper } from './apiHelper';
+export * from './apiHelper';
 export * from './dateUtils';

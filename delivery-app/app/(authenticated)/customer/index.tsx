@@ -169,6 +169,7 @@ export default function HomeScreen() {
       <View style={styles.headerWrapper}>
         <Header
           showFilter={true}
+          showProfile={false}
           onFilterPress={() => { setFilterModalVisible(true); }}
         />
       </View>

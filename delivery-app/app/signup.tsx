@@ -104,7 +104,17 @@ export default function SignupScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.content}>
           {/* Header */}
-          <Text style={styles.title}>Caterer Registration</Text>
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Caterer Registration</Text>
+          </View>
+        </View>
         <View style={styles.warningBox}>
           <Text style={styles.warningText}>
             ⚠️ Signup only for caterers providing service
@@ -231,12 +241,6 @@ export default function SignupScreen() {
         </TouchableOpacity>
 
         {/* Back to Login */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Back to Login</Text>
-        </TouchableOpacity>
       </View>
       </ScrollView>
     </SafeAreaView>
@@ -256,12 +260,19 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 12,
   },
+  header: {
+    marginBottom: 20,
+    paddingTop: 8,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   title: {
     fontSize: 28,
     fontWeight: "700",
     color: "#1A1A1A",
-    marginBottom: 16,
-    textAlign: "center",
+    flex: 1,
   },
   warningBox: {
     backgroundColor: "#FEF3C7",
@@ -374,11 +385,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   backButton: {
-    alignItems: "center",
-    padding: 12,
+    marginRight: 8,
+    paddingRight: 10,
   },
   backButtonText: {
-    fontSize: 14,
+    fontSize: 34,
     color: "#10B981",
     fontWeight: "600",
   },

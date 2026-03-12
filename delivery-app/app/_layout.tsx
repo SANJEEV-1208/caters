@@ -28,7 +28,13 @@ export default function RootLayout() {
 
       // Navigate to order details if notification is about an order
       if (data.type === "order_status_update" && data.orderId) {
-        const orderId = String(data.orderId); // Ensure it's a string
+        // Ensure orderId is a valid primitive type (string or number)
+        if (typeof data.orderId !== "string" && typeof data.orderId !== "number") {
+          console.error("❌ Invalid orderId format:", data.orderId);
+          return;
+        }
+
+        const orderId = String(data.orderId);
         console.log(`🚀 Navigating to order: ${orderId}`);
         router.push(`/(authenticated)/customer/orderdetails?orderId=${orderId}`);
       }

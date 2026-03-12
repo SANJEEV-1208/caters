@@ -110,10 +110,20 @@ export default function RestaurantSignupScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.content}>
         {/* Header */}
-        <Text style={styles.title}>Restaurant Registration</Text>
-        <Text style={styles.subtitle}>
-          Register your restaurant to start taking orders from table QR codes
-        </Text>
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>Restaurant Registration</Text>
+          </View>
+          <Text style={styles.subtitle}>
+            Register your restaurant to start taking orders from table QR codes
+          </Text>
+        </View>
 
         <View style={styles.warningBox}>
           <Text style={styles.warningText}>
@@ -243,11 +253,6 @@ export default function RestaurantSignupScreen() {
             <Text style={styles.signupButtonText}>Register Restaurant</Text>
           )}
         </TouchableOpacity>
-
-        {/* Back Link */}
-        <TouchableOpacity onPress={() => router.back()} disabled={loading}>
-          <Text style={styles.backLink}>← Back</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -266,19 +271,36 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  header: {
+    marginBottom: 20,
+    paddingTop: 8,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  backButton: {
+    marginRight: 8,
+    padding: 8,
+  },
+  backButtonText: {
+    fontSize: 25,
+    color: "#F59E0B",
+    fontWeight: "600",
+  },
   title: {
     fontSize: 28,
     fontWeight: "700",
     color: "#1A1A1A",
-    marginBottom: 8,
-    textAlign: "center",
+    flex: 1,
   },
   subtitle: {
     fontSize: 14,
     color: "#6B7280",
-    textAlign: "center",
     marginBottom: 20,
     lineHeight: 20,
+    paddingLeft: 14,
   },
   warningBox: {
     backgroundColor: "#FEF3C7",
@@ -372,12 +394,6 @@ const styles = StyleSheet.create({
   signupButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  backLink: {
-    fontSize: 14,
-    color: "#F59E0B",
-    textAlign: "center",
     fontWeight: "600",
   },
 });
