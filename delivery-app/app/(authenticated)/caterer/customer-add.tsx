@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { searchUserByPhone, createCustomer } from "@/src/api/authApi";
 import { getCatererApartments, addCustomerToApartment } from "@/src/api/apartmentApi";
-import { createSubscription } from "@/src/api/subscriptionApi";
+import { createSubscription, getCustomerSubscriptions } from "@/src/api/subscriptionApi";
 import { showValidationError, showSuccessAlert, showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 import { HeaderComponent } from "@/src/components/common";
 import ApartmentSelector from "@/src/components/caterer/ApartmentSelector";
@@ -69,28 +69,71 @@ export default function CustomerAddScreen() {
 
     setSearching(true);
     setShowCreateForm(false);
-    try {
-      // Normalize phone number for search - ensure it has +91 prefix
-      const normalizedPhone = phone.startsWith('+91') ? phone : `+91${phone.replace(/^\+?91/, '')}`;
+    setFoundUser(null);
 
-      const result = await searchUserByPhone(normalizedPhone);
+    try {
+      // Try multiple phone number formats to find existing customer
+      const phoneVariations = [
+        phone.startsWith('+91') ? phone : `+91${phone.replace(/^\+?91/, '')}`, // With +91
+        phone.replace(/^\+?91/, ''), // Without +91
+        phone, // As entered
+      ];
+
+      let result = null;
+
+      // Try each phone format
+      for (const phoneFormat of phoneVariations) {
+        try {
+          result = await searchUserByPhone(phoneFormat);
+          if (result) break; // Found user, stop searching
+        } catch (err) {
+          // Continue to next format
+          continue;
+        }
+      }
+
       if (result) {
         if (result.role === "customer") {
-          setFoundUser(result);
-          setShowCreateForm(false);
+          // Check if customer is already subscribed to this caterer
+          try {
+            const subscriptions = await getCustomerSubscriptions(result.id);
+            const alreadySubscribed = subscriptions.some(sub => sub.catererId === user?.id);
+
+            if (alreadySubscribed) {
+              showInfoAlert(
+                "Customer Already Exists",
+                `${result.name} is already subscribed to your service.`,
+                () => {
+                  setFoundUser(null);
+                  setShowCreateForm(false);
+                  setPhone("");
+                }
+              );
+            } else {
+              setFoundUser(result);
+              setShowCreateForm(false);
+            }
+          } catch (subError) {
+            // If subscription check fails, still show the user (they can add)
+            console.error("Failed to check subscription:", subError);
+            setFoundUser(result);
+            setShowCreateForm(false);
+          }
         } else {
           showErrorAlert("This user is not a customer");
           setFoundUser(null);
           setShowCreateForm(false);
         }
       } else {
-        // User not found - show create form
+        // User not found after trying all formats - show create form
         setFoundUser(null);
         setShowCreateForm(true);
       }
     } catch (error) {
       console.error("Failed to search user:", error);
       showErrorAlert("Failed to search for user");
+      setFoundUser(null);
+      setShowCreateForm(false);
     } finally {
       setSearching(false);
     }
@@ -152,20 +195,40 @@ export default function CustomerAddScreen() {
       // Normalize phone number - ensure it has +91 prefix
       const normalizedPhone = phone.startsWith('+91') ? phone : `+91${phone.replace(/^\+?91/, '')}`;
 
-      // Step 1: Create new customer
-      const newCustomer = await createCustomer({
-        name: customerName,
-        phone: normalizedPhone,
-        address: customerAddress,
-      });
+      let customerId: number;
+
+      try {
+        // Step 1: Try to create new customer
+        const newCustomer = await createCustomer({
+          name: customerName,
+          phone: normalizedPhone,
+          address: customerAddress,
+        });
+        customerId = newCustomer.id;
+      } catch (createError: unknown) {
+        // If customer already exists, search for them instead
+        if (createError instanceof Error && createError.message.includes("already exists")) {
+          console.log("Customer already exists, searching for them...");
+          const existingUser = await searchUserByPhone(normalizedPhone);
+
+          if (existingUser && existingUser.role === "customer") {
+            customerId = existingUser.id;
+            console.log("Found existing customer:", existingUser.name);
+          } else {
+            throw new Error("Customer already exists but could not be found. Please try searching again.");
+          }
+        } else {
+          throw createError;
+        }
+      }
 
       // Step 2: Create subscription (customer-caterer relationship)
-      await createSubscription(newCustomer.id, user!.id);
+      await createSubscription(customerId, user!.id);
 
       // Step 3: Link to apartment ONLY if an apartment is selected (skip for direct add)
       if (selectedApartmentId) {
         await addCustomerToApartment({
-          customerId: newCustomer.id,
+          customerId: customerId,
           apartmentId: selectedApartmentId,
           catererId: user!.id,
           addedVia: "manual",
@@ -173,7 +236,7 @@ export default function CustomerAddScreen() {
       }
 
       showSuccessAlert(
-        `Customer created successfully!\n\n${newCustomer.name} can now place orders from your service.`,
+        `Customer added successfully!\n\nThey can now place orders from your service.`,
         () => router.back()
       );
     } catch (error: unknown) {
