@@ -111,11 +111,11 @@ export default function CustomerAddScreen() {
 
       const isNewSubscription = !subscription.isExisting;
 
-      // Step 2: Link to apartment if selected
-      if (selectedApartmentId || addDirectly) {
+      // Step 2: Link to apartment ONLY if an apartment is selected (skip for direct add)
+      if (selectedApartmentId) {
         await addCustomerToApartment({
           customerId: foundUser.id,
-          apartmentId: selectedApartmentId || null, // null for direct add
+          apartmentId: selectedApartmentId,
           catererId: user.id,
           addedVia: "manual",
         });
@@ -162,11 +162,11 @@ export default function CustomerAddScreen() {
       // Step 2: Create subscription (customer-caterer relationship)
       await createSubscription(newCustomer.id, user!.id);
 
-      // Step 3: Link to apartment if selected
-      if (selectedApartmentId || addDirectly) {
+      // Step 3: Link to apartment ONLY if an apartment is selected (skip for direct add)
+      if (selectedApartmentId) {
         await addCustomerToApartment({
           customerId: newCustomer.id,
-          apartmentId: selectedApartmentId || null,
+          apartmentId: selectedApartmentId,
           catererId: user!.id,
           addedVia: "manual",
         });
