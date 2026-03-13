@@ -221,7 +221,7 @@ export default function CustomerAddScreen() {
               {searching ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Ionicons name="search" size={20} color="#FFFFFF" />
+                <Ionicons name="add" size={24} color="#FFFFFF" />
               )}
             </TouchableOpacity>
           </View>

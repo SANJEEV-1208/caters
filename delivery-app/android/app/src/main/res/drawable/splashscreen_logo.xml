@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Simple food delivery icon placeholder -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20C40.75,20 30,30.75 30,44C30,57.25 40.75,68 54,68C67.25,68 78,57.25 78,44C78,30.75 67.25,20 54,20ZM54,64C43.05,64 34,54.95 34,44C34,33.05 43.05,24 54,24C64.95,24 74,33.05 74,44C74,54.95 64.95,64 54,64Z"/>
+
+    <!-- Fork and knife symbol -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,36L46,52L48,52L48,36L46,36Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,36L52,44L54,44L54,52L56,52L56,44L58,44L58,36L52,36Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,36L60,52L62,52L62,36L60,36Z"/>
+</vector>

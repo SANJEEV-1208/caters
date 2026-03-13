@@ -291,6 +291,67 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// Search user by phone (NO PIN REQUIRED - for caterers to find customers before adding to subscription)
+exports.searchUserByPhone = async (req, res) => {
+  try {
+    const { phone } = req.query;
+
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    // Normalize phone number - remove +91 prefix if present
+    const normalizedPhone = phone.replace(/^\+91/, '');
+
+    // Create hash for lookup (supports both original phone formats)
+    const phoneHash1 = hash(phone);
+    const phoneHash2 = hash(normalizedPhone);
+
+    // Try to find user by phone hash (encrypted lookup)
+    // Fallback to plaintext for backward compatibility during migration
+    const result = await pool.query(
+      `SELECT * FROM users
+       WHERE phone_hash IN ($1, $2)
+       OR phone IN ($3, $4)`,
+      [phoneHash1, phoneHash2, phone, normalizedPhone]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+    const decryptedRestaurantAddress = user.restaurant_address_encrypted
+      ? decrypt(user.restaurant_address_encrypted)
+      : user.restaurant_address;
+
+    // Return user info without PIN or tokens (for caterer to add to subscription)
+    const formattedUser = {
+      id: user.id,
+      phone: decryptedPhone,
+      role: user.role,
+      name: user.name,
+      serviceName: user.service_name,
+      address: decryptedAddress,
+      caterType: user.cater_type,
+      restaurantName: user.restaurant_name,
+      restaurantAddress: decryptedRestaurantAddress,
+      paymentQrCode: user.payment_qr_code,
+      profilePicture: user.profile_picture,
+      createdAt: user.created_at
+    };
+
+    res.json(formattedUser);
+  } catch (error) {
+    console.error('Search user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Create customer (used by caterers when adding new customers)
 exports.createCustomer = async (req, res) => {
   try {

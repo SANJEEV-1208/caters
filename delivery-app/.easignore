@@ -1,0 +1,33 @@
+# EAS Build Ignore File
+# Excludes files/folders from being uploaded to EAS Build servers
+
+# Android build artifacts
+android/.gradle
+android/.gradle/**
+android/build
+android/app/build
+
+# iOS build artifacts
+ios/build
+ios/Pods
+
+# Node modules (already in .gitignore but being explicit)
+node_modules
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+
+# Cache directories
+.cache
+.expo
+
+# Other build artifacts
+.gradle
+build
+*.log

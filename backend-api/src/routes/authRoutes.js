@@ -70,6 +70,14 @@ router.get(
   authController.getUserById
 );
 
+// GET /api/auth/search-user - Search user by phone (protected, caterer only, NO PIN REQUIRED)
+router.get(
+  '/search-user',
+  authenticateToken,
+  requireRole('caterer'),
+  authController.searchUserByPhone
+);
+
 // PATCH /api/auth/users/:id - Update user profile (protected, ownership required)
 router.patch(
   '/users/:id',

@@ -15,6 +15,11 @@ exports.getUserById = async (req, res) => {
   return await authService.getUserById(req, res);
 };
 
+// Search user by phone (NO PIN REQUIRED - for caterers adding customers)
+exports.searchUserByPhone = async (req, res) => {
+  return await authService.searchUserByPhone(req, res);
+};
+
 // Create customer (used by caterers when adding new customers)
 exports.createCustomer = async (req, res) => {
   return await authService.createCustomer(req, res);

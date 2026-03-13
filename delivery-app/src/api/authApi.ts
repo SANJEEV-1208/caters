@@ -104,18 +104,20 @@ export const signupCaterer = async (data: SignupData & { pin: string }): Promise
   }
 };
 
-// Search user by phone number
+// Search user by phone number (NO PIN REQUIRED - for caterers adding customers)
 export const searchUserByPhone = async (phone: string): Promise<User | null> => {
   try {
-    // Reuse loginUser which now uses the new endpoint
-    const result = await loginUser(phone);
+    const res = await authenticatedFetch(`${BASE_URL}/auth/search-user?phone=${encodeURIComponent(phone)}`);
 
-    // If user needs PIN setup, return null (not a complete user yet)
-    if (result && 'requiresPinSetup' in result && result.requiresPinSetup) {
-      return null;
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null; // User not found
+      }
+      const error = await res.json();
+      throw new Error(error.error || "Failed to search user");
     }
 
-    return result as User | null;
+    return await res.json();
   } catch (error) {
     console.error("Search user API error:", error);
     throw error;
