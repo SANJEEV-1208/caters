@@ -27,11 +27,18 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [justSelected, setJustSelected] = useState(false);
 
   // LocationIQ API key (Free tier: 5,000 requests/day)
   const API_KEY = 'pk.b7b47c05118a2a3bdaa6b9c520516df9';
 
   useEffect(() => {
+    // Skip API call if we just selected from dropdown
+    if (justSelected) {
+      setJustSelected(false);
+      return;
+    }
+
     const timer = setTimeout(() => {
       if (value.length > 2) {
         void fetchSuggestions(value);
@@ -42,7 +49,7 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
     }, 400); // Debounce: wait 400ms after user stops typing
 
     return () => { clearTimeout(timer); };
-  }, [value]);
+  }, [value]); // Only depend on value, not justSelected
 
   const fetchSuggestions = async (query: string) => {
     try {
@@ -68,12 +75,14 @@ export default function LocationAutocomplete({ value, onSelect, placeholder }: P
   };
 
   const handleSelectSuggestion = (suggestion: LocationSuggestion) => {
+    setJustSelected(true); // Mark that we just selected from dropdown
     onSelect(suggestion.display_name);
     setShowSuggestions(false);
     setSuggestions([]);
   };
 
   const handleTextChange = (text: string) => {
+    setJustSelected(false); // Reset flag when user manually types
     onSelect(text);
     if (text.length <= 2) {
       setShowSuggestions(false);

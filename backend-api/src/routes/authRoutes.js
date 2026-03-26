@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authenticateToken, requireOwnership, requireRole } = require('../middleware/auth');
+const { authenticateToken, requireOwnership, requireRole, optionalAuth, conditionalOwnership } = require('../middleware/auth');
 const { authLimiter, qrCodeLimiter } = require('../middleware/rateLimiter');
 const {
   validateLogin,
@@ -60,13 +60,15 @@ router.post(
   authController.createCustomer
 );
 
-// GET /api/auth/users/:id - Get user by ID (protected, ownership required)
+// GET /api/auth/users/:id - Get user by ID
+// Public access for restaurant caterers (walk-in customers can view QR code)
+// Protected access for home kitchen caterers and customers (requires ownership)
 router.get(
   '/users/:id',
-  authenticateToken,
+  optionalAuth, // Allow both authenticated and guest access
   validateUserId,
   handleValidationErrors,
-  requireOwnership('id'),
+  conditionalOwnership('id'), // Smart authorization based on user type
   authController.getUserById
 );
 

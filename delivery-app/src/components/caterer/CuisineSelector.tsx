@@ -171,20 +171,15 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
         onRequestClose={closeModal}
       >
         <Pressable style={styles.modalOverlay} onPress={closeModal}>
-          <KeyboardAvoidingView
-            behavior="position"
-            style={styles.keyboardAvoidingView}
-            keyboardVerticalOffset={-100}
+          <View
+            style={styles.modalContent}
           >
-            <Pressable
-              style={styles.modalContent}
-              onPress={(e) => { e.stopPropagation(); }}
+            <ScrollView
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
+              bounces={true}
             >
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-              >
                 {/* Header */}
                 <View style={styles.modalHeader}>
                   <View style={styles.modalHeaderLeft}>
@@ -246,6 +241,7 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
                       onImageUploaded={(url) => { setNewCuisineImage(url); }}
                       currentImage={newCuisineImage}
                       disabled={loading}
+                      showPreview={false}
                     />
                   </View>
                 </View>
@@ -280,8 +276,7 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
                   </TouchableOpacity>
                 </View>
               </ScrollView>
-            </Pressable>
-          </KeyboardAvoidingView>
+            </View>
         </Pressable>
       </Modal>
     </>
@@ -371,21 +366,17 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
-  keyboardAvoidingView: {
-    width: "100%",
-  },
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    maxHeight: "85%",
+    height: "85%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
+    overflow: "hidden",
   },
   modalHeader: {
     flexDirection: "row",
@@ -548,9 +539,11 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   cuisineImageUpload: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   scrollContent: {
-    paddingBottom: 300,
+    paddingTop: 24,
+    paddingHorizontal: 24,
+    paddingBottom: Platform.OS === "ios" ? 34 : 24,
   },
 });

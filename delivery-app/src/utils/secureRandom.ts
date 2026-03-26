@@ -11,38 +11,29 @@
  */
 export const getSecureRandomInt = (min: number, max: number): number => {
   const range = max - min;
-  const bytesNeeded = Math.ceil(Math.log2(range) / 8);
-  const maxValue = Math.pow(256, bytesNeeded);
-  const randomBytes = new Uint8Array(bytesNeeded);
 
-  // Use crypto.getRandomValues for secure random generation
+  // Try to use crypto.getRandomValues if available
   if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(randomBytes);
-  } else {
-    // Fallback: Use timestamp-based seeding for better entropy
-    // Still not cryptographically secure, but better than plain Math.random()
-    console.warn('Crypto API not available - falling back to timestamp-based entropy');
-    const seed = Date.now() * performance.now();
-    let currentSeed = seed;
-
-    for (let i = 0; i < bytesNeeded; i++) {
-      // Linear congruential generator with better constants
-      currentSeed = (currentSeed * 1103515245 + 12345) & 0x7fffffff;
-      randomBytes[i] = (currentSeed >> 16) & 0xff;
-    }
+    const randomBuffer = new Uint32Array(1);
+    crypto.getRandomValues(randomBuffer);
+    return min + (randomBuffer[0] % range);
   }
 
-  let randomValue = 0;
-  for (let i = 0; i < bytesNeeded; i++) {
-    randomValue = (randomValue * 256) + randomBytes[i];
-  }
+  // Fallback: Enhanced Math.random() with timestamp entropy
+  // Combines multiple entropy sources for better randomness
+  const timestamp = Date.now();
+  const performanceNow = typeof performance !== 'undefined' ? performance.now() : 0;
+  const mathRandom = Math.random();
 
-  // Avoid modulo bias by rejecting values that would cause unfair distribution
-  if (randomValue >= maxValue - (maxValue % range)) {
-    return getSecureRandomInt(min, max);
-  }
+  // Mix all entropy sources
+  const combined = (timestamp * 1000 + performanceNow * 100 + mathRandom * 1000000) % 1000000;
+  const seed = Math.floor(combined);
 
-  return min + (randomValue % range);
+  // Use a better random function with the seed
+  const random = (seed * 9301 + 49297) % 233280;
+  const value = random / 233280;
+
+  return min + Math.floor(value * range);
 };
 
 /**

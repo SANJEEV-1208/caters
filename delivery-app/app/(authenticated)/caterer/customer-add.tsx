@@ -19,6 +19,7 @@ import { createSubscription, getCustomerSubscriptions } from "@/src/api/subscrip
 import { showValidationError, showSuccessAlert, showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 import { HeaderComponent } from "@/src/components/common";
 import ApartmentSelector from "@/src/components/caterer/ApartmentSelector";
+import LocationAutocomplete from "@/src/components/LocationAutocomplete";
 
 type User = {
   id: number;
@@ -259,7 +260,6 @@ export default function CustomerAddScreen() {
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
         {/* Phone Number Search */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Search Customer</Text>
           <Text style={styles.sectionHint}>
             Enter phone number (e.g., 9876543210 or +919876543210)
           </Text>
@@ -293,17 +293,6 @@ export default function CustomerAddScreen() {
         {/* Create New Customer Form */}
         {showCreateForm && (
           <>
-            <View style={styles.section}>
-              <View style={styles.createNoticeCard}>
-                <Ionicons name="information-circle" size={24} color="#3B82F6" />
-                <View style={styles.createNoticeText}>
-                  <Text style={styles.createNoticeTitle}>Customer Not Found</Text>
-                  <Text style={styles.createNoticeSubtitle}>
-                    Create a new customer account for {phone}
-                  </Text>
-                </View>
-              </View>
-            </View>
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Customer Details</Text>
@@ -337,16 +326,11 @@ export default function CustomerAddScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Address (Optional)</Text>
-                <View style={styles.inputContainer}>
-                  <Ionicons name="location-outline" size={20} color="#6B7280" />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter delivery address"
-                    value={customerAddress}
-                    onChangeText={setCustomerAddress}
-                    multiline
-                  />
-                </View>
+                <LocationAutocomplete
+                  value={customerAddress}
+                  onSelect={setCustomerAddress}
+                  placeholder="Enter delivery address"
+                />
               </View>
             </View>
 

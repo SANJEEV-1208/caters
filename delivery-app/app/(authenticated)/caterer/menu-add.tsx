@@ -93,6 +93,8 @@ export default function MenuAddScreen() {
       name: formData.name,
       price: formData.price,
       imageUrl: formData.image,
+      cuisine: formData.cuisine,
+      requireCuisine: true, // Home kitchen menus require cuisine selection
       requireDates: true,
       selectedDates,
     });
@@ -190,6 +192,7 @@ export default function MenuAddScreen() {
             onImageUploaded={(url) => { setFormData({ ...formData, image: url }); }}
             currentImage={formData.image}
             disabled={loading}
+            showPreview={true}  
           />
         </View>
 

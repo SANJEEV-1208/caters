@@ -105,3 +105,55 @@ exports.optionalAuth = (req, res, next) => {
     next();
   });
 };
+
+/**
+ * Conditional ownership middleware for getUserById
+ * - Restaurant caterers: Public access allowed (no auth needed)
+ * - Home kitchen caterers and customers: Requires ownership
+ */
+exports.conditionalOwnership = (userIdParam = 'id') => {
+  return async (req, res, next) => {
+    const pool = require('../config/database');
+    const resourceUserId = req.params[userIdParam];
+
+    if (!resourceUserId) {
+      return res.status(400).json({ error: 'User ID not found in request' });
+    }
+
+    try {
+      // Check if the requested user is a restaurant caterer
+      const result = await pool.query(
+        'SELECT role, cater_type FROM users WHERE id = $1',
+        [resourceUserId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const targetUser = result.rows[0];
+
+      // Allow public access for restaurant caterers (walk-in customers)
+      if (targetUser.role === 'caterer' && targetUser.cater_type === 'restaurant') {
+        req.isPublicAccess = true; // Flag for service layer
+        return next();
+      }
+
+      // For home kitchen caterers and customers, require authentication
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Verify ownership
+      if (Number(resourceUserId) !== req.user.id) {
+        return res.status(403).json({ error: 'Access denied. You can only access your own resources.' });
+      }
+
+      req.isPublicAccess = false; // Authenticated access
+      next();
+    } catch (error) {
+      console.error('Conditional ownership error:', error);
+      return res.status(500).json({ error: 'Authorization check failed' });
+    }
+  };
+};

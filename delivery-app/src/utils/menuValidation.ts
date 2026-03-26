@@ -4,6 +4,8 @@ export interface MenuFormData {
   name: string;
   price: string;
   imageUrl: string;
+  cuisine?: string;
+  requireCuisine?: boolean;
   requireDates?: boolean;
   selectedDates?: string[];
 }
@@ -24,6 +26,12 @@ export const validateMenuForm = (data: MenuFormData): { valid: boolean; priceNum
   const priceNum = Number.parseFloat(data.price);
   if (Number.isNaN(priceNum) || priceNum <= 0) {
     showValidationError("Price", "Please enter a valid price");
+    return { valid: false };
+  }
+
+  // Validate cuisine (only if required - home kitchen needs it, restaurant doesn't)
+  if (data.requireCuisine !== false && (!data.cuisine || !data.cuisine.trim())) {
+    showValidationError("Cuisine", "Please select a cuisine or add a new one");
     return { valid: false };
   }
 

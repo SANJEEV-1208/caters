@@ -14,6 +14,7 @@ import { useRouter, usePathname } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { showErrorAlert } from "@/src/utils/alertHelpers";
+import { loginUser as apiLoginUser } from "@/src/api/authApi";
 
 // Helper function to get the correct login route based on user's actual role
 const getCorrectLoginRoute = (
@@ -34,6 +35,8 @@ export default function LoginScreen() {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingUser, setCheckingUser] = useState(false);
+  const [pinRequired, setPinRequired] = useState<boolean | null>(null); // null = not checked, true = has PIN, false = first-time
   const router = useRouter();
   const pathname = usePathname();
   const { login, logout, user, isAuthenticated } = useAuth();
@@ -72,51 +75,114 @@ export default function LoginScreen() {
     }
   }, [isAuthenticated, user?.role, user?.caterType, pathname, logout, router]);
 
+  // Check if user needs PIN setup by attempting API call with phone only
+  const checkUserStatus = async (phoneNumber: string) => {
+    if (phoneNumber.length !== 10) return;
+
+    setCheckingUser(true);
+    setPinRequired(null);
+
+    try {
+      const testPhone = "+91" + phoneNumber;
+      // Make direct API call with phone only (no PIN) to check user status
+      const response = await apiLoginUser(testPhone, undefined);
+
+      if (response && 'requiresPinSetup' in response && response.requiresPinSetup) {
+        // First-time user - needs PIN setup
+        setPinRequired(false);
+      } else if (response) {
+        // Somehow got authenticated without PIN - shouldn't happen, but treat as returning user
+        setPinRequired(true);
+      }
+    } catch (error: any) {
+      if (error.message?.includes("PIN is required")) {
+        // Returning user - has PIN set
+        setPinRequired(true);
+      } else if (error.message?.includes("not found")) {
+        // User doesn't exist
+        setPinRequired(null);
+        showErrorAlert("User not found. Please check your phone number.");
+      } else {
+        // Other errors - assume returning user to be safe
+        console.warn("Error checking user status:", error.message);
+        setPinRequired(true);
+      }
+    } finally {
+      setCheckingUser(false);
+    }
+  };
+
   const handleLogin = async () => {
     if (phone?.length !== 10) {
       showErrorAlert("Please enter a valid 10-digit phone number");
       return;
     }
 
-    if (pin && (pin.length < 4 || pin.length > 6)) {
-      showErrorAlert("Please enter a valid 4-6 digit PIN");
+    // First-time user (no PIN required)
+    if (pinRequired === false) {
+      setLoading(true);
+      try {
+        // Pass undefined (not empty string) for first-time users
+        await login(fullPhone, undefined);
+      } catch (error: any) {
+        if (error.message === "PIN_SETUP_REQUIRED") {
+          const setupData = error.setupData;
+          router.push({
+            pathname: "/setup-pin",
+            params: {
+              userId: String(setupData?.userId ?? ""),
+              phone: setupData?.phone ?? "",
+              name: setupData?.name ?? "",
+            },
+          });
+        } else {
+          showErrorAlert(error.message || "Login failed. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
-    setLoading(true);
+    // Returning user (PIN required)
+    if (pinRequired === true) {
+      if (!pin || pin.length < 4 || pin.length > 6) {
+        showErrorAlert("Please enter a valid 4-6 digit PIN");
+        return;
+      }
 
-    try {
-      const success = await login(fullPhone, pin);
-      if (success) {
-        // Don't redirect yet - let the useEffect check role first
-        // The useEffect will handle redirect or show error if wrong role
-      } else {
-        showErrorAlert("Login failed. Please check your credentials.");
+      setLoading(true);
+      try {
+        const success = await login(fullPhone, pin);
+        if (success) {
+          // Don't redirect yet - let the useEffect check role first
+          // The useEffect will handle redirect or show error if wrong role
+        } else {
+          showErrorAlert("Login failed. Please check your credentials.");
+          setLoading(false);
+        }
+      } catch (error: any) {
+        showErrorAlert(error.message || "Login failed. Please try again.");
         setLoading(false);
       }
-    } catch (error: any) {
-      if (error.message === "PIN_SETUP_REQUIRED") {
-        const setupData = error.setupData;
-        router.push({
-          pathname: "/setup-pin",
-          params: {
-            userId: String(setupData?.userId ?? ""),
-            phone: setupData?.phone ?? "",
-            name: setupData?.name ?? "",
-          },
-        });
-      } else {
-        showErrorAlert(error.message || "Login failed. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    // User status not checked yet
+    showErrorAlert("Please wait while we check your account status.");
   };
 
   const handlePhoneChange = (text: string) => {
     const cleaned = text.replaceAll(/\D/g, "");
     if (cleaned.length <= 10) {
       setPhone(cleaned);
+      setPinRequired(null); // Reset PIN status when phone changes
+      setPin(""); // Clear PIN when phone changes
+
+      // Check user status when 10 digits entered
+      if (cleaned.length === 10) {
+        void checkUserStatus(cleaned);
+      }
     }
   };
 
@@ -181,31 +247,50 @@ export default function LoginScreen() {
 
           {/* PIN */}
           <Text style={styles.label}>PIN (4-6 digits)</Text>
-          <View style={styles.pinInputContainer}>
+          <View style={[
+            styles.pinInputContainer,
+            pinRequired === false && styles.pinInputDisabled
+          ]}>
             <TextInput
               style={styles.pinInput}
-              placeholder="Enter your PIN"
-              placeholderTextColor="#9CA3AF"
+              placeholder={
+                pinRequired === false
+                  ? "Not required for first-time login"
+                  : pinRequired === true
+                  ? "Enter your PIN"
+                  : "Checking user status..."
+              }
+              placeholderTextColor={pinRequired === false ? "#D1D5DB" : "#9CA3AF"}
               keyboardType="number-pad"
               maxLength={6}
               secureTextEntry={!showPin}
               value={pin}
               onChangeText={handlePinChange}
-              editable={!loading}
+              editable={!loading && !checkingUser && pinRequired === true}
             />
-            <TouchableOpacity
-              style={styles.eyeButton}
-              onPress={() => setShowPin(!showPin)}
-            >
-              <Ionicons
-                name={showPin ? "eye-outline" : "eye-off-outline"}
-                size={24}
-                color="#6B7280"
-              />
-            </TouchableOpacity>
+            {pinRequired === true && (
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPin(!showPin)}
+              >
+                <Ionicons
+                  name={showPin ? "eye-outline" : "eye-off-outline"}
+                  size={24}
+                  color="#6B7280"
+                />
+              </TouchableOpacity>
+            )}
+            {checkingUser && (
+              <View style={styles.eyeButton}>
+                <ActivityIndicator size="small" color="#10B981" />
+              </View>
+            )}
           </View>
           <Text style={styles.helperText}>
-            First time? Leave PIN empty - you'll set it after login
+            {pinRequired === false && "First-time user detected. Click login to set up your PIN."}
+            {pinRequired === true && "Enter your PIN to continue"}
+            {pinRequired === null && phone.length === 10 && checkingUser && "Checking your account..."}
+            {pinRequired === null && phone.length < 10 && "Enter phone number to continue"}
           </Text>
 
           {/* Login Button */}
@@ -370,6 +455,11 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
+  },
+  pinInputDisabled: {
+    backgroundColor: "#F3F4F6",
+    borderColor: "#D1D5DB",
+    opacity: 0.6,
   },
   pinInput: {
     flex: 1,

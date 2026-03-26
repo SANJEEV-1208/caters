@@ -1,4 +1,5 @@
 import { API_CONFIG } from "../config/api";
+import { authenticatedFetch } from "../utils/apiHelper";
 
 const BASE_URL = API_CONFIG.BASE_URL;
 
@@ -43,7 +44,7 @@ export const getCatererCuisines = async (catererId: number) => {
 };
 
 export const createCatererCuisine = async (catererId: number, name: string, image?: string) => {
-  const res = await fetch(`${BASE_URL}/cuisines/caterer`, {
+  const res = await authenticatedFetch(`${BASE_URL}/cuisines/caterer`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ catererId, name, image }),
@@ -53,7 +54,7 @@ export const createCatererCuisine = async (catererId: number, name: string, imag
 };
 
 export const deleteCatererCuisine = async (cuisineId: number) => {
-  const res = await fetch(`${BASE_URL}/cuisines/caterer/${cuisineId}`, {
+  const res = await authenticatedFetch(`${BASE_URL}/cuisines/caterer/${cuisineId}`, {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('Failed to delete cuisine');

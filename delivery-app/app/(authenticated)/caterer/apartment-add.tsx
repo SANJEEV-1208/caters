@@ -44,7 +44,7 @@ export default function ApartmentAddScreen() {
 
   const handleGenerateCode = () => {
     const newCode = generateAccessCode();
-    setFormData({ ...formData, accessCode: newCode });
+    setFormData(prev => ({ ...prev, accessCode: newCode }));
   };
 
   const handleSubmit = async () => {

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import ApartmentCard from "@/src/components/caterer/ApartmentCard";
@@ -34,11 +35,7 @@ export default function ApartmentsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    void loadApartments();
-  }, []);
-
-  const loadApartments = async () => {
+  const loadApartments = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -70,7 +67,14 @@ export default function ApartmentsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user?.id]);
+
+  // Refetch data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      void loadApartments();
+    }, [loadApartments])
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

@@ -53,6 +53,7 @@ export default function RestaurantMenuForm({
       name,
       price,
       imageUrl,
+      requireCuisine: false, // Restaurant menus don't need cuisine selection
       requireDates: false,
     });
 

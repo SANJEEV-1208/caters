@@ -49,6 +49,17 @@ export default function CatererOrdersScreen() {
     filterOrders();
   }, [orders, selectedDateFilter, selectedStatus]);
 
+  // Auto-refresh every 30 seconds to check for new orders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!refreshing && !loading) {
+        void loadOrders();
+      }
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [refreshing, loading]);
+
   const loadOrders = async () => {
     if (!user?.id) return;
 

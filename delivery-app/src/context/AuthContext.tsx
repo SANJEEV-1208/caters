@@ -16,6 +16,7 @@ type AuthContextType = {
   user: User | null;
   setUser: (user: User | null) => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (phone: string, pin?: string) => Promise<boolean>;
   signup: (data: SignupData & { pin: string }) => Promise<boolean>;
   logout: () => void;
@@ -276,6 +277,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       user,
       setUser,
       isAuthenticated,
+      isLoading,
       login,
       signup,
       logout,
@@ -284,7 +286,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       selectedDeliveryDate,
       setSelectedDeliveryDate,
     }),
-    [user, isAuthenticated, selectedCatererId, selectedDeliveryDate, login, signup, logout]
+    [user, isAuthenticated, isLoading, selectedCatererId, selectedDeliveryDate, login, signup, logout]
   );
 
   return (

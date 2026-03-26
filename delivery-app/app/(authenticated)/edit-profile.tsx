@@ -168,11 +168,12 @@ export default function EditProfileScreen() {
       const updateData = buildUpdateData();
       const updatedUser = await updateUserProfile(user.id, updateData);
 
-      // IMPORTANT: Preserve the token from the current user
-      // Backend doesn't return token, but we need to keep it for authenticated requests
+      // IMPORTANT: Preserve authentication tokens from the current user
+      // Backend doesn't return tokens, but we need to keep them for authenticated requests
       setUser({
         ...updatedUser,
-        token: user.token, // Preserve existing token
+        token: user.token, // Preserve access token
+        refreshToken: user.refreshToken, // Preserve refresh token
       });
 
       showSuccessAlert("Profile updated successfully", () => router.back());

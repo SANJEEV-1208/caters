@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import StatsCard from "@/src/components/caterer/StatsCard";
@@ -30,11 +31,7 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
 
-  useEffect(() => {
-    void loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -55,7 +52,25 @@ export default function Dashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user?.id]);
+
+  // Refetch data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      void loadDashboardData();
+    }, [loadDashboardData])
+  );
+
+  // Auto-refresh every 30 seconds to check for new orders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!refreshing && !loading) {
+        void loadDashboardData();
+      }
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [loadDashboardData, refreshing, loading]);
 
   const onRefresh = () => {
     setRefreshing(true);

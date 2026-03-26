@@ -18,6 +18,7 @@ interface CloudinaryImagePickerProps {
   label?: string;
   disabled?: boolean;
   folder?: string;
+  showPreview?: boolean;
 }
 
 export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
@@ -26,6 +27,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   label = 'Upload Image',
   disabled = false,
   folder,
+  showPreview = true,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -49,6 +51,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: 'images',
         allowsEditing: true,
+        aspect: [4, 3], // Set aspect ratio for proper cropping
         quality: 0.8,
         base64: true,
       });
@@ -182,7 +185,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
         )}
       </TouchableOpacity>
 
-      {selectedImageUri && !uploading && (
+      {showPreview && selectedImageUri && !uploading && (
         <View style={styles.previewContainer}>
           <Text style={styles.previewLabel}>Image Preview:</Text>
           <Image source={{ uri: selectedImageUri }} style={styles.previewImage} />

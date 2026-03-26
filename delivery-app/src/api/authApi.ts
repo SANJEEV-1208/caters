@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, SignupData } from "@/src/types/auth";
 import { API_CONFIG } from "../config/api";
 import { authenticatedFetch, optionalAuthFetch } from "../utils/apiHelper";
@@ -216,15 +217,33 @@ export const signupRestaurant = async (data: {
   }
 };
 
-// Get user by ID - Supports both guest and authenticated access
-// Guests can view caterer info (for QR ordering), authenticated users send token
+// Get user by ID - Public for restaurants, authenticated for home kitchens
+// Supports both authenticated and guest access
 export const getUserById = async (userId: number): Promise<User | null> => {
   try {
-    const res = await optionalAuthFetch(`${BASE_URL}/auth/users/${userId}`);
+    // Check if user has a token to determine auth strategy
+    const userJson = await AsyncStorage.getItem('user');
+    const hasToken = userJson ? JSON.parse(userJson).token : null;
+
+    let res: Response;
+
+    if (hasToken) {
+      // Logged-in user: Use authenticatedFetch (handles token refresh)
+      res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}`);
+    } else {
+      // Guest user: Use regular fetch (for restaurant walk-ins)
+      res = await fetch(`${BASE_URL}/auth/users/${userId}`, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     if (!res.ok) {
+      // Backend will return 401 for home kitchens or if restaurant endpoint not updated
       return null;
     }
-    return await res.json();
+
+    const userData = await res.json();
+    return userData;
   } catch (error) {
     console.error("Get user by ID error:", error);
     return null;
@@ -237,6 +256,7 @@ export const updatePaymentQrCode = async (
   qrCodeUrl: string
 ): Promise<User> => {
   try {
+    // Use the dedicated QR code update endpoint
     const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}/qr`, {
       method: "PATCH",
       headers: {
@@ -246,10 +266,19 @@ export const updatePaymentQrCode = async (
     });
 
     if (!res.ok) {
-      throw new Error("Failed to update QR code");
+      const errorText = await res.text();
+      let errorMessage = "Failed to update QR code";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
     }
 
-    return await res.json();
+    const data = await res.json();
+    return data;
   } catch (error) {
     console.error("Update QR code error:", error);
     throw error;
@@ -259,8 +288,6 @@ export const updatePaymentQrCode = async (
 // Set PIN for first-time users (customers added by caterer)
 export const setPin = async (userId: number, pin: string): Promise<User> => {
   try {
-    console.log('🔑 Setting PIN for user:', userId, 'PIN length:', pin.length);
-
     const res = await fetch(`${BASE_URL}/auth/set-pin`, {
       method: "POST",
       headers: {
@@ -269,32 +296,22 @@ export const setPin = async (userId: number, pin: string): Promise<User> => {
       body: JSON.stringify({ userId, pin }),
     });
 
-    console.log('📡 Set PIN response status:', res.status);
-
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('❌ Set PIN error response:', errorText);
-
       let errorMessage = "Failed to set PIN";
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.error || errorJson.message || errorMessage;
-        if (errorJson.details) {
-          console.error('❌ Validation details:', errorJson.details);
-        }
       } catch (e) {
-        console.error('❌ Failed to parse error response:', e);
         errorMessage = errorText || errorMessage;
       }
-
       throw new Error(errorMessage);
     }
 
     const data = await res.json();
-    console.log('✅ PIN set successfully, user role:', data.role);
     return data as User;
   } catch (error) {
-    console.error("❌ Set PIN API error:", error);
+    console.error("Set PIN API error:", error);
     throw error;
   }
 };
@@ -305,8 +322,6 @@ export const updateUserProfile = async (
   updates: Record<string, string | undefined>
 ): Promise<User> => {
   try {
-    console.log('📝 Updating profile for user:', userId);
-
     const res = await authenticatedFetch(`${BASE_URL}/auth/users/${userId}`, {
       method: "PATCH",
       headers: {
@@ -321,10 +336,9 @@ export const updateUserProfile = async (
     }
 
     const data = await res.json();
-    console.log('✅ Profile updated successfully');
     return data as User;
   } catch (error) {
-    console.error("❌ Update profile API error:", error);
+    console.error("Update profile API error:", error);
     throw error;
   }
 };
@@ -332,8 +346,6 @@ export const updateUserProfile = async (
 // Refresh access token using refresh token
 export const refreshAccessToken = async (refreshToken: string): Promise<User | null> => {
   try {
-    console.log('🔄 Refreshing access token...');
-
     const res = await fetch(`${BASE_URL}/auth/refresh`, {
       method: "POST",
       headers: {
@@ -343,15 +355,13 @@ export const refreshAccessToken = async (refreshToken: string): Promise<User | n
     });
 
     if (!res.ok) {
-      console.warn('⚠️ Refresh token invalid or expired');
       return null;
     }
 
     const data = await res.json();
-    console.log('✅ Access token refreshed successfully');
     return data as User;
   } catch (error) {
-    console.error("❌ Refresh token API error:", error);
+    console.error("Refresh token API error:", error);
     return null;
   }
 };
@@ -359,8 +369,6 @@ export const refreshAccessToken = async (refreshToken: string): Promise<User | n
 // Logout user and revoke refresh token
 export const logoutUser = async (refreshToken: string): Promise<boolean> => {
   try {
-    console.log('🚪 Logging out and revoking refresh token...');
-
     const res = await fetch(`${BASE_URL}/auth/logout`, {
       method: "POST",
       headers: {
@@ -370,14 +378,12 @@ export const logoutUser = async (refreshToken: string): Promise<boolean> => {
     });
 
     if (!res.ok) {
-      console.warn('⚠️ Failed to revoke refresh token on backend');
       return false;
     }
 
-    console.log('✅ Refresh token revoked on backend');
     return true;
   } catch (error) {
-    console.error("❌ Logout API error:", error);
+    console.error("Logout API error:", error);
     return false;
   }
 };

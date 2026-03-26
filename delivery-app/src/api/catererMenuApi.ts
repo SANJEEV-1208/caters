@@ -68,6 +68,10 @@ export const updateMenuItem = async (
   id: number,
   data: Partial<MenuItem>
 ): Promise<MenuItem> => {
+  console.log('=== UPDATE MENU ITEM ===');
+  console.log('ID:', id);
+  console.log('Data:', JSON.stringify(data, null, 2));
+
   const res = await authenticatedFetch(`${BASE_URL}/menus/${id}`, {
     method: "PUT",
     headers: {
@@ -76,11 +80,34 @@ export const updateMenuItem = async (
     body: JSON.stringify(data),
   });
 
+  console.log('Response status:', res.status);
+
   if (!res.ok) {
-    throw new Error("Failed to update menu item");
+    const errorText = await res.text();
+    console.error('❌ Update failed - Status:', res.status);
+    console.error('❌ Error response:', errorText);
+
+    let errorMessage = "Failed to update menu item";
+    try {
+      const errorJson = JSON.parse(errorText);
+      console.error('❌ Error details:', errorJson);
+      errorMessage = errorJson.error || errorJson.message || errorMessage;
+
+      // If there are validation errors, log them
+      if (errorJson.errors) {
+        console.error('❌ Validation errors:', errorJson.errors);
+        errorMessage = errorJson.errors.map((e: any) => e.msg).join(', ');
+      }
+    } catch (e) {
+      console.error('❌ Could not parse error:', errorText);
+    }
+
+    throw new Error(errorMessage);
   }
 
-  return await res.json();
+  const result = await res.json();
+  console.log('✅ Update successful:', result);
+  return result;
 };
 
 export const deleteMenuItem = async (id: number): Promise<void> => {

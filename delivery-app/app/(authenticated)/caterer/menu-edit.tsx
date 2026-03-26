@@ -95,6 +95,8 @@ export default function MenuEditScreen() {
       name: formData.name,
       price: formData.price,
       imageUrl: formData.image,
+      cuisine: formData.cuisine,
+      requireCuisine: true, // Home kitchen menus require cuisine selection
       requireDates: true,
       selectedDates,
     });
@@ -104,17 +106,30 @@ export default function MenuEditScreen() {
 
     setSaving(true);
     try {
-      await updateMenuItem(item.id, {
+      const updateData: any = {
+        catererId: item.catererId, // Backend requires catererId for validation
         name: formData.name.trim(),
-        description: formData.description.trim(),
         price: validation.priceNum!,
         category: formData.category,
-        cuisine: formData.cuisine,
         type: formData.type,
-        image: formData.image.trim(),
         availableDates: [...selectedDates].sort((a, b) => a.localeCompare(b)),
         inStock: formData.inStock,
-      });
+      };
+
+      // Only include optional fields if they're not empty
+      if (formData.description.trim()) {
+        updateData.description = formData.description.trim();
+      }
+
+      if (formData.cuisine.trim()) {
+        updateData.cuisine = formData.cuisine.trim();
+      }
+
+      if (formData.image.trim()) {
+        updateData.image = formData.image.trim();
+      }
+
+      await updateMenuItem(item.id, updateData);
 
       Alert.alert("Success", "Menu item updated successfully", [
         { text: "OK", onPress: () => router.back() },

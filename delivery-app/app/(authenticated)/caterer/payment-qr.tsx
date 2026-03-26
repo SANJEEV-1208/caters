@@ -47,8 +47,17 @@ export default function PaymentQrScreen() {
 
     setLoading(true);
     try {
-      const updatedUser = await updatePaymentQrCode(user.id, qrCodeUrl.trim());
-      setUser(updatedUser); // Update user in context
+      const updatedUserData = await updatePaymentQrCode(user.id, qrCodeUrl.trim());
+
+      // Merge QR code into existing user object to preserve authentication tokens
+      const mergedUser = {
+        ...user,
+        paymentQrCode: updatedUserData.paymentQrCode,
+        token: user.token, // Preserve access token
+        refreshToken: user.refreshToken, // Preserve refresh token
+      };
+
+      setUser(mergedUser); // Update user in context with preserved tokens
       showSuccessAlert("Payment QR code updated successfully", () => router.back());
     } catch (error) {
       console.error("Failed to update QR code:", error);
@@ -67,8 +76,17 @@ export default function PaymentQrScreen() {
         void (async () => {
           setLoading(true);
           try {
-            const updatedUser = await updatePaymentQrCode(user.id, "");
-            setUser(updatedUser);
+            await updatePaymentQrCode(user.id, "");
+
+            // Merge QR code removal into existing user object to preserve authentication tokens
+            const mergedUser = {
+              ...user,
+              paymentQrCode: undefined,
+              token: user.token, // Preserve access token
+              refreshToken: user.refreshToken, // Preserve refresh token
+            };
+
+            setUser(mergedUser);
             setQrCodeUrl("");
             showSuccessAlert("Payment QR code removed");
           } catch (error) {
@@ -145,27 +163,6 @@ export default function PaymentQrScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                uploadMethod === 'url' && styles.methodButtonActive,
-              ]}
-              onPress={() => { setUploadMethod('url'); }}
-            >
-              <Ionicons
-                name="link"
-                size={20}
-                color={uploadMethod === 'url' ? '#10B981' : '#6B7280'}
-              />
-              <Text
-                style={[
-                  styles.methodButtonText,
-                  uploadMethod === 'url' && styles.methodButtonTextActive,
-                ]}
-              >
-                Enter URL
-              </Text>
-            </TouchableOpacity>
           </View>
         )}
 

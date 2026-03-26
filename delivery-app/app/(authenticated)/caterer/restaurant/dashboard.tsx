@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import StatsCard from "@/src/components/caterer/StatsCard";
@@ -28,17 +29,13 @@ export default function RestaurantDashboard() {
   const [pendingOrders, setPendingOrders] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
 
-  useEffect(() => {
-    void loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!user?.id) return;
 
     try {
       const ordersData = await getCatererOrders(user.id);
       setOrders(ordersData);
-      
+
       // Calculate stats
       const pending = ordersData.filter(
         (order) => order.status === "pending" || order.status === "confirmed"
@@ -50,13 +47,31 @@ export default function RestaurantDashboard() {
       Alert.alert("Error", "Failed to load dashboard data");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [user?.id]);
 
-  const onRefresh = async () => {
+  // Refetch data whenever the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      void loadDashboardData();
+    }, [loadDashboardData])
+  );
+
+  // Auto-refresh every 30 seconds to check for new orders
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!refreshing && !loading) {
+        void loadDashboardData();
+      }
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [loadDashboardData, refreshing, loading]);
+
+  const onRefresh = () => {
     setRefreshing(true);
-    await loadDashboardData();
-    setRefreshing(false);
+    void loadDashboardData();
   };
 
   const handleLogout = () => {

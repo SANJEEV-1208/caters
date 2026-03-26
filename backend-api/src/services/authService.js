@@ -255,9 +255,11 @@ exports.signupCaterer = async (req, res) => {
 };
 
 // Get user by ID
+// Supports both public access (for restaurant caterers) and authenticated access
 exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
+    const isPublicAccess = req.isPublicAccess; // Set by conditionalOwnership middleware
 
     const result = await pool.query(
       'SELECT * FROM users WHERE id = $1',
@@ -269,6 +271,24 @@ exports.getUserById = async (req, res) => {
     }
 
     const user = result.rows[0];
+
+    // For public access to restaurant caterers, return only public business info
+    if (isPublicAccess && user.role === 'caterer' && user.cater_type === 'restaurant') {
+      const publicUser = {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        caterType: user.cater_type,
+        restaurantName: user.restaurant_name,
+        restaurantAddress: user.restaurant_address,
+        paymentQrCode: user.payment_qr_code,
+        profilePicture: user.profile_picture,
+        // Don't expose: phone, address, service_name, created_at for public access
+      };
+      return res.json(publicUser);
+    }
+
+    // For authenticated access, return full user data
     const formattedUser = {
       id: user.id,
       phone: user.phone,

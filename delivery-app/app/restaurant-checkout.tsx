@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { createOrder } from "@/src/api/orderApi";
 import { getUserById } from "@/src/api/authApi";
+import { API_CONFIG } from "@/src/config/api";
 import { Order } from "@/src/types/order";
 import { getCurrentTimestampIST, getTodayIST } from "@/src/utils/dateUtils";
 import QrCodePaymentModal from "@/src/components/QrCodePaymentModal";
@@ -34,6 +35,7 @@ export default function RestaurantCheckout() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingQrCode, setLoadingQrCode] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "cod">("cod");
   const [showQrModal, setShowQrModal] = useState(false);
   const [catererQrCode, setCatererQrCode] = useState<string | null>(null);
@@ -57,18 +59,27 @@ export default function RestaurantCheckout() {
   // Fetch caterer's payment QR code
   useEffect(() => {
     const fetchCatererQrCode = async () => {
+      setLoadingQrCode(true);
       try {
         const caterer = await getUserById(catererId);
-        if (caterer?.paymentQrCode) {
+
+        if (caterer?.paymentQrCode && caterer.paymentQrCode.trim() !== '') {
           setCatererQrCode(caterer.paymentQrCode);
+        } else {
+          setCatererQrCode(null);
         }
       } catch (error) {
         console.error("Failed to fetch caterer QR code:", error);
+        setCatererQrCode(null);
+      } finally {
+        setLoadingQrCode(false);
       }
     };
 
     if (catererId) {
       void fetchCatererQrCode();
+    } else {
+      setLoadingQrCode(false);
     }
   }, [catererId]);
 
@@ -76,14 +87,19 @@ export default function RestaurantCheckout() {
     setPaymentMethod(method);
 
     if (method === "upi") {
-      if (!catererQrCode) {
+      console.log('💳 UPI selected. QR code status:', catererQrCode ? 'Available' : 'Not available');
+      console.log('💳 QR code value:', catererQrCode);
+
+      if (!catererQrCode || catererQrCode.trim() === '') {
+        console.warn('⚠️ No QR code available, showing alert');
         Alert.alert(
           "UPI Not Available",
-          "This restaurant doesn't accept UPI payments. Please use Cash on Delivery.",
+          `${restaurantName} hasn't set up UPI payments yet. Please use Cash on Delivery.`,
           [{ text: "OK", onPress: () => { setPaymentMethod("cod"); } }]
         );
         return;
       }
+      console.log('✅ Opening QR modal');
       setShowQrModal(true);
     }
   };
@@ -274,31 +290,42 @@ export default function RestaurantCheckout() {
                 style={[
                   styles.paymentOption,
                   paymentMethod === "upi" && styles.paymentOptionActive,
+                  (loadingQrCode || !catererQrCode) && styles.paymentOptionDisabled,
                 ]}
                 onPress={() => { handlePaymentMethodSelect("upi"); }}
+                disabled={loadingQrCode}
               >
                 <View style={styles.paymentOptionContent}>
                   <Ionicons
                     name="qr-code"
                     size={28}
-                    color={paymentMethod === "upi" ? "#8B5CF6" : "#94A3B8"}
+                    color={paymentMethod === "upi" ? "#8B5CF6" : (loadingQrCode || !catererQrCode) ? "#D1D5DB" : "#94A3B8"}
                   />
                   <View style={styles.paymentOptionText}>
                     <Text
                       style={[
                         styles.paymentOptionTitle,
                         paymentMethod === "upi" && styles.paymentOptionTitleActive,
+                        (loadingQrCode || !catererQrCode) && styles.paymentOptionTitleDisabled,
                       ]}
                     >
                       UPI Payment
+                      {loadingQrCode && " (Loading...)"}
+                      {!loadingQrCode && !catererQrCode && " (Unavailable)"}
                     </Text>
-                    <Text style={styles.paymentOptionSubtitle}>
-                      Pay via GPay/PhonePe/Paytm
+                    <Text style={[
+                      styles.paymentOptionSubtitle,
+                      (loadingQrCode || !catererQrCode) && { color: "#D1D5DB" }
+                    ]}>
+                      {loadingQrCode ? "Checking availability..." : !catererQrCode ? "Not set up by restaurant" : "Pay via GPay/PhonePe/Paytm"}
                     </Text>
                   </View>
                 </View>
                 {paymentMethod === "upi" && (
                   <Ionicons name="checkmark-circle" size={24} color="#8B5CF6" />
+                )}
+                {loadingQrCode && (
+                  <ActivityIndicator size="small" color="#8B5CF6" />
                 )}
               </TouchableOpacity>
 
@@ -833,6 +860,10 @@ const styles = StyleSheet.create({
     borderColor: "#8B5CF6",
     backgroundColor: "#F5F3FF",
   },
+  paymentOptionDisabled: {
+    opacity: 0.5,
+    backgroundColor: "#F1F5F9",
+  },
   paymentOptionContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -850,6 +881,9 @@ const styles = StyleSheet.create({
   },
   paymentOptionTitleActive: {
     color: "#1E293B",
+  },
+  paymentOptionTitleDisabled: {
+    color: "#94A3B8",
   },
   paymentOptionSubtitle: {
     fontSize: 13,
