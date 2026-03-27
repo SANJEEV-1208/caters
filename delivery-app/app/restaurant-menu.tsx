@@ -13,6 +13,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getCatererMenuItems } from "@/src/api/catererMenuApi";
+import { getUserById } from "@/src/api/authApi";
 import { MenuItem } from "@/src/types/menu";
 
 export default function RestaurantMenuBrowser() {
@@ -27,11 +28,39 @@ export default function RestaurantMenuBrowser() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<"veg" | "non-veg" | "all">("all");
   const [cart, setCart] = useState<Map<number, number>>(new Map()); // itemId -> quantity
+  const [restaurantLocation, setRestaurantLocation] = useState<string>("");
 
   useEffect(() => {
     console.log('Loading restaurant menu - CatererId:', catererId);
-    void loadMenuItems();
+    void loadRestaurantData();
   }, [catererId]);
+
+  const loadRestaurantData = async () => {
+    await Promise.all([
+      loadMenuItems(),
+      loadRestaurantLocation()
+    ]);
+  };
+
+  const loadRestaurantLocation = async () => {
+    try {
+      const restaurant = await getUserById(catererId);
+      if (restaurant?.restaurantAddress) {
+        // Extract city and state from address (format: "Full address, City, State, PIN")
+        const addressParts = restaurant.restaurantAddress.split(',').map(part => part.trim());
+        if (addressParts.length >= 2) {
+          // Get last two parts (typically State and possibly PIN, and City before that)
+          const state = addressParts[addressParts.length - 2]; // Second last part
+          const city = addressParts[addressParts.length - 3] || addressParts[addressParts.length - 2]; // Third last or second last
+          setRestaurantLocation(`${city}, ${state}`);
+        } else {
+          setRestaurantLocation(restaurant.restaurantAddress);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load restaurant location:", error);
+    }
+  };
 
   const loadMenuItems = async () => {
     try {
@@ -154,10 +183,10 @@ export default function RestaurantMenuBrowser() {
           </TouchableOpacity>
           <View style={styles.headerInfo}>
             <Text style={styles.restaurantName}>{restaurantName}</Text>
-            {tableNumber && (
-              <View style={styles.tableChip}>
-                <Ionicons name="location" size={14} color="#FFF" />
-                <Text style={styles.tableInfo}>{tableNumber}</Text>
+            {restaurantLocation && (
+              <View style={styles.locationChip}>
+                <Ionicons name="location-outline" size={14} color="#FFF" />
+                <Text style={styles.locationText}>{restaurantLocation}</Text>
               </View>
             )}
           </View>
@@ -379,7 +408,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     letterSpacing: 0.5,
   },
-  tableChip: {
+  locationChip: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.25)",
@@ -388,7 +417,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     gap: 4,
   },
-  tableInfo: {
+  locationText: {
     fontSize: 13,
     fontWeight: "600",
     color: "#FFFFFF",

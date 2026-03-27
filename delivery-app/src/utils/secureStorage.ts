@@ -11,14 +11,26 @@ const ACCESS_TOKEN_KEY = 'kaaspro_access_token';
 
 /**
  * Store refresh token securely (encrypted)
+ * Uses delete-then-save pattern to prevent Android Keystore conflicts
  */
 export const saveRefreshToken = async (token: string): Promise<void> => {
   try {
+    // Always delete existing token first to prevent Keystore conflicts in production
+    try {
+      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+    } catch (deleteError) {
+      // Ignore deletion errors (key might not exist)
+      console.log('ℹ️ No existing refresh token to delete (or deletion failed)');
+    }
+
+    // Now save the new token
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
     console.log('✅ Refresh token saved securely');
   } catch (error) {
     console.error('❌ Failed to save refresh token:', error);
-    throw error;
+    // Don't throw - fall back gracefully (token won't persist across app restarts)
+    // This prevents signup from failing due to SecureStore issues
+    console.warn('⚠️ Continuing without secure token storage');
   }
 };
 
@@ -49,12 +61,22 @@ export const deleteRefreshToken = async (): Promise<void> => {
 
 /**
  * Store access token in regular AsyncStorage (not as sensitive, short-lived)
+ * Uses delete-then-save pattern for consistency
  */
 export const saveAccessToken = async (token: string): Promise<void> => {
   try {
+    // Delete existing token first to prevent conflicts
+    try {
+      await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    } catch (deleteError) {
+      // Ignore deletion errors
+    }
+
+    // Save new token
     await AsyncStorage.setItem(ACCESS_TOKEN_KEY, token);
   } catch (error) {
     console.error('❌ Failed to save access token:', error);
+    // Don't throw - graceful degradation
   }
 };
 
