@@ -101,15 +101,15 @@ export default function CustomerAddScreen() {
             const alreadySubscribed = subscriptions.some(sub => sub.catererId === user?.id);
 
             if (alreadySubscribed) {
-              showInfoAlert(
-                "Customer Already Exists",
-                `${result.name} is already subscribed to your service.`,
-                () => {
-                  setFoundUser(null);
-                  setShowCreateForm(false);
-                  setPhone("");
-                }
-              );
+              // Navigate to edit page instead of showing alert
+              router.push({
+                pathname: "/(authenticated)/caterer/customer-edit",
+                params: {
+                  customerId: String(result.id),
+                  name: result.name,
+                  phone: result.phone,
+                },
+              });
             } else {
               setFoundUser(result);
               setShowCreateForm(false);
