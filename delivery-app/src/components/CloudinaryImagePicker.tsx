@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,13 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   const [selectedImageUri, setSelectedImageUri] = useState<string | null>(
     currentImage || null
   );
+  const [pendingAsset, setPendingAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
+
+  // Update selected image when currentImage prop changes (e.g., when reusing previous item)
+  useEffect(() => {
+    setSelectedImageUri(currentImage || null);
+    setPendingAsset(null); // Clear pending asset when currentImage changes
+  }, [currentImage]);
 
   const selectImage = async () => {
     if (disabled) return;
@@ -62,15 +69,24 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
       if (result.assets?.[0]) {
         const asset = result.assets[0];
+        // Store the selected/cropped image locally for preview
         setSelectedImageUri(asset.uri || null);
-
-        // Upload to Cloudinary
-        await uploadToCloudinary(asset);
+        setPendingAsset(asset); // Store asset for later upload
+        // Don't upload automatically - wait for user to click Upload button
       }
     } catch (error) {
       console.error('Image selection error:', error);
       showErrorAlert('Failed to select image. Please try again.');
     }
+  };
+
+  const handleUpload = async () => {
+    if (!pendingAsset) {
+      showWarningAlert('Please select an image first.');
+      return;
+    }
+
+    await uploadToCloudinary(pendingAsset);
   };
 
   const uploadToCloudinary = async (asset: ImagePicker.ImagePickerAsset) => {
@@ -119,6 +135,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
           setSelectedImageUri(imageUrl);
           onImageUploaded(imageUrl);
+          setPendingAsset(null); // Clear pending asset after successful upload
           setUploading(false);
 
           showSuccessAlert('Image uploaded successfully!');
@@ -179,7 +196,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
               style={styles.buttonIcon}
             />
             <Text style={styles.uploadButtonText}>
-              {selectedImageUri ? 'Change Image' : 'Select from Gallery'}
+              {selectedImageUri && !pendingAsset ? 'Change Image' : 'Select from Gallery'}
             </Text>
           </View>
         )}
@@ -187,17 +204,39 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
       {showPreview && selectedImageUri && !uploading && (
         <View style={styles.previewContainer}>
-          <Text style={styles.previewLabel}>Image Preview:</Text>
+          <Text style={styles.previewLabel}>
+            {pendingAsset ? 'Preview (Not uploaded yet)' : 'Image Preview:'}
+          </Text>
           <Image source={{ uri: selectedImageUri }} style={styles.previewImage} />
           <View style={styles.previewInfo}>
-            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-            <Text style={styles.previewText}>
-              {selectedImageUri === currentImage
-                ? 'Current image'
-                : 'New image ready'}
+            <Ionicons
+              name={pendingAsset ? "alert-circle" : "checkmark-circle"}
+              size={16}
+              color={pendingAsset ? "#F59E0B" : "#10B981"}
+            />
+            <Text style={[
+              styles.previewText,
+              pendingAsset && styles.previewTextPending
+            ]}>
+              {pendingAsset
+                ? 'Tap Upload button to save'
+                : (selectedImageUri === currentImage ? 'Current image' : 'Uploaded successfully')}
             </Text>
           </View>
         </View>
+      )}
+
+      {/* Upload Button - Only shown when there's a pending asset */}
+      {pendingAsset && !uploading && (
+        <TouchableOpacity
+          style={styles.confirmUploadButton}
+          onPress={() => { void handleUpload(); }}
+          disabled={disabled}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="cloud-upload-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.confirmUploadButtonText}>Upload Image</Text>
+        </TouchableOpacity>
       )}
 
       {uploading && (
@@ -207,7 +246,9 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       )}
 
       <Text style={styles.helperText}>
-        Select an image from your device gallery. Max size: 10MB
+        {pendingAsset
+          ? 'Image selected and cropped. Click Upload to save to cloud.'
+          : 'Select an image from your device gallery. Max size: 10MB'}
       </Text>
     </View>
   );
@@ -287,6 +328,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#10B981',
     fontWeight: '500',
+  },
+  previewTextPending: {
+    color: '#F59E0B',
+  },
+  confirmUploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  confirmUploadButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   progressBarContainer: {
     height: 4,

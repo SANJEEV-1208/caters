@@ -32,6 +32,22 @@ router.get(
   apartmentController.getCustomerApartmentLinks
 );
 
+// GET /api/apartments/customer-link - Get a specific customer's apartment link (protected, caterer only)
+router.get(
+  '/customer-link',
+  authenticateToken,
+  requireRole('caterer'),
+  apartmentController.getCustomerApartmentLink
+);
+
+// DELETE /api/apartments/unlink - Unlink customer from apartment (protected, caterer only)
+router.delete(
+  '/unlink',
+  authenticateToken,
+  requireRole('caterer'),
+  apartmentController.unlinkCustomerFromApartment
+);
+
 // POST /api/apartments - Create apartment (protected, caterer only)
 router.post(
   '/',

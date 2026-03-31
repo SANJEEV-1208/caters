@@ -160,7 +160,21 @@ export default function CustomersScreen() {
       <FlatList
         data={filteredCustomers}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <CustomerCard customer={item} />}
+        renderItem={({ item }) => (
+          <CustomerCard
+            customer={item}
+            onPress={() => {
+              router.push({
+                pathname: "/(authenticated)/caterer/customer-edit",
+                params: {
+                  customerId: String(item.id),
+                  name: item.name,
+                  phone: item.phone,
+                },
+              });
+            }}
+          />
+        )}
         contentContainerStyle={screenStyles.listContent}
         refreshControl={
           <RefreshControl

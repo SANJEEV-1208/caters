@@ -21,7 +21,6 @@ export default function PaymentQrScreen() {
   const { user, setUser } = useAuth();
   const [qrCodeUrl, setQrCodeUrl] = useState(user?.paymentQrCode || "");
   const [loading, setLoading] = useState(false);
-  const [uploadMethod, setUploadMethod] = useState<'gallery' | 'url'>('gallery');
 
   const handleImageUploaded = (url: string) => {
     setQrCodeUrl(url);
@@ -31,18 +30,8 @@ export default function PaymentQrScreen() {
     if (!user?.id) return;
 
     if (!qrCodeUrl.trim()) {
-      showValidationError("QR Code", "Please upload or enter a QR code image");
+      showValidationError("QR Code", "Please upload a QR code image");
       return;
-    }
-
-    // Basic URL validation (only if using URL method)
-    if (uploadMethod === 'url') {
-      try {
-        new URL(qrCodeUrl);
-      } catch {
-        showValidationError("URL", "Please enter a valid URL");
-        return;
-      }
     }
 
     setLoading(true);
@@ -118,7 +107,7 @@ export default function PaymentQrScreen() {
           <View style={styles.infoTextContainer}>
             <Text style={styles.infoTitle}>How it works</Text>
             <Text style={styles.infoText}>
-              Upload your GPay or UPI QR code image URL. Customers will scan this QR code
+              Upload your GPay or UPI QR code image. Customers will scan this QR code
               to pay you directly.
             </Text>
           </View>
@@ -138,39 +127,11 @@ export default function PaymentQrScreen() {
           </View>
         )}
 
-        {/* Upload Method Selector */}
+        {/* Upload QR Code */}
         {!user?.paymentQrCode && (
-          <View style={styles.methodSelector}>
-            <TouchableOpacity
-              style={[
-                styles.methodButton,
-                uploadMethod === 'gallery' && styles.methodButtonActive,
-              ]}
-              onPress={() => { setUploadMethod('gallery'); }}
-            >
-              <Ionicons
-                name="image"
-                size={20}
-                color={uploadMethod === 'gallery' ? '#10B981' : '#6B7280'}
-              />
-              <Text
-                style={[
-                  styles.methodButtonText,
-                  uploadMethod === 'gallery' && styles.methodButtonTextActive,
-                ]}
-              >
-                Upload from Gallery
-              </Text>
-            </TouchableOpacity>
-
-          </View>
-        )}
-
-        {/* Upload from Gallery */}
-        {!user?.paymentQrCode && uploadMethod === 'gallery' && (
           <View style={styles.field}>
             <CloudinaryImagePicker
-              label="Upload QR Code from Gallery *"
+              label="Upload QR Code *"
               onImageUploaded={handleImageUploaded}
               currentImage={qrCodeUrl}
               disabled={loading}
@@ -179,28 +140,9 @@ export default function PaymentQrScreen() {
           </View>
         )}
 
-        {/* QR Code URL Input */}
-        {!user?.paymentQrCode && uploadMethod === 'url' && (
-          <View style={styles.field}>
-            <Text style={styles.label}>QR Code Image URL *</Text>
-            <Text style={styles.hint}>
-              Upload your QR code image to a service like Imgur or use a direct image link
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="https://example.com/your-qr-code.jpg"
-              value={qrCodeUrl}
-              onChangeText={setQrCodeUrl}
-              autoCapitalize="none"
-              keyboardType="url"
-              multiline
-            />
-          </View>
-        )}
-
         {/* Instructions */}
         <View style={styles.instructionsCard}>
-          <Text style={styles.instructionsTitle}>How to get your QR code:</Text>
+          <Text style={styles.instructionsTitle}>How to upload your QR code:</Text>
           <View style={styles.instructionItem}>
             <Text style={styles.instructionNumber}>1.</Text>
             <Text style={styles.instructionText}>
@@ -210,19 +152,13 @@ export default function PaymentQrScreen() {
           <View style={styles.instructionItem}>
             <Text style={styles.instructionNumber}>2.</Text>
             <Text style={styles.instructionText}>
-              Take a screenshot of your QR code
+              Take a screenshot of your QR code and save it to your gallery
             </Text>
           </View>
           <View style={styles.instructionItem}>
             <Text style={styles.instructionNumber}>3.</Text>
             <Text style={styles.instructionText}>
-              Upload it to an image hosting service (Imgur, ImgBB, etc.)
-            </Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <Text style={styles.instructionNumber}>4.</Text>
-            <Text style={styles.instructionText}>
-              Copy the direct image link and paste it above
+              Tap "Upload QR Code" above and select the screenshot from your gallery
             </Text>
           </View>
         </View>
@@ -346,21 +282,6 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 14,
-    color: "#1A1A1A",
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  inputDisabled: {
-    backgroundColor: "#F9FAFB",
-    color: "#9CA3AF",
-  },
   instructionsCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
@@ -423,35 +344,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#EF4444",
-  },
-  methodSelector: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  methodButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
-    padding: 14,
-  },
-  methodButtonActive: {
-    borderColor: "#10B981",
-    backgroundColor: "#F0FDF4",
-  },
-  methodButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#6B7280",
-  },
-  methodButtonTextActive: {
-    color: "#10B981",
-    fontWeight: "600",
   },
 });

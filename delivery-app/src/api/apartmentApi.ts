@@ -114,9 +114,61 @@ export const linkCustomerToApartmentByCode = async (
   return await res.json();
 };
 
-export const removeCustomerFromApartment = async (id: number): Promise<void> => {
-  // Backend doesn't have this endpoint yet
-  throw new Error("Remove customer from apartment not yet implemented in new backend");
+export const removeCustomerFromApartment = async (customerId: number, catererId: number): Promise<void> => {
+  const res = await authenticatedFetch(`${BASE_URL}/apartments/unlink`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ customerId, catererId }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: "Failed to remove customer from apartment" }));
+    throw new Error(error.error || "Failed to remove customer from apartment");
+  }
+};
+
+// Get customer's current apartment assignment for a specific caterer
+export const getCustomerApartmentLink = async (customerId: number, catererId: number): Promise<CustomerApartment | null> => {
+  try {
+    const res = await authenticatedFetch(`${BASE_URL}/apartments/customer-link?customerId=${customerId}&catererId=${catererId}`);
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        return null; // No apartment assignment found
+      }
+      throw new Error("Failed to fetch customer apartment link");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Failed to get customer apartment link:", error);
+    return null;
+  }
+};
+
+// Update customer's apartment assignment (removes old link and creates new one)
+export const updateCustomerApartment = async (
+  customerId: number,
+  catererId: number,
+  newApartmentId: number | null // null for direct add
+): Promise<CustomerApartment> => {
+  // Step 1: Remove existing apartment link
+  try {
+    await removeCustomerFromApartment(customerId, catererId);
+  } catch (error) {
+    // Ignore error if no existing link
+    console.log("No existing apartment link to remove or removal failed");
+  }
+
+  // Step 2: Create new apartment link
+  return await addCustomerToApartment({
+    customerId,
+    apartmentId: newApartmentId,
+    catererId,
+    addedVia: "manual",
+  });
 };
 
 // Get all customers for a caterer with their apartment info

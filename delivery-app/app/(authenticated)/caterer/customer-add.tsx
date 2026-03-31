@@ -191,6 +191,12 @@ export default function CustomerAddScreen() {
       return;
     }
 
+    // Address is mandatory for direct add customers
+    if (addDirectly && !customerAddress.trim()) {
+      showValidationError("Delivery Address", "Please enter delivery address for direct customers");
+      return;
+    }
+
     setAdding(true);
     try {
       // Normalize phone number - ensure it has +91 prefix
@@ -200,10 +206,11 @@ export default function CustomerAddScreen() {
 
       try {
         // Step 1: Try to create new customer
+        // Only include address if customer is added directly (no apartment)
         const newCustomer = await createCustomer({
           name: customerName,
           phone: normalizedPhone,
-          address: customerAddress,
+          address: addDirectly ? customerAddress : undefined,
         });
         customerId = newCustomer.id;
       } catch (createError: unknown) {
@@ -304,7 +311,7 @@ export default function CustomerAddScreen() {
                   <Ionicons name="person-outline" size={20} color="#6B7280" />
                   <TextInput
                     style={styles.input}
-                    placeholder="Enter customer name"
+                    placeholder="e.g John Doe"
                     value={customerName}
                     onChangeText={setCustomerName}
                     autoCapitalize="words"
@@ -323,15 +330,6 @@ export default function CustomerAddScreen() {
                   />
                 </View>
               </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Address (Optional)</Text>
-                <LocationAutocomplete
-                  value={customerAddress}
-                  onSelect={setCustomerAddress}
-                  placeholder="Enter delivery address"
-                />
-              </View>
             </View>
 
             {/* Apartment Selection */}
@@ -342,12 +340,35 @@ export default function CustomerAddScreen() {
               onSelectApartment={(id) => {
                 setSelectedApartmentId(id);
                 setAddDirectly(false);
+                // Clear address when switching to apartment (not needed)
+                setCustomerAddress("");
               }}
               onToggleDirectAdd={() => {
                 setAddDirectly(!addDirectly);
                 setSelectedApartmentId(null);
+                if (addDirectly) {
+                  // Switching from direct to apartment - clear address
+                  setCustomerAddress("");
+                }
               }}
             />
+
+            {/* Address field - Only shown for direct add */}
+            {addDirectly && (
+              <View style={styles.section}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Delivery Address *</Text>
+                  <LocationAutocomplete
+                    value={customerAddress}
+                    onSelect={setCustomerAddress}
+                    placeholder="Enter customer delivery address"
+                  />
+                  <Text style={styles.inputHint}>
+                    Required for direct customers without apartment assignment
+                  </Text>
+                </View>
+              </View>
+            )}
 
             {/* Create Button */}
             <TouchableOpacity
@@ -394,10 +415,16 @@ export default function CustomerAddScreen() {
               onSelectApartment={(id) => {
                 setSelectedApartmentId(id);
                 setAddDirectly(false);
+                // Clear address when switching to apartment (not needed)
+                setCustomerAddress("");
               }}
               onToggleDirectAdd={() => {
                 setAddDirectly(!addDirectly);
                 setSelectedApartmentId(null);
+                if (addDirectly) {
+                  // Switching from direct to apartment - clear address
+                  setCustomerAddress("");
+                }
               }}
             />
 
@@ -587,5 +614,11 @@ const styles = StyleSheet.create({
   },
   inputTextDisabled: {
     color: "#9CA3AF",
+  },
+  inputHint: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 4,
+    fontStyle: "italic",
   },
 });

@@ -243,3 +243,56 @@ exports.getCustomerApartmentLinks = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Get a specific customer's apartment link for a caterer (for edit screen)
+exports.getCustomerApartmentLink = async (req, res) => {
+  try {
+    const { customerId, catererId } = req.query;
+
+    if (!customerId || !catererId) {
+      return res.status(400).json({ error: 'Customer ID and Caterer ID are required' });
+    }
+
+    const result = await pool.query(
+      'SELECT * FROM customer_apartments WHERE customer_id = $1 AND caterer_id = $2',
+      [customerId, catererId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer apartment link not found' });
+    }
+
+    res.json(formatCustomerApartment(result.rows[0]));
+  } catch (error) {
+    console.error('Get customer apartment link error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Unlink customer from apartment (for updating apartment assignment)
+exports.unlinkCustomerFromApartment = async (req, res) => {
+  try {
+    const { customerId, catererId } = req.body;
+
+    if (!customerId || !catererId) {
+      return res.status(400).json({ error: 'Customer ID and Caterer ID are required' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM customer_apartments WHERE customer_id = $1 AND caterer_id = $2 RETURNING *',
+      [customerId, catererId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer apartment link not found' });
+    }
+
+    res.json({
+      message: 'Customer unlinked from apartment successfully',
+      link: formatCustomerApartment(result.rows[0])
+    });
+  } catch (error) {
+    console.error('Unlink customer from apartment error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

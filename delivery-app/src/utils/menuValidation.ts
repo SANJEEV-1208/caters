@@ -43,7 +43,7 @@ export const validateMenuForm = (data: MenuFormData): { valid: boolean; priceNum
 
   // Validate image
   if (!data.imageUrl.trim()) {
-    showValidationError("Image", "Please enter image URL");
+    showValidationError("Food Image", "Please upload a food image");
     return { valid: false };
   }
 

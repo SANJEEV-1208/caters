@@ -34,3 +34,13 @@ exports.getCustomerApartments = async (req, res) => {
 exports.getCustomerApartmentLinks = async (req, res) => {
   return await apartmentService.getCustomerApartmentLinks(req, res);
 };
+
+// Get a specific customer's apartment link for a caterer
+exports.getCustomerApartmentLink = async (req, res) => {
+  return await apartmentService.getCustomerApartmentLink(req, res);
+};
+
+// Unlink customer from apartment
+exports.unlinkCustomerFromApartment = async (req, res) => {
+  return await apartmentService.unlinkCustomerFromApartment(req, res);
+};

@@ -64,6 +64,8 @@ export const CuisineSelector: React.FC<CuisineSelectorProps> = ({
         newCuisineImage.trim()
       );
       onCuisinesUpdated([...cuisines, newCuisine]);
+      // Auto-select the newly created cuisine
+      onSelectCuisine(newCuisine.name);
       setNewCuisineName("");
       setNewCuisineImage("");
       setShowAddModal(false);
