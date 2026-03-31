@@ -151,6 +151,71 @@ exports.checkSubscription = async (req, res) => {
   }
 };
 
+// Update customer profile (caterer can update their subscribed customers)
+exports.updateCustomerProfile = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const catererId = req.user.id; // From authenticateToken middleware
+    const { name, address } = req.body;
+
+    // Verify caterer is subscribed to this customer
+    const subscription = await pool.query(
+      'SELECT * FROM subscriptions WHERE customer_id = $1 AND caterer_id = $2',
+      [customerId, catererId]
+    );
+
+    if (subscription.rows.length === 0) {
+      return res.status(403).json({ error: 'You can only update your subscribed customers' });
+    }
+
+    // Build update query dynamically based on provided fields
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (name !== undefined) {
+      updates.push(`name = $${paramCount}`);
+      values.push(name);
+      paramCount++;
+    }
+
+    if (address !== undefined) {
+      updates.push(`address = $${paramCount}`);
+      values.push(address);
+      paramCount++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    // Add customerId as the last parameter
+    values.push(customerId);
+
+    const result = await pool.query(
+      `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const updatedUser = result.rows[0];
+    res.json({
+      id: updatedUser.id,
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      name: updatedUser.name,
+      address: updatedUser.address,
+      createdAt: updatedUser.created_at
+    });
+  } catch (error) {
+    console.error('Update customer profile error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Create subscription
 exports.createSubscription = async (req, res) => {
   try {

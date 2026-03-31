@@ -20,6 +20,11 @@ exports.checkSubscription = async (req, res) => {
   return await subscriptionService.checkSubscription(req, res);
 };
 
+// Update customer profile (caterer only)
+exports.updateCustomerProfile = async (req, res) => {
+  return await subscriptionService.updateCustomerProfile(req, res);
+};
+
 // Create subscription
 exports.createSubscription = async (req, res) => {
   return await subscriptionService.createSubscription(req, res);

@@ -13,7 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
-import { updateUserProfile, getUserById } from "@/src/api/authApi";
+import { getUserById } from "@/src/api/authApi";
+import { updateCustomerProfile } from "@/src/api/subscriptionApi";
 import { getCatererApartments, getCustomerApartmentLink, updateCustomerApartment } from "@/src/api/apartmentApi";
 import { showValidationError, showSuccessAlert, showErrorAlert } from "@/src/utils/alertHelpers";
 import { HeaderComponent } from "@/src/components/common";
@@ -104,7 +105,7 @@ export default function CustomerEditScreen() {
     try {
       // Step 1: Update customer profile (name and address)
       // Only save address if customer is added directly (no apartment)
-      await updateUserProfile(customerId, {
+      await updateCustomerProfile(customerId, {
         name: customerName.trim(),
         address: addDirectly ? customerAddress.trim() : undefined,
       });

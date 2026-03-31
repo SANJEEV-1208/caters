@@ -36,6 +36,14 @@ router.post(
   subscriptionController.createSubscription
 );
 
+// PATCH /api/subscriptions/customers/:customerId - Update customer profile (protected, caterer only)
+router.patch(
+  '/customers/:customerId',
+  authenticateToken,
+  requireRole('caterer'),
+  subscriptionController.updateCustomerProfile
+);
+
 // DELETE /api/subscriptions/:id - Delete subscription (protected, caterer only - caterer removes customer)
 router.delete(
   '/:id',

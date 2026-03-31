@@ -129,6 +129,40 @@ export const createSubscription = async (
   }
 };
 
+// Update customer profile (caterer only - for subscribed customers)
+export const updateCustomerProfile = async (
+  customerId: number,
+  updates: { name?: string; address?: string }
+): Promise<User> => {
+  try {
+    const res = await authenticatedFetch(`${BASE_URL}/subscriptions/customers/${customerId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      let errorMessage = "Failed to update customer profile";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        console.error('Failed to parse error response:', e);
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Update customer profile error:", error);
+    throw error;
+  }
+};
+
 // Remove a subscription
 export const removeSubscription = async (subscriptionId: number): Promise<void> => {
   try {
