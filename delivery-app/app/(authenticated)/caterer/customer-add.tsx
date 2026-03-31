@@ -15,7 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/src/context/AuthContext";
 import { searchUserByPhone, createCustomer } from "@/src/api/authApi";
 import { getCatererApartments, addCustomerToApartment } from "@/src/api/apartmentApi";
-import { createSubscription, getCustomerSubscriptions } from "@/src/api/subscriptionApi";
+import { createSubscription, checkCustomerSubscription } from "@/src/api/subscriptionApi";
 import { showValidationError, showSuccessAlert, showErrorAlert, showInfoAlert } from "@/src/utils/alertHelpers";
 import { HeaderComponent } from "@/src/components/common";
 import ApartmentSelector from "@/src/components/caterer/ApartmentSelector";
@@ -97,11 +97,10 @@ export default function CustomerAddScreen() {
         if (result.role === "customer") {
           // Check if customer is already subscribed to this caterer
           try {
-            const subscriptions = await getCustomerSubscriptions(result.id);
-            const alreadySubscribed = subscriptions.some(sub => sub.catererId === user?.id);
+            const checkResult = await checkCustomerSubscription(result.id, user.id);
 
-            if (alreadySubscribed) {
-              // Navigate to edit page instead of showing alert
+            if (checkResult.isSubscribed) {
+              // Navigate to edit page for existing subscriber
               router.push({
                 pathname: "/(authenticated)/caterer/customer-edit",
                 params: {
@@ -111,6 +110,7 @@ export default function CustomerAddScreen() {
                 },
               });
             } else {
+              // Customer exists but not subscribed yet - show add form
               setFoundUser(result);
               setShowCreateForm(false);
             }

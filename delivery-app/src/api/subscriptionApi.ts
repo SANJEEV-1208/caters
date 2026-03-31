@@ -29,6 +29,36 @@ export const getCustomerSubscriptions = async (customerId: number): Promise<Subs
   }
 };
 
+// Check if a customer is subscribed to a specific caterer (for caterers)
+export const checkCustomerSubscription = async (
+  customerId: number,
+  catererId: number
+): Promise<{ isSubscribed: boolean; subscription?: Subscription }> => {
+  try {
+    const res = await authenticatedFetch(
+      `${BASE_URL}/subscriptions/check?customerId=${customerId}&catererId=${catererId}`
+    );
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      let errorMessage = "Failed to check subscription";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (e) {
+        console.error('Failed to parse error response:', e);
+        errorMessage = errorText || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Check subscription error:", error);
+    throw error;
+  }
+};
+
 // Get caterer details by ID
 export const getCatererDetails = async (catererId: number): Promise<User> => {
   try {

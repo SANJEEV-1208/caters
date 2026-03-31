@@ -15,6 +15,11 @@ exports.getAllCaterers = async (req, res) => {
   return await subscriptionService.getAllCaterers(req, res);
 };
 
+// Check if customer is subscribed to caterer
+exports.checkSubscription = async (req, res) => {
+  return await subscriptionService.checkSubscription(req, res);
+};
+
 // Create subscription
 exports.createSubscription = async (req, res) => {
   return await subscriptionService.createSubscription(req, res);

@@ -20,6 +20,14 @@ router.get('/caterers', subscriptionController.getAllCaterers);
 // GET /api/subscriptions/caterers/:catererId - Get caterer details (public - for customer to browse)
 router.get('/caterers/:catererId', subscriptionController.getCatererDetails);
 
+// GET /api/subscriptions/check - Check if customer is subscribed to caterer (protected, caterer only)
+router.get(
+  '/check',
+  authenticateToken,
+  requireRole('caterer'),
+  subscriptionController.checkSubscription
+);
+
 // POST /api/subscriptions - Create subscription (protected, caterer only - caterer adds customer)
 router.post(
   '/',

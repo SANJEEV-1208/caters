@@ -121,6 +121,36 @@ exports.getAllCaterers = async (req, res) => {
   }
 };
 
+// Check if customer is subscribed to caterer (for caterers to verify)
+exports.checkSubscription = async (req, res) => {
+  try {
+    const { customerId, catererId } = req.query;
+
+    if (!customerId || !catererId) {
+      return res.status(400).json({ error: 'Customer ID and Caterer ID are required' });
+    }
+
+    const result = await pool.query(
+      'SELECT * FROM subscriptions WHERE customer_id = $1 AND caterer_id = $2',
+      [customerId, catererId]
+    );
+
+    if (result.rows.length > 0) {
+      // Subscription exists
+      res.json({
+        isSubscribed: true,
+        subscription: formatSubscription(result.rows[0])
+      });
+    } else {
+      // No subscription found
+      res.json({ isSubscribed: false });
+    }
+  } catch (error) {
+    console.error('Check subscription error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Create subscription
 exports.createSubscription = async (req, res) => {
   try {
