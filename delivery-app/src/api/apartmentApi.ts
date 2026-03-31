@@ -157,18 +157,24 @@ export const updateCustomerApartment = async (
   // Step 1: Remove existing apartment link
   try {
     await removeCustomerFromApartment(customerId, catererId);
+    console.log("Removed existing apartment link");
   } catch (error) {
-    // Ignore error if no existing link
-    console.log("No existing apartment link to remove or removal failed");
+    // Ignore 404 error if no existing link, but log others
+    console.log("No existing apartment link to remove or removal failed:", error);
   }
 
   // Step 2: Create new apartment link
-  return await addCustomerToApartment({
-    customerId,
-    apartmentId: newApartmentId,
-    catererId,
-    addedVia: "manual",
-  });
+  try {
+    return await addCustomerToApartment({
+      customerId,
+      apartmentId: newApartmentId,
+      catererId,
+      addedVia: "manual",
+    });
+  } catch (error) {
+    console.error("Failed to add customer to apartment:", error);
+    throw error;
+  }
 };
 
 // Get all customers for a caterer with their apartment info

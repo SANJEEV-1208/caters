@@ -146,16 +146,23 @@ exports.manualLinkCustomerToApartment = async (req, res) => {
       return res.status(400).json({ error: 'Customer ID and Caterer ID are required' });
     }
 
+    // First, check if ANY link already exists for this customer-caterer pair
+    const existingLink = await pool.query(
+      'SELECT * FROM customer_apartments WHERE customer_id = $1 AND caterer_id = $2',
+      [customerId, catererId]
+    );
+
     // If apartmentId is null, it's a direct add (no apartment)
     if (apartmentId === null) {
-      // For direct add, check if customer is already added directly to this caterer
-      const existing = await pool.query(
-        'SELECT * FROM customer_apartments WHERE customer_id = $1 AND apartment_id IS NULL AND caterer_id = $2',
-        [customerId, catererId]
-      );
+      // Check if customer is already added directly to this caterer
+      if (existingLink.rows.length > 0 && existingLink.rows[0].apartment_id === null) {
+        // Same link already exists - return it instead of erroring (idempotent)
+        return res.status(200).json(formatCustomerApartment(existingLink.rows[0]));
+      }
 
-      if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Customer already added directly to this caterer' });
+      // Different link exists - must remove old one first
+      if (existingLink.rows.length > 0) {
+        return res.status(409).json({ error: 'Customer already linked to an apartment. Remove existing link first.' });
       }
     } else {
       // Check if apartment exists and belongs to caterer
@@ -168,17 +175,19 @@ exports.manualLinkCustomerToApartment = async (req, res) => {
         return res.status(404).json({ error: 'Apartment not found or does not belong to this caterer' });
       }
 
-      // Check if link already exists
-      const existing = await pool.query(
-        'SELECT * FROM customer_apartments WHERE customer_id = $1 AND apartment_id = $2 AND caterer_id = $3',
-        [customerId, apartmentId, catererId]
-      );
+      // Check if same link already exists
+      if (existingLink.rows.length > 0 && existingLink.rows[0].apartment_id === apartmentId) {
+        // Same link already exists - return it instead of erroring (idempotent)
+        return res.status(200).json(formatCustomerApartment(existingLink.rows[0]));
+      }
 
-      if (existing.rows.length > 0) {
-        return res.status(409).json({ error: 'Customer already linked to this apartment' });
+      // Different link exists - must remove old one first
+      if (existingLink.rows.length > 0) {
+        return res.status(409).json({ error: 'Customer already linked to a different apartment. Remove existing link first.' });
       }
     }
 
+    // No existing link - create new one
     const result = await pool.query(
       'INSERT INTO customer_apartments (customer_id, apartment_id, caterer_id, added_via) VALUES ($1, $2, $3, $4) RETURNING *',
       [customerId, apartmentId, catererId, addedVia || 'manual']
@@ -187,7 +196,9 @@ exports.manualLinkCustomerToApartment = async (req, res) => {
     res.status(201).json(formatCustomerApartment(result.rows[0]));
   } catch (error) {
     console.error('Manual link customer to apartment error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };
 
