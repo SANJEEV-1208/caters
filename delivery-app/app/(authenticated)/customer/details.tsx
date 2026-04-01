@@ -69,7 +69,7 @@
                 ]}
               />
               <Text style={styles.categoryText}>
-                {category === "veg" ? "Vegetarian" : "Non-Vegetarian"}
+                {category === "veg" ? "Veg" : "Non-Veg"}
               </Text>
             </View>
           </View>
@@ -179,8 +179,8 @@
 
     backButton: {
       position: "absolute",
-      top: 48,
-      left: 16,
+      top: 12,
+      left: 12,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -205,8 +205,8 @@
 
     categoryBadge: {
       position: "absolute",
-      top: 48,
-      right: 16,
+      top: 12,
+      right: 12,
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: "rgba(255, 255, 255, 0.95)",

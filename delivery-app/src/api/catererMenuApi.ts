@@ -59,13 +59,15 @@ export const createMenuItem = async (
 
   if (!res.ok) {
     // Try to extract error message from response
+    let errorMessage = "Failed to create menu item";
     try {
       const errorData = await res.json();
-      throw new Error(errorData.message || errorData.error || "Failed to create menu item");
+      errorMessage = errorData.message || errorData.error || "Failed to create menu item";
     } catch (parseError) {
-      // If JSON parsing fails, throw generic error
-      throw new Error("Failed to create menu item");
+      // If JSON parsing fails, use default message
+      console.error("Failed to parse error response:", parseError);
     }
+    throw new Error(errorMessage);
   }
 
   return await res.json();

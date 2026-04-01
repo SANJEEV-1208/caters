@@ -139,10 +139,24 @@ export default function MenuEditScreen() {
 
       // Check if it's a duplicate error
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes('Duplicate menu item') || errorMessage.includes('already exists')) {
+      if (errorMessage.includes('already exists')) {
+        // Extract dates from the error message if available
+        const dateMatch = errorMessage.match(/date\(s\): (.+?)\./);
+        let formattedDates = "the specified date";
+
+        if (dateMatch) {
+          // Convert dates from yyyy-mm-dd to dd-mm-yyyy
+          const rawDates = dateMatch[1].split(', ');
+          const convertedDates = rawDates.map(dateStr => {
+            const [year, month, day] = dateStr.trim().split('-');
+            return `${day}-${month}-${year}`;
+          });
+          formattedDates = convertedDates.join(', ');
+        }
+
         Alert.alert(
           "Duplicate Menu Item",
-          errorMessage,
+          `This menu item already exists for ${formattedDates}. Please choose a different date or modify the item name.`,
           [{ text: "OK" }]
         );
       } else {
