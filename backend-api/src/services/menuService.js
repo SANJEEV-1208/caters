@@ -108,6 +108,32 @@ exports.createMenuItem = async (req, res) => {
       return res.status(403).json({ error: 'You can only create menu items for your own catering service' });
     }
 
+    // Check for duplicate menu items on the same dates
+    if (availableDates && availableDates.length > 0) {
+      const duplicateCheck = await pool.query(
+        `SELECT id, name, available_dates
+         FROM caterer_menus
+         WHERE caterer_id = $1
+         AND LOWER(TRIM(name)) = LOWER(TRIM($2))
+         AND available_dates && $3::text[]`,
+        [catererId, name, availableDates]
+      );
+
+      if (duplicateCheck.rows.length > 0) {
+        const existingItem = duplicateCheck.rows[0];
+        const overlappingDates = availableDates.filter(date =>
+          existingItem.available_dates.includes(date)
+        );
+
+        return res.status(409).json({
+          error: 'Duplicate menu item',
+          message: `"${name}" already exists for the selected date(s): ${overlappingDates.join(', ')}. Please use a different name or select different dates.`,
+          overlappingDates: overlappingDates,
+          existingItemId: existingItem.id
+        });
+      }
+    }
+
     const result = await pool.query(
       `INSERT INTO caterer_menus
       (caterer_id, name, description, price, category, cuisine, type, image, available_dates, in_stock)
@@ -165,6 +191,33 @@ exports.updateMenuItem = async (req, res) => {
 
     if (req.user && req.user.id !== oldItem.caterer_id) {
       return res.status(403).json({ error: 'You can only update your own menu items' });
+    }
+
+    // Check for duplicate menu items on the same dates (excluding current item)
+    if (name && availableDates && availableDates.length > 0) {
+      const duplicateCheck = await pool.query(
+        `SELECT id, name, available_dates
+         FROM caterer_menus
+         WHERE caterer_id = $1
+         AND LOWER(TRIM(name)) = LOWER(TRIM($2))
+         AND available_dates && $3::text[]
+         AND id != $4`,
+        [oldItem.caterer_id, name, availableDates, id]
+      );
+
+      if (duplicateCheck.rows.length > 0) {
+        const existingItem = duplicateCheck.rows[0];
+        const overlappingDates = availableDates.filter(date =>
+          existingItem.available_dates.includes(date)
+        );
+
+        return res.status(409).json({
+          error: 'Duplicate menu item',
+          message: `"${name}" already exists for the selected date(s): ${overlappingDates.join(', ')}. Please use a different name or select different dates.`,
+          overlappingDates: overlappingDates,
+          existingItemId: existingItem.id
+        });
+      }
     }
 
     const result = await pool.query(

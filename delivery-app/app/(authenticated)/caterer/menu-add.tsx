@@ -122,7 +122,18 @@ export default function MenuAddScreen() {
       ]);
     } catch (error) {
       console.error("Failed to add menu item:", error);
-      Alert.alert("Error", "Failed to add menu item");
+
+      // Check if it's a duplicate error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('Duplicate menu item') || errorMessage.includes('already exists')) {
+        Alert.alert(
+          "Duplicate Menu Item",
+          errorMessage,
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert("Error", "Failed to add menu item. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

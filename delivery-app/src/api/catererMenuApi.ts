@@ -58,7 +58,14 @@ export const createMenuItem = async (
   });
 
   if (!res.ok) {
-    throw new Error("Failed to create menu item");
+    // Try to extract error message from response
+    try {
+      const errorData = await res.json();
+      throw new Error(errorData.message || errorData.error || "Failed to create menu item");
+    } catch (parseError) {
+      // If JSON parsing fails, throw generic error
+      throw new Error("Failed to create menu item");
+    }
   }
 
   return await res.json();

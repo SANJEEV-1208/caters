@@ -136,7 +136,18 @@ export default function MenuEditScreen() {
       ]);
     } catch (error) {
       console.error("Failed to update menu item:", error);
-      Alert.alert("Error", "Failed to update menu item");
+
+      // Check if it's a duplicate error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('Duplicate menu item') || errorMessage.includes('already exists')) {
+        Alert.alert(
+          "Duplicate Menu Item",
+          errorMessage,
+          [{ text: "OK" }]
+        );
+      } else {
+        Alert.alert("Error", "Failed to update menu item. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
