@@ -20,7 +20,14 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.sanjeev_s.deliveryapp",
       "allowBackup": false,
-      "usesCleartextTraffic": false
+      "usesCleartextTraffic": false,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "output": "static"

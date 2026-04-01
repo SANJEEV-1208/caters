@@ -29,7 +29,12 @@ interface LoginResponse {
 // Login - authenticate user with phone and PIN
 export const loginUser = async (phone: string, pin?: string): Promise<User | LoginResponse | null> => {
   try {
-    console.log('🔍 Login attempt:', { phone, hasPin: !!pin, endpoint: `${BASE_URL}/auth/login` });
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      console.log('🔍 Login attempt:', { phone, hasPin: !!pin, endpoint: `${BASE_URL}/auth/login` });
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
@@ -37,9 +42,14 @@ export const loginUser = async (phone: string, pin?: string): Promise<User | Log
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ phone, pin }),
+      signal: controller.signal,
     });
 
-    console.log('📡 Login response:', { status: res.status, ok: res.ok });
+    clearTimeout(timeoutId);
+
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      console.log('📡 Login response:', { status: res.status, ok: res.ok });
+    }
 
     if (!res.ok) {
       if (res.status === 404) {
@@ -57,20 +67,31 @@ export const loginUser = async (phone: string, pin?: string): Promise<User | Log
 
     // Check if user needs to set PIN
     if (data.requiresPinSetup) {
-      console.log('⚠️ First-time login - PIN setup required');
+      if (API_CONFIG.IS_DEVELOPMENT) {
+        console.log('⚠️ First-time login - PIN setup required');
+      }
       return data as LoginResponse;
     }
 
-    console.log('✅ Login successful:', data.phone, data.role);
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      console.log('✅ Login successful:', data.phone, data.role);
+    }
     return data as User;
   } catch (error) {
-    // Only log network errors (unexpected), not validation errors (expected)
+    // Handle network errors
     if (error instanceof TypeError && error.message.includes('Network request failed')) {
       console.error('🔥 NETWORK ERROR: Cannot reach backend server');
-      console.error(`   Check if backend is running at ${BASE_URL}`);
-      console.error('   Ensure phone and computer are on same WiFi network');
+      console.error(`   Backend URL: ${BASE_URL}`);
+      throw new Error('Network error. Please check your internet connection and try again.');
     }
-    // Re-throw without logging (login page will handle display)
+
+    // Handle timeout errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('⏱️ REQUEST TIMEOUT: Backend took too long to respond');
+      throw new Error('Request timeout. The server is taking too long to respond. Please try again.');
+    }
+
+    // Re-throw other errors
     throw error;
   }
 };
@@ -78,6 +99,9 @@ export const loginUser = async (phone: string, pin?: string): Promise<User | Log
 // Signup - create new caterer
 export const signupCaterer = async (data: SignupData & { pin: string }): Promise<User> => {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+
     const res = await fetch(`${BASE_URL}/auth/signup`, {
       method: "POST",
       headers: {
@@ -90,7 +114,10 @@ export const signupCaterer = async (data: SignupData & { pin: string }): Promise
         address: data.address,
         pin: data.pin,
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const error = await res.json();
@@ -100,6 +127,19 @@ export const signupCaterer = async (data: SignupData & { pin: string }): Promise
     const createdUser = await res.json();
     return createdUser;
   } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('Network request failed')) {
+      console.error('🔥 NETWORK ERROR: Cannot reach backend server');
+      console.error(`   Backend URL: ${BASE_URL}`);
+      throw new Error('Network error. Please check your internet connection and try again.');
+    }
+
+    // Handle timeout errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('⏱️ REQUEST TIMEOUT: Backend took too long to respond');
+      throw new Error('Request timeout. The server is taking too long to respond. Please try again.');
+    }
+
     console.error("Signup API error:", error);
     throw error;
   }
