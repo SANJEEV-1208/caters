@@ -272,6 +272,13 @@ exports.getUserById = async (req, res) => {
 
     const user = result.rows[0];
 
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+    const decryptedRestaurantAddress = user.restaurant_address_encrypted
+      ? decrypt(user.restaurant_address_encrypted)
+      : user.restaurant_address;
+
     // For public access to restaurant caterers, return only public business info
     if (isPublicAccess && user.role === 'caterer' && user.cater_type === 'restaurant') {
       const publicUser = {
@@ -280,7 +287,7 @@ exports.getUserById = async (req, res) => {
         role: user.role,
         caterType: user.cater_type,
         restaurantName: user.restaurant_name,
-        restaurantAddress: user.restaurant_address,
+        restaurantAddress: decryptedRestaurantAddress,
         paymentQrCode: user.payment_qr_code,
         profilePicture: user.profile_picture,
         // Don't expose: phone, address, service_name, created_at for public access
@@ -291,14 +298,14 @@ exports.getUserById = async (req, res) => {
     // For authenticated access, return full user data
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
       serviceName: user.service_name,
-      address: user.address,
+      address: decryptedAddress,
       caterType: user.cater_type,
       restaurantName: user.restaurant_name,
-      restaurantAddress: user.restaurant_address,
+      restaurantAddress: decryptedRestaurantAddress,
       paymentQrCode: user.payment_qr_code,
       profilePicture: user.profile_picture,
       createdAt: user.created_at
@@ -384,28 +391,42 @@ exports.createCustomer = async (req, res) => {
     // Normalize phone number - remove +91 prefix if present
     const normalizedPhone = phone.replace(/^\+91/, '');
 
-    // Check if user already exists (check both formats)
+    // Encrypt phone number and address for security
+    const { encrypted: phoneEncrypted, hash: phoneHash } = encryptPhone(phone);
+    const addressEncrypted = address ? encryptAddress(address) : null;
+
+    // Create hash for duplicate check (supports both phone formats)
+    const phoneHash1 = hash(phone);
+    const phoneHash2 = hash(normalizedPhone);
+
+    // Check if user already exists (check both hashed and plaintext for backward compat)
     const existingUser = await pool.query(
-      'SELECT * FROM users WHERE phone = $1 OR phone = $2',
-      [phone, normalizedPhone]
+      'SELECT * FROM users WHERE phone_hash IN ($1, $2) OR phone IN ($3, $4)',
+      [phoneHash1, phoneHash2, phone, normalizedPhone]
     );
 
     if (existingUser.rows.length > 0) {
       return res.status(409).json({ error: 'User with this phone already exists' });
     }
 
+    // Insert with encrypted fields
     const result = await pool.query(
-      'INSERT INTO users (phone, role, name, address) VALUES ($1, $2, $3, $4) RETURNING *',
-      [phone, 'customer', name, address || null]
+      'INSERT INTO users (phone, phone_encrypted, phone_hash, role, name, address, address_encrypted) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [phone, phoneEncrypted, phoneHash, 'customer', name, address || null, addressEncrypted]
     );
 
     const user = result.rows[0];
+
+    // Decrypt for response
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
-      address: user.address,
+      address: decryptedAddress,
       createdAt: user.created_at
     };
 
@@ -450,16 +471,24 @@ exports.updatePaymentQrCode = async (req, res) => {
     console.log('[QR Update] Successfully updated QR code');
 
     const user = result.rows[0];
+
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+    const decryptedRestaurantAddress = user.restaurant_address_encrypted
+      ? decrypt(user.restaurant_address_encrypted)
+      : user.restaurant_address;
+
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
       serviceName: user.service_name,
-      address: user.address,
+      address: decryptedAddress,
       caterType: user.cater_type,
       restaurantName: user.restaurant_name,
-      restaurantAddress: user.restaurant_address,
+      restaurantAddress: decryptedRestaurantAddress,
       paymentQrCode: user.payment_qr_code,
       profilePicture: user.profile_picture,
       createdAt: user.created_at
@@ -649,12 +678,19 @@ exports.setPin = async (req, res) => {
 
     const updatedUser = result.rows[0];
 
+    // Decrypt encrypted fields
+    const decryptedPhone = updatedUser.phone_encrypted ? decrypt(updatedUser.phone_encrypted) : updatedUser.phone;
+    const decryptedAddress = updatedUser.address_encrypted ? decrypt(updatedUser.address_encrypted) : updatedUser.address;
+    const decryptedRestaurantAddress = updatedUser.restaurant_address_encrypted
+      ? decrypt(updatedUser.restaurant_address_encrypted)
+      : updatedUser.restaurant_address;
+
     // Generate JWT token after PIN is set
     console.log('🔑 Generating JWT token...');
     const token = jwt.sign(
       {
         id: updatedUser.id,
-        phone: updatedUser.phone,
+        phone: decryptedPhone,
         role: updatedUser.role
       },
       JWT_SECRET,
@@ -663,14 +699,14 @@ exports.setPin = async (req, res) => {
 
     const formattedUser = {
       id: updatedUser.id,
-      phone: updatedUser.phone,
+      phone: decryptedPhone,
       role: updatedUser.role,
       name: updatedUser.name,
       serviceName: updatedUser.service_name,
-      address: updatedUser.address,
+      address: decryptedAddress,
       caterType: updatedUser.cater_type,
       restaurantName: updatedUser.restaurant_name,
-      restaurantAddress: updatedUser.restaurant_address,
+      restaurantAddress: decryptedRestaurantAddress,
       paymentQrCode: updatedUser.payment_qr_code,
       profilePicture: updatedUser.profile_picture,
       createdAt: updatedUser.created_at,
@@ -757,16 +793,23 @@ exports.updateUserProfile = async (req, res) => {
     const result = await pool.query(query, values);
     const user = result.rows[0];
 
+    // Decrypt encrypted fields
+    const decryptedPhone = user.phone_encrypted ? decrypt(user.phone_encrypted) : user.phone;
+    const decryptedAddress = user.address_encrypted ? decrypt(user.address_encrypted) : user.address;
+    const decryptedRestaurantAddress = user.restaurant_address_encrypted
+      ? decrypt(user.restaurant_address_encrypted)
+      : user.restaurant_address;
+
     const formattedUser = {
       id: user.id,
-      phone: user.phone,
+      phone: decryptedPhone,
       role: user.role,
       name: user.name,
       serviceName: user.service_name,
-      address: user.address,
+      address: decryptedAddress,
       caterType: user.cater_type,
       restaurantName: user.restaurant_name,
-      restaurantAddress: user.restaurant_address,
+      restaurantAddress: decryptedRestaurantAddress,
       paymentQrCode: user.payment_qr_code,
       profilePicture: user.profile_picture,
       createdAt: user.created_at

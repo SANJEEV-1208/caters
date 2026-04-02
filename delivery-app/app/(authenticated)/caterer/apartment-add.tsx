@@ -119,6 +119,7 @@ export default function ApartmentAddScreen() {
           <TextInput
             style={styles.input}
             placeholder="e.g., Sunrise Apartments"
+            placeholderTextColor="#9CA3AF"
             value={formData.name}
             onChangeText={(text) => { setFormData({ ...formData, name: text }); }}
           />
@@ -196,6 +197,7 @@ export default function ApartmentAddScreen() {
             <TextInput
               style={styles.input}
               placeholder="Enter custom access code (min 4 chars)"
+              placeholderTextColor="#9CA3AF"
               value={formData.accessCode}
               onChangeText={(text) =>
                 { setFormData({ ...formData, accessCode: text.toUpperCase() }); }

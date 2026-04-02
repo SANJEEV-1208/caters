@@ -277,6 +277,7 @@ export default function CustomerAddScreen() {
               <TextInput
                 style={styles.phoneInput}
                 placeholder="9876543210 or +919876543210"
+                placeholderTextColor="#9CA3AF"
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
@@ -312,6 +313,7 @@ export default function CustomerAddScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="e.g John Doe"
+                    placeholderTextColor="#9CA3AF"
                     value={customerName}
                     onChangeText={setCustomerName}
                     autoCapitalize="words"
